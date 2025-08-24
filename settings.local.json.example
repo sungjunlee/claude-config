@@ -1,0 +1,35 @@
+{
+  "// Note": "Copy this file to settings.local.json and customize for your personal preferences",
+  
+  "personalPreferences": {
+    "// Example API key (replace with your actual key)": "",
+    "anthropicApiKey": "YOUR_API_KEY_HERE",
+    
+    "// GitHub settings": "",
+    "githubUsername": "YOUR_USERNAME",
+    "githubToken": "YOUR_GITHUB_TOKEN",
+    
+    "// Local paths": "",
+    "defaultProjectPath": "~/workspace",
+    "backupPath": "~/backups/claude"
+  },
+  
+  "permissions": {
+    "// Deny access to sensitive files": "",
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(**/*.key)",
+      "Read(**/*.pem)"
+    ]
+  },
+  
+  "// MCP servers configuration": "",
+  "mcpServers": {
+    "// Example MCP server": {
+      "command": "node",
+      "args": ["/path/to/mcp-server.js"]
+    }
+  }
+}

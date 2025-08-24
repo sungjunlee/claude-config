@@ -1,0 +1,51 @@
+{
+  "claude": {
+    "autoRunTests": true,
+    "skipPermissions": false,
+    "preferredModel": "default",
+    "clearContextFrequency": "often",
+    "language": "auto",
+    "autoInvokeAgents": true
+  },
+  "development": {
+    "testOnSave": true,
+    "lintOnSave": true,
+    "formatOnSave": true,
+    "commitConvention": "conventional",
+    "coverageThreshold": 80
+  },
+  "agents": {
+    "codeReviewer": {
+      "autoTrigger": ["pr", "commit"],
+      "model": "sonnet"
+    },
+    "testRunner": {
+      "autoTrigger": ["test-failure", "coverage-low"],
+      "model": "sonnet"
+    },
+    "debugger": {
+      "autoTrigger": ["complex-error"],
+      "model": "opus"
+    }
+  },
+  "commands": {
+    "shortcuts": {
+      "c": "commit",
+      "t": "test",
+      "d": "debug",
+      "r": "review",
+      "p": "plan"
+    },
+    "defaultTimeout": 120000
+  },
+  "ui": {
+    "theme": "auto",
+    "compactMode": false,
+    "showMetrics": true
+  },
+  "performance": {
+    "maxContextSize": "medium",
+    "cacheDuration": 900,
+    "parallelOperations": true
+  }
+}

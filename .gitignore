@@ -1,0 +1,32 @@
+# Personal settings
+settings.local.json
+*.local.md
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# API keys and secrets
+.env
+.env.local
+secrets.json
+api_keys.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
