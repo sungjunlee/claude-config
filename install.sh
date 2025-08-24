@@ -141,6 +141,11 @@ install_config() {
         cp -r commands "$CLAUDE_CONFIG_DIR/"
     fi
     
+    if [ -d "scripts" ]; then
+        log "Installing scripts..."
+        cp -r scripts "$CLAUDE_CONFIG_DIR/"
+    fi
+    
     if [ -f "CLAUDE.md" ]; then
         log "Installing CLAUDE.md..."
         cp CLAUDE.md "$CLAUDE_CONFIG_DIR/"
@@ -186,6 +191,13 @@ verify_installation() {
         info "✓ Commands installed ($(find "$CLAUDE_CONFIG_DIR/commands" -name "*.md" | wc -l) files)"
     else
         warn "✗ Commands not found"
+        success=false
+    fi
+    
+    if [ -d "$CLAUDE_CONFIG_DIR/scripts" ]; then
+        info "✓ Scripts installed ($(ls -1 "$CLAUDE_CONFIG_DIR/scripts" | wc -l) files)"
+    else
+        warn "✗ Scripts not found"
         success=false
     fi
     
