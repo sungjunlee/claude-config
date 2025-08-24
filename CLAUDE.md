@@ -25,6 +25,12 @@
 - Test failures → test-runner
 - PR creation → code-reviewer
 - Complex errors → debugger
+- Time/date needed → time-aware (자동 현재 시간 확인)
+
+## Time Awareness
+- time-aware agent가 자동으로 현재 시간 제공
+- Web search 시 현재 연도 사용 (2025, not 2024)
+- 문서/버전 검색 시 최신 정보 우선
 
 ## LLM Model Selection
 - Use latest models for API calls: @llm-models-latest.md

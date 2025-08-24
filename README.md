@@ -10,7 +10,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 
 ## ✨ What You Get
 
-- **3 Core Agents**: Code reviewer, test runner, debugger
+- **4 Core Agents**: Code reviewer, test runner, debugger, time-aware
 - **10 Essential Commands**: `/commit`, `/test`, `/debug`, `/review`, etc.
 - **Minimal Global Config**: Lean CLAUDE.md for all projects
 - **Headless Ready**: Works on remote Linux servers
@@ -29,7 +29,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 
 ```
 ~/.claude/
-├── agents/           # 3 specialized agents
+├── agents/           # 4 specialized agents
 ├── commands/         # 10 workflow commands
 ├── CLAUDE.md         # Global preferences
 └── settings.json     # Configuration
