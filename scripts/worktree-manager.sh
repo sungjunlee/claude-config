@@ -1,5 +1,5 @@
 #!/bin/bash
-# Worktree Manager - 작업 분배 및 관리 도구
+# Worktree Manager - Task distribution and management tool
 
 set -euo pipefail
 
@@ -16,28 +16,28 @@ WORKTREES_DIR=".worktrees"
 # 도움말
 show_help() {
     cat <<EOF
-Worktree Manager - Git Worktree 작업 분배 도구
+Worktree Manager - Git Worktree task distribution tool
 
 Usage: $0 {init|distribute|status|sync|help}
 
 Commands:
-  init       - PLAN.md 템플릿 생성
-  distribute - PLAN.md 기반으로 작업 분배
-  status     - 모든 worktree 상태 확인
-  sync       - worktree 간 환경 파일 동기화
-  help       - 이 도움말 표시
+  init       - Create PLAN.md template
+  distribute - Distribute tasks based on PLAN.md
+  status     - Check all worktree status
+  sync       - Synchronize environment files between worktrees
+  help       - Show this help message
 
 Example:
-  $0 init                    # 초기 설정
-  vim .worktrees/PLAN.md     # 작업 계획 편집
-  $0 distribute              # 작업 분배
-  cd .worktrees/auth         # worktree로 이동
-  claude                     # Claude 실행
+  $0 init                    # Initial setup
+  vim .worktrees/PLAN.md     # Edit task plan
+  $0 distribute              # Distribute tasks
+  cd .worktrees/auth         # Move to worktree
+  claude                     # Run Claude
 
 EOF
 }
 
-# PLAN.md 템플릿 생성
+# Create PLAN.md template
 create_plan_template() {
     mkdir -p "$WORKTREES_DIR"
     
@@ -51,39 +51,39 @@ create_plan_template() {
     fi
     
     cat > "$WORKTREES_DIR/PLAN.md" <<'EOF'
-# 작업 계획
+# Task Plan
 
-## 작업 목록
+## Task List
 ```bash
-# 형식: task-name: 작업 설명
-# 예시:
-auth: 사용자 인증 시스템 구현 (OAuth2.0, JWT)
-payment: 결제 모듈 구현 (Stripe 연동)
-search: 검색 기능 구현 (Elasticsearch)
+# Format: task-name: task description
+# Example:
+auth: Implement user authentication system (OAuth2.0, JWT)
+payment: Implement payment module (Stripe integration)
+search: Implement search feature (Elasticsearch)
 ```
 
-## 공통 컨텍스트
-- TypeScript 사용
-- 테스트 코드 포함
-- REST API 규격 준수
-- 에러 처리 통일
+## Common Context
+- Use TypeScript
+- Include test code
+- Follow REST API standards
+- Unified error handling
 
-## 참고사항
-- 각 작업은 독립적으로 실행 가능해야 함
-- 브랜치명은 feature/task-name 형식으로 자동 생성
-- 작업별 지시서는 .worktrees/tasks/ 폴더에 생성됨
+## Notes
+- Each task must be independently executable
+- Branch names are automatically generated as feature/task-name
+- Task instructions are generated in .worktrees/tasks/ folder
 EOF
     
     echo -e "${GREEN}✓ Created PLAN.md template at $WORKTREES_DIR/PLAN.md${NC}"
     echo -e "${BLUE}Next step: Edit the file and run '$0 distribute'${NC}"
 }
 
-# 환경 파일 복사
+# Copy environment files
 copy_env_files() {
     local worktree_path=$1
     local root_path=$2
     
-    # 복사할 파일 목록
+    # List of files to copy
     local env_files=(
         ".env"
         ".env.local"
@@ -144,7 +144,7 @@ copy_env_files() {
     fi
 }
 
-# 작업 분배
+# Distribute tasks
 distribute_tasks() {
     if [[ ! -f "$WORKTREES_DIR/PLAN.md" ]]; then
         echo -e "${RED}✗ PLAN.md not found${NC}"
@@ -186,7 +186,7 @@ distribute_tasks() {
             if [[ -d "$worktree_path" ]]; then
                 echo -e "    ${YELLOW}⚠ Worktree already exists${NC}"
             else
-                # 브랜치가 이미 존재하는지 확인
+                # Branch가 이미 존재하는지 확인
                 if git show-ref --verify --quiet "refs/heads/$branch_name"; then
                     git worktree add "$worktree_path" "$branch_name" 2>/dev/null
                     echo "    ✓ Added worktree (existing branch)"
@@ -196,47 +196,47 @@ distribute_tasks() {
                 fi
             fi
             
-            # 환경 파일 복사
+            # Copy environment files
             echo "    📄 Copying environment files..."
             copy_env_files "$worktree_path" "."
             
-            # 작업 지시서 생성
+            # Generate task instructions
             cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF
 # Task: $task_name
 
-## 📋 작업 내용
+## 📋 Task Description
 $task_desc
 
-## 🚀 시작하기
+## 🚀 Getting Started
 
-1. Worktree로 이동:
+1. Move to worktree:
 \`\`\`bash
 cd $worktree_path
 \`\`\`
 
-2. Claude 실행:
+2. Run Claude:
 \`\`\`bash
 claude
 \`\`\`
 
-3. 이 파일의 작업 내용 참조해서 구현 시작
+3. Refer to this file's task description and start implementation
 
-## 📁 파일 위치
-- **작업 디렉토리**: \`$worktree_path\`
-- **브랜치**: \`$branch_name\`
-- **공통 컨텍스트**: \`../$WORKTREES_DIR/CONTEXT.md\`
-- **작업 계획**: \`../$WORKTREES_DIR/PLAN.md\`
+## 📁 File Locations
+- **Working Directory**: \`$worktree_path\`
+- **Branch**: \`$branch_name\`
+- **Common Context**: \`../$WORKTREES_DIR/CONTEXT.md\`
+- **Task Plan**: \`../$WORKTREES_DIR/PLAN.md\`
 
-## ✅ 완료 기준
-- [ ] 기능 구현 완료
-- [ ] 테스트 코드 작성
-- [ ] 문서 업데이트
-- [ ] 코드 리뷰 준비
+## ✅ Completion Criteria
+- [ ] Feature implementation complete
+- [ ] Write test code
+- [ ] Update documentation
+- [ ] Prepare for code review
 
 ## 📝 Notes
-- 환경 파일(.env 등)은 이미 복사됨
-- node_modules는 심링크로 연결됨
-- 다른 worktree와 독립적으로 작업 가능
+- Environment files (.env, etc.) already copied
+- node_modules is symlinked
+- Can work independently from other worktrees
 
 ---
 Generated: $(date '+%Y-%m-%d %H:%M:%S')
@@ -254,13 +254,13 @@ EOF
         return 1
     fi
     
-    # 완료 메시지
-    echo -e "${GREEN}✅ 작업 분배 완료! ($task_count tasks)${NC}\n"
-    echo -e "${BLUE}다음 단계:${NC}"
-    echo "각 worktree로 이동해서 Claude 실행:"
+    # Completion message
+    echo -e "${GREEN}✅ Task distribution complete! ($task_count tasks)${NC}\n"
+    echo -e "${BLUE}Next steps:${NC}"
+    echo "Run Claude in each worktree:"
     echo ""
     
-    # 생성된 worktree 목록 표시
+    # Display list of created worktrees
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
             local task_name=$(basename "$dir")
@@ -269,10 +269,10 @@ EOF
     done
     
     echo ""
-    echo -e "${YELLOW}Tip:${NC} 각 터미널/탭에서 별도로 실행하면 병렬 작업 가능"
+    echo -e "${YELLOW}Tip:${NC} Run separately in each terminal/tab for parallel work"
 }
 
-# 상태 확인
+# Check status
 show_status() {
     echo -e "${BLUE}═══════════════════════════════${NC}"
     echo -e "${BLUE}     Worktree Status${NC}"
@@ -291,7 +291,7 @@ show_status() {
             worktree_found=true
             local task_name=$(basename "$dir")
             
-            # 작업 디렉토리로 이동
+            # Working Directory로 이동
             pushd "$dir" > /dev/null
             
             local branch=$(git branch --show-current)
@@ -299,7 +299,7 @@ show_status() {
             local commits=$(git rev-list --count HEAD 2>/dev/null || echo "0")
             local last_commit=$(git log -1 --pretty=format:"%s" 2>/dev/null || echo "No commits yet")
             
-            # 상태 아이콘 결정
+            # Determine status icon
             local status_icon="🔄"
             if [[ $changes -eq 0 && $commits -gt 0 ]]; then
                 status_icon="✅"
@@ -329,13 +329,13 @@ show_status() {
         echo "Run '$0 distribute' after creating PLAN.md"
     fi
     
-    # Git worktree list 요약
+    # Git worktree list summary
     echo -e "${BLUE}───────────────────────────────${NC}"
     echo -e "${BLUE}Git Worktree Summary:${NC}"
     git worktree list 2>/dev/null | grep "$WORKTREES_DIR" || echo "No git worktrees found"
 }
 
-# 환경 파일 동기화
+# Synchronize environment files
 sync_env_files() {
     echo -e "${BLUE}🔄 Syncing environment files...${NC}\n"
     
@@ -346,7 +346,7 @@ sync_env_files() {
     
     local sync_count=0
     
-    # 동기화할 파일 목록
+    # List of files to synchronize
     local sync_files=(
         ".env"
         ".env.local"

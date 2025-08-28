@@ -1,9 +1,9 @@
-# Worktree 병렬 작업 시스템 사용 가이드
+# Worktree Parallel Task System Usage Guide
 
 ## 🎯 개요
 
-Git worktree를 활용해서 여러 작업을 병렬로 진행하는 시스템입니다.
-각 작업은 독립된 브랜치와 디렉토리에서 진행되며, 여러 Claude Code 인스턴스를 동시에 실행할 수 있습니다.
+A system that uses Git worktree to run multiple tasks in parallel.
+Each task runs in an independent branch and directory, allowing multiple Claude Code instances to run simultaneously.
 
 ## 📦 설치
 
@@ -18,38 +18,38 @@ chmod +x scripts/worktree-manager.sh
 
 ## 🚀 빠른 시작
 
-### 1. 작업 계획 생성 (자동)
+### 1. Generate Task Plan (Automatic)
 ```bash
-# Claude에서 plan-agent를 활용한 자동 생성
-/worktree-plan "인증, 결제, 검색 기능 구현"
+# Automatic generation using plan-agent in Claude
+/worktree-plan "Implement authentication, payment, and search features"
 ```
 
-또는 수동으로:
+Or manually:
 
 ```bash
-# 템플릿 생성 후 편집
+# Create template then edit
 ./scripts/worktree-manager.sh init
 vim .worktrees/PLAN.md
 ```
 
-### 2. 작업 분배
+### 2. Distribute Tasks
 ```bash
 ./scripts/worktree-manager.sh distribute
-# 또는 Claude 내에서
+# Or within Claude
 /worktree-distribute
 ```
 
-### 3. 각 worktree에서 작업
+### 3. Work in Each Worktree
 ```bash
 # Terminal 1
 cd .worktrees/auth
 claude
 
-# Terminal 2 (새 탭/창)
+# Terminal 2 (new tab/window)
 cd .worktrees/payment
 claude
 
-# Terminal 3 (새 탭/창)
+# Terminal 3 (new tab/window)
 cd .worktrees/search
 claude
 ```
@@ -58,34 +58,34 @@ claude
 
 ### Claude Commands
 
-- `/worktree-plan [작업 설명]` - plan-agent로 PLAN.md 자동 생성
-- `/worktree-distribute` - PLAN.md 기반 작업 분배
-- `/worktree-status` - 모든 worktree 상태 확인
-- `/worktree-sync` - 환경 파일 동기화
+- `/worktree-plan [task description]` - Automatically generate PLAN.md with plan-agent
+- `/worktree-distribute` - Distribute tasks based on PLAN.md
+- `/worktree-status` - Check all worktree status
+- `/worktree-sync` - Synchronize environment files
 
 ### Shell Script
 
 ```bash
-# 초기 템플릿 생성
+# Create initial template
 ./scripts/worktree-manager.sh init
 
-# 작업 분배 실행
+# Execute task distribution
 ./scripts/worktree-manager.sh distribute
 
-# 상태 확인
+# Check status
 ./scripts/worktree-manager.sh status
 
-# 환경 파일 동기화
+# Synchronize environment files
 ./scripts/worktree-manager.sh sync
 ```
 
-## 🗂️ 디렉토리 구조
+## 🗂️ Directory Structure
 
 ```
 myproject/
 ├── .worktrees/              # Worktree 루트
-│   ├── PLAN.md              # 작업 계획
-│   ├── tasks/               # 작업별 지시서
+│   ├── PLAN.md              # Task plan
+│   ├── tasks/               # Task instructions
 │   │   ├── auth.md
 │   │   ├── payment.md
 │   │   └── search.md
@@ -97,27 +97,27 @@ myproject/
 └── src/                     # 메인 코드
 ```
 
-## 🔄 작업 흐름
+## 🔄 Workflow
 
-### 1. 계획 수립
+### 1. Planning
 - `/worktree-plan` 명령으로 plan-agent가 자동 생성
 - 또는 PLAN.md를 직접 작성
-- 각 작업은 독립적으로 실행 가능하도록 설계
+- Each task is designed to be independently executable
 
-### 2. 자동 분배
-- 각 작업별로 git worktree 생성
+### 2. Automatic Distribution
+- Create git worktree for each task
 - 브랜치명: `feature/[task-name]`
-- 환경 파일 자동 복사 (.env, package.json 등)
+- Automatically copy environment files (.env, package.json 등)
 - node_modules는 심링크로 연결 (디스크 절약)
 
-### 3. 병렬 작업
+### 3. Parallel Work
 - 각 worktree에서 독립적으로 Claude Code 실행
-- 작업 지시서는 `.worktrees/tasks/[task].md` 참조
+- Task instructions are at `.worktrees/tasks/[task].md` 참조
 - 서로 간섭 없이 동시 진행
 
-### 4. 완료 및 병합
+### 4. Completion and Merge
 ```bash
-# 작업 완료 후 메인 브랜치로 병합
+# After task completion, merge to main branch
 git checkout main
 git merge feature/auth
 git merge feature/payment
@@ -128,7 +128,7 @@ git worktree remove .worktrees/auth
 
 ## ✨ 특징
 
-### 자동 환경 복사
+### Automatic Environment Copying
 다음 파일들이 자동으로 복사됩니다:
 - `.env`, `.env.local`, `.env.development`
 - `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`
@@ -137,11 +137,11 @@ git worktree remove .worktrees/auth
 - Python: `requirements.txt`, `pyproject.toml`
 - Ruby: `Gemfile`, `Gemfile.lock`
 
-### 의존성 관리
+### Dependency Management
 - `node_modules`는 심링크로 연결 (디스크 공간 절약)
 - Python `venv`도 심링크로 공유 가능
 
-### 격리된 작업 환경
+### Isolated Work Environment
 - 각 worktree는 독립된 git 브랜치
 - 파일 변경이 서로 영향 없음
 - 독립적인 커밋 히스토리
@@ -192,7 +192,7 @@ git branch -D feature/task-name
 ./scripts/worktree-manager.sh distribute
 ```
 
-### 환경 파일 동기화
+### Synchronize environment files
 ```bash
 # .env가 변경되었을 때
 ./scripts/worktree-manager.sh sync

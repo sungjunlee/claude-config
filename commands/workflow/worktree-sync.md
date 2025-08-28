@@ -1,6 +1,6 @@
 # Command: /worktree-sync
 
-worktree 간 공유 정보 동기화
+Synchronize shared information between worktrees
 
 ## Usage
 
@@ -10,26 +10,26 @@ worktree 간 공유 정보 동기화
 
 ## Description
 
-worktree 간에 공유해야 할 정보를 동기화합니다.
-환경 변수 변경사항, 공통 설정, 컨텍스트 정보 등을 전파합니다.
+Synchronizes information that needs to be shared between worktrees.
+Propagates environment variable changes, common settings, context information, etc.
 
 ## Actions
 
-1. **환경 파일 동기화**
-   - 메인 브랜치의 .env 변경사항을 모든 worktree에 전파
-   - package.json 의존성 변경 감지 및 알림
+1. **Environment file synchronization**
+   - Propagate .env changes from main branch to all worktrees
+   - Detect and notify package.json dependency changes
 
-2. **공유 컨텍스트 업데이트**
-   - `.worktrees/CONTEXT.md` 파일 업데이트
-   - 각 worktree의 진행 상황을 STATUS.md에 기록
+2. **Update shared context**
+   - Update `.worktrees/CONTEXT.md` file
+   - Record progress of each worktree in STATUS.md
 
-3. **설정 파일 동기화**
-   - tsconfig.json, .eslintrc 등 설정 파일 변경 전파
+3. **Configuration file synchronization**
+   - Propagate changes to configuration files like tsconfig.json, .eslintrc
 
 ## Example
 
 ```bash
-# 메인에서 .env 수정 후
+# After modifying .env in main
 /worktree-sync
 
 # 출력:
@@ -41,12 +41,12 @@ worktree 간에 공유해야 할 정보를 동기화합니다.
 
 ## Implementation
 
-환경 파일 변경 감지 및 선택적 동기화:
-- 변경된 파일만 복사
-- 충돌 가능성 있는 파일은 사용자에게 확인
-- node_modules는 심링크 유지
+Detect environment file changes and selective synchronization:
+- Copy only changed files
+- Confirm with user for potentially conflicting files
+- Maintain node_modules symlink
 
 ## Notes
 
-- 작업 중인 파일은 덮어쓰지 않음
-- 중요 변경사항은 사용자 확인 필요
+- Do not overwrite files being worked on
+- Important changes require user confirmation
