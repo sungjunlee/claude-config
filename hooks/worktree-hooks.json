@@ -1,0 +1,68 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/hooks/worktree-pre-edit.sh",
+            "description": "Check if edit should be in a worktree"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/hooks/worktree-post-edit.sh",
+            "description": "Track changes in worktree"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/hooks/worktree-track-command.sh",
+            "description": "Log commands per worktree session"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/hooks/worktree-session-complete.sh",
+            "description": "Handle worktree session completion"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/hooks/worktree-notify.sh",
+            "description": "Notify worktree status changes"
+          }
+        ]
+      }
+    ]
+  },
+  "worktree_settings": {
+    "auto_create_on_branch": true,
+    "isolate_sessions": true,
+    "track_session_changes": true,
+    "parallel_limit": 5,
+    "port_allocation": "automatic",
+    "cleanup_on_merge": true
+  }
+}
