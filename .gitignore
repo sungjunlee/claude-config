@@ -2,6 +2,9 @@
 settings.local.json
 *.local.md
 
+# Worktree 관련
+.worktrees/
+
 # Backup files
 *.backup
 *.bak

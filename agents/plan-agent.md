@@ -122,6 +122,40 @@ Generate actionable plans in this structure:
 Ready to execute? The plan will guide the implementation.
 ```
 
+### For Worktree Parallel Planning
+
+When invoked via `/worktree-plan`, generate `.worktrees/PLAN.md` in this format:
+
+```markdown
+# 작업 계획
+생성일: [Date]
+생성자: plan-agent
+
+## 작업 목록
+```bash
+# Format: task-name: description (estimated time)
+# Only include tasks that can run in parallel
+auth: OAuth2.0 authentication implementation (2h)
+payment: Stripe payment integration (3h)
+search: Elasticsearch search feature (2h)
+```
+
+## 공통 컨텍스트
+[Shared requirements and standards]
+
+## 작업 의존성
+[Dependencies between tasks, if any]
+
+## 참고사항
+[Additional notes from research]
+```
+
+Key considerations for parallel work planning:
+- Identify truly independent tasks
+- Avoid overlapping file modifications
+- Ensure each task has clear boundaries
+- Consider resource constraints (DB, ports, etc.)
+
 ## Special Instructions
 
 ### When Invoked from /resume:
