@@ -18,34 +18,28 @@ chmod +x scripts/worktree-manager.sh
 
 ## 🚀 빠른 시작
 
-### 1. 초기 설정
+### 1. 작업 계획 생성 (자동)
 ```bash
-./scripts/worktree-manager.sh init
+# Claude에서 plan-agent를 활용한 자동 생성
+/worktree-plan "인증, 결제, 검색 기능 구현"
 ```
 
-### 2. 작업 계획 작성
+또는 수동으로:
+
 ```bash
+# 템플릿 생성 후 편집
+./scripts/worktree-manager.sh init
 vim .worktrees/PLAN.md
 ```
 
-PLAN.md 예시:
-```markdown
-## 작업 목록
-​```bash
-auth: OAuth2.0 로그인 시스템 구현
-payment: Stripe 결제 연동
-search: Elasticsearch 검색 기능
-​```
-```
-
-### 3. 작업 분배
+### 2. 작업 분배
 ```bash
 ./scripts/worktree-manager.sh distribute
 # 또는 Claude 내에서
 /worktree-distribute
 ```
 
-### 4. 각 worktree에서 작업
+### 3. 각 worktree에서 작업
 ```bash
 # Terminal 1
 cd .worktrees/auth
@@ -64,6 +58,7 @@ claude
 
 ### Claude Commands
 
+- `/worktree-plan [작업 설명]` - plan-agent로 PLAN.md 자동 생성
 - `/worktree-distribute` - PLAN.md 기반 작업 분배
 - `/worktree-status` - 모든 worktree 상태 확인
 - `/worktree-sync` - 환경 파일 동기화
@@ -105,7 +100,8 @@ myproject/
 ## 🔄 작업 흐름
 
 ### 1. 계획 수립
-- PLAN.md에 작업 목록 작성
+- `/worktree-plan` 명령으로 plan-agent가 자동 생성
+- 또는 PLAN.md를 직접 작성
 - 각 작업은 독립적으로 실행 가능하도록 설계
 
 ### 2. 자동 분배
