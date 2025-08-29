@@ -1,0 +1,23 @@
+# Scratch Notes
+
+## Current Focus
+Enhancing handoff/resume workflow with flow state tracking
+
+## Blockers
+- None currently, but considering how to handle multi-project scenarios
+
+## Quick Notes
+- Flow state + confidence level provides better context for resume
+- Scratch notes act as "working memory" between sessions
+- Keep it simple - no strict format required
+- Consider git hooks for auto-backup later
+
+## Try Next
+- Test the enhanced workflow in a real project
+- Consider adding auto-detection of flow state based on recent actions
+- Maybe add a `/scratch` command for quick updates?
+
+## References
+- Context Engineering concept by Tobi Lütke
+- Windsurf's Flow awareness pattern
+- LangGraph's scratchpad approach
