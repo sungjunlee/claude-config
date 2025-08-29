@@ -56,6 +56,12 @@ Restore work context from a previous handoff document and intelligently determin
    - **Extract complexity level from metadata**
    - **Extract flow_state and confidence_level**
 
+3. **Load Scratch Notes**:
+   - Check for `docs/handoff/.scratch.md`
+   - If exists, load as priority context
+   - Display any blockers or "try next" items prominently
+   - Use as immediate working memory
+
 ### Phase 2: Flow State and Complexity Assessment
 
 **Analyze flow_state and confidence_level from metadata:**
@@ -168,6 +174,12 @@ Display restored context appropriately:
 - Active work: [description]
 - Known issues: [warnings]
 
+### Working Memory (from scratch notes)
+[If scratch.md exists, show key points:]
+- Current focus: [from scratch]
+- Blockers: [from scratch]
+- Try next: [from scratch]
+
 ### Continuation Strategy
 [Based on complexity, show delegation or direct path]
 ```
@@ -221,6 +233,26 @@ Strategy:
 [If exploring + medium confidence: "Continue evaluation, document findings"]
 [If deep_work + high confidence: "Direct continuation optimal"]
 ```
+
+## Scratch Notes Integration
+
+The resume command prioritizes loading scratch notes for immediate context:
+
+### What are Scratch Notes?
+- Lightweight working memory stored at `docs/handoff/.scratch.md`
+- Contains current focus, blockers, and "try next" approaches
+- Loaded automatically if present, displayed prominently
+
+### How Scratch Notes Enhance Resume
+```markdown
+# If scratch.md exists, you'll see:
+## 🧠 Working Memory Restored
+Current Focus: "Debugging JWT refresh token rotation"
+Blockers: ["Race condition in token invalidation"]
+Try Next: ["Implement Redis-based token blacklist"]
+```
+
+This provides immediate orientation without reading entire handoff, enabling faster continuation of interrupted work.
 
 ## Error Handling
 

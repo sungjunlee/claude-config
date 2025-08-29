@@ -56,6 +56,9 @@ Create handoff at `docs/handoff/HANDOFF-[YYYYMMDD-HHMM].md` with:
 ### Key Decisions
 [Important architecture/implementation choices made]
 
+### Working Notes
+[Include from docs/handoff/.scratch.md if exists]
+
 ## 📋 Next Steps
 ### Complexity: [Simple|Medium|Complex]
 1. [Priority tasks to continue]
@@ -148,6 +151,7 @@ Suggest handoff creation when:
    - Extract key decisions and context
    - **Assess complexity of remaining work**
    - **Determine current flow state and confidence level**
+   - **Check for scratch notes at `docs/handoff/.scratch.md`**
 
 2. **Flow State Assessment**:
    - **deep_work**: Continuous progress on clear tasks (3+ successful steps)
@@ -172,6 +176,7 @@ Suggest handoff creation when:
    - Create structured markdown document
    - Update metadata file with complexity info
    - **Include flow_state and confidence_level in metadata**
+   - **Include scratch notes if present**
    - Track used agents and pending reviews
    - Archive old handoffs if needed
 
@@ -188,5 +193,44 @@ Suggest handoff creation when:
    - Indicate complexity level for next session
    - **Display flow state and confidence for context**
    - Suggest `/clear` if appropriate
+
+## Scratch Notes Pattern
+
+The scratch notes provide a lightweight, persistent working memory across sessions:
+
+### File Location
+`docs/handoff/.scratch.md` - A simple markdown file for quick notes and thoughts
+
+### Format (Flexible and Simple)
+```markdown
+# Scratch Notes
+
+## Current Focus
+[One-line description of what you're working on]
+
+## Blockers
+- [Things that are stuck]
+- [Problems to solve next session]
+
+## Quick Notes
+- [Any thoughts, ideas, or reminders]
+- [Links or references to check]
+- [Hypotheses to test]
+
+## Try Next
+- [Specific approaches to attempt]
+```
+
+### Usage
+- **During session**: Update freely as work progresses
+- **At handoff**: Automatically included in handoff document
+- **At resume**: Loaded first to provide immediate context
+- **Keep it simple**: No strict format required, just useful notes
+
+### Benefits
+- Persists thoughts that don't fit elsewhere
+- Captures "mental state" between sessions
+- Lightweight alternative to complex TODO systems
+- Natural place for debugging notes and hypotheses
 
 Generate handoff documentation now based on the specified mode.
