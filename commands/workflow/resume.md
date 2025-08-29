@@ -54,15 +54,31 @@ Restore work context from a previous handoff document and intelligently determin
    - Identify next steps
    - Note important warnings
    - **Extract complexity level from metadata**
+   - **Extract flow_state and confidence_level**
 
-### Phase 2: Complexity Assessment
+### Phase 2: Flow State and Complexity Assessment
 
-Evaluate the work complexity based on:
+**Analyze flow_state and confidence_level from metadata:**
+```python
+# Flow state determines continuation strategy
+if flow_state == "debugging" and confidence_level < 4:
+    # Stuck in debugging - invoke debugger agent
+    invoke_debugger_agent()
+elif flow_state == "exploring" and confidence_level < 6:
+    # Still searching for approach - research needed
+    invoke_research_or_plan_agent()
+elif flow_state == "deep_work" and confidence_level > 7:
+    # Clear path - continue directly
+    continue_with_current_approach()
+```
+
+**Evaluate the work complexity based on:**
 - Number and nature of next steps
 - Technical debt indicators
 - Dependency requirements
 - Modernization/migration scope
 - External integrations needed
+- **Combined with flow_state for accurate assessment**
 
 ```python
 Complexity Indicators:
@@ -73,11 +89,13 @@ Complexity Indicators:
 
 ### Phase 3: Intelligent Delegation
 
-Based on complexity assessment, automatically delegate to appropriate agents:
+Based on **flow_state, confidence_level, and complexity assessment**, automatically delegate to appropriate agents:
 
 #### For Complex Tasks (complexity > 7):
 ```markdown
 ## 🔄 Complex Work Detected
+
+Complexity: [level] | Flow: [state] | Confidence: [level]/10
 
 Analyzing modernization/migration requirements...
 
@@ -88,6 +106,27 @@ The plan-agent will:
 - Check latest library versions
 - Generate comprehensive execution plan
 - Setup automated workflows
+```
+
+#### For Debugging State (flow_state == "debugging"):
+```markdown
+## 🔍 Debugging Session Detected
+
+Confidence level: [level]/10
+[If confidence < 4: "Previous approach blocked. Trying new strategy..."]
+
+Invoking debugger agent for systematic analysis.
+```
+
+#### For Exploring State (flow_state == "exploring"):
+```markdown
+## 🔎 Exploration Mode Active
+
+Confidence level: [level]/10
+Multiple approaches being evaluated.
+
+[If days_since > 2: "Refreshing research with latest information..."]
+[If confidence < 5: "Consider using plan-agent for structured approach"]
 ```
 
 #### For Medium Tasks (complexity 4-7):
@@ -121,6 +160,8 @@ Display restored context appropriately:
 - Objective: [from handoff]
 - Completed: [task list]
 - Complexity: [level]
+- Flow State: [deep_work|exploring|debugging|refactoring|implementing]
+- Confidence: [level]/10
 
 ### Current State
 - Modified files: [list]
@@ -144,10 +185,12 @@ Automatically triggered for:
 - Work requiring coordination across multiple systems
 
 ### Other Agent Invocations
-Based on specific needs:
+Based on specific needs and flow state:
 - **test-runner**: When test failures detected in handoff
-- **debugger**: When unresolved errors present
+- **debugger**: When unresolved errors present OR flow_state="debugging" with low confidence
 - **code-reviewer**: When PR preparation needed
+- **research-agent**: When flow_state="exploring" with low confidence
+- **time-aware**: Automatically when checking dates or versions
 
 ## Integration with Git Workflow
 
@@ -159,17 +202,24 @@ Automatically check and prepare git environment:
 
 ## Smart Suggestions
 
-Based on handoff analysis, provide intelligent suggestions:
+Based on handoff analysis and flow state, provide intelligent suggestions:
 
 ```markdown
 ## 🎯 Recommended Actions
 
+Flow State: [state] | Confidence: [level]/10
+
 Based on your handoff:
-1. [Primary recommendation based on complexity]
+1. [Primary recommendation based on flow_state + confidence + complexity]
 2. [Secondary options]
 
 Detected patterns:
 - [Pattern type]: [Suggested approach]
+
+Strategy:
+[If debugging + low confidence: "Systematic debugging approach recommended"]
+[If exploring + medium confidence: "Continue evaluation, document findings"]
+[If deep_work + high confidence: "Direct continuation optimal"]
 ```
 
 ## Error Handling

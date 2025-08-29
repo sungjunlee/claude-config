@@ -124,6 +124,8 @@ planned_next: [plan-agent|direct_task]
 agents_used: [list of agents invoked]
 pending_reviews: [CodeRabbit, etc.]
 research_needed: [true|false]
+flow_state: [deep_work|exploring|debugging|refactoring|implementing]
+confidence_level: [1-10]
 ```
 
 ## Auto-trigger Conditions
@@ -145,29 +147,46 @@ Suggest handoff creation when:
    - Identify completed vs pending work
    - Extract key decisions and context
    - **Assess complexity of remaining work**
+   - **Determine current flow state and confidence level**
 
-2. **Complexity Assessment**:
+2. **Flow State Assessment**:
+   - **deep_work**: Continuous progress on clear tasks (3+ successful steps)
+   - **exploring**: Searching/investigating solutions (high file navigation)
+   - **debugging**: Fixing errors or test failures (error patterns detected)
+   - **refactoring**: Code restructuring without functionality changes
+   - **implementing**: Building new features from scratch
+
+3. **Confidence Level Calculation**:
+   - 9-10: Clear path forward, recent successes
+   - 6-8: Some progress but minor uncertainties
+   - 3-5: Multiple approaches being evaluated
+   - 1-2: Blocked or stuck, need external help
+
+4. **Complexity Assessment**:
    - Evaluate next steps complexity (1-10 scale)
    - Determine if plan-agent needed for resume
    - Identify research requirements
    - Note external dependencies
 
-3. **Generate Handoff**:
+5. **Generate Handoff**:
    - Create structured markdown document
    - Update metadata file with complexity info
+   - **Include flow_state and confidence_level in metadata**
    - Track used agents and pending reviews
    - Archive old handoffs if needed
 
-4. **Validate**:
+6. **Validate**:
    - Ensure all active work captured
    - Verify file lists are complete
    - Check next steps are actionable
    - Confirm complexity assessment accurate
+   - **Verify flow state accurately reflects session end state**
 
-5. **Notify**:
+7. **Notify**:
    - Confirm handoff created
    - Show file location
    - Indicate complexity level for next session
+   - **Display flow state and confidence for context**
    - Suggest `/clear` if appropriate
 
 Generate handoff documentation now based on the specified mode.
