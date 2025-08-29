@@ -130,45 +130,104 @@ install_config() {
     # Create config directory if it doesn't exist
     mkdir -p "$CLAUDE_CONFIG_DIR"
     
-    # Copy configuration files
-    if [ -d "agents" ]; then
+    # Check if running from local directory or need to download
+    if [ -d "agents" ] && [ -d "commands" ]; then
+        # Local installation - files exist in current directory
+        log "Installing from local directory..."
+        
+        # Copy configuration files
+        if [ -d "agents" ]; then
+            log "Installing agents..."
+            cp -r agents "$CLAUDE_CONFIG_DIR/"
+        fi
+        
+        if [ -d "commands" ]; then
+            log "Installing commands..."
+            cp -r commands "$CLAUDE_CONFIG_DIR/"
+        fi
+        
+        if [ -d "scripts" ]; then
+            log "Installing scripts..."
+            cp -r scripts "$CLAUDE_CONFIG_DIR/"
+        fi
+        
+        if [ -f "CLAUDE.md" ]; then
+            log "Installing CLAUDE.md..."
+            cp CLAUDE.md "$CLAUDE_CONFIG_DIR/"
+        fi
+        
+        # Handle settings.json with merge logic
+        if [ -f "settings.json" ]; then
+            if [ -f "$CLAUDE_CONFIG_DIR/settings.json" ]; then
+                warn "settings.json already exists, creating settings.json.new"
+                cp settings.json "$CLAUDE_CONFIG_DIR/settings.json.new"
+                info "Please manually merge settings.json.new with your existing settings.json"
+            else
+                log "Installing settings.json..."
+                cp settings.json "$CLAUDE_CONFIG_DIR/"
+            fi
+        fi
+        
+        # Create settings.local.json from example if it exists
+        if [ -f "settings.local.json.example" ]; then
+            if [ ! -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]; then
+                log "Creating settings.local.json from example..."
+                cp settings.local.json.example "$CLAUDE_CONFIG_DIR/settings.local.json"
+                warn "Please edit $CLAUDE_CONFIG_DIR/settings.local.json with your personal settings"
+            fi
+        fi
+    else
+        # Remote installation - need to clone from git
+        log "Downloading configuration from GitHub..."
+        
+        # Create temporary directory
+        local temp_dir=$(mktemp -d)
+        trap "rm -rf $temp_dir" EXIT
+        
+        # Clone the repository
+        if ! git clone --depth 1 "$REPO_URL" "$temp_dir" 2>/dev/null; then
+            error "Failed to download configuration files from GitHub"
+            error "Please ensure git is installed and you have internet connection"
+            exit 1
+        fi
+        
+        # Copy files from temp directory
         log "Installing agents..."
-        cp -r agents "$CLAUDE_CONFIG_DIR/"
-    fi
-    
-    if [ -d "commands" ]; then
+        cp -r "$temp_dir/agents" "$CLAUDE_CONFIG_DIR/"
+        
         log "Installing commands..."
-        cp -r commands "$CLAUDE_CONFIG_DIR/"
-    fi
-    
-    if [ -d "scripts" ]; then
+        cp -r "$temp_dir/commands" "$CLAUDE_CONFIG_DIR/"
+        
         log "Installing scripts..."
-        cp -r scripts "$CLAUDE_CONFIG_DIR/"
-    fi
-    
-    if [ -f "CLAUDE.md" ]; then
+        cp -r "$temp_dir/scripts" "$CLAUDE_CONFIG_DIR/"
+        
         log "Installing CLAUDE.md..."
-        cp CLAUDE.md "$CLAUDE_CONFIG_DIR/"
-    fi
-    
-    # Handle settings.json with merge logic
-    if [ -f "settings.json" ]; then
+        cp "$temp_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
+        
+        log "Installing llm-models-latest.md..."
+        cp "$temp_dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
+        
+        # Handle settings.json with merge logic
         if [ -f "$CLAUDE_CONFIG_DIR/settings.json" ]; then
             warn "settings.json already exists, creating settings.json.new"
-            cp settings.json "$CLAUDE_CONFIG_DIR/settings.json.new"
+            cp "$temp_dir/settings.json" "$CLAUDE_CONFIG_DIR/settings.json.new"
             info "Please manually merge settings.json.new with your existing settings.json"
         else
             log "Installing settings.json..."
-            cp settings.json "$CLAUDE_CONFIG_DIR/"
+            cp "$temp_dir/settings.json" "$CLAUDE_CONFIG_DIR/"
         fi
-    fi
-    
-    # Create settings.local.json from example if it exists
-    if [ -f "settings.local.json.example" ]; then
+        
+        # Create settings.local.json from example
         if [ ! -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]; then
             log "Creating settings.local.json from example..."
-            cp settings.local.json.example "$CLAUDE_CONFIG_DIR/settings.local.json"
+            cp "$temp_dir/settings.local.json.example" "$CLAUDE_CONFIG_DIR/settings.local.json"
             warn "Please edit $CLAUDE_CONFIG_DIR/settings.local.json with your personal settings"
+        fi
+        
+        # Copy docs directory if it exists
+        if [ -d "$temp_dir/docs" ]; then
+            log "Installing documentation..."
+            cp -r "$temp_dir/docs" "$CLAUDE_CONFIG_DIR/"
         fi
     fi
 }
