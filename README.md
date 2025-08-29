@@ -4,8 +4,14 @@ Personal Claude Code configuration for efficient AI-assisted development.
 
 ## 🚀 One-line Installation
 
+### Linux/macOS
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
+```
+
+### Windows (PowerShell)
+```powershell
+irm https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 | iex
 ```
 
 ## ✨ What You Get
@@ -28,7 +34,8 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 ## 📁 What Gets Installed
 
 ```
-~/.claude/
+~/.claude/                     # Linux/macOS
+%USERPROFILE%\.claude\         # Windows
 ├── agents/           # 4 specialized agents
 ├── commands/         # 10 workflow commands
 ├── CLAUDE.md         # Global preferences
@@ -37,6 +44,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 
 ## ⚙️ Alternative Installation
 
+### Linux/macOS
 ```bash
 # Clone and review first
 git clone https://github.com/sungjunlee/claude-config.git
@@ -47,10 +55,28 @@ cd claude-config
 ssh user@server "bash -s" < install.sh
 ```
 
+### Windows
+```powershell
+# Clone and review first
+git clone https://github.com/sungjunlee/claude-config.git
+cd claude-config
+.\install.ps1
+
+# Or download and run
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 -OutFile install.ps1
+.\install.ps1
+```
+
 ## 🔄 Updates
 
+### Linux/macOS
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
+```
+
+### Windows
+```powershell
+irm https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 | iex
 ```
 
 Your existing settings are automatically backed up.
