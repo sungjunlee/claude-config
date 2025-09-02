@@ -57,18 +57,18 @@ This command leverages plan-agent's capabilities:
 
 ## Generated PLAN.md Structure
 
-```markdown
+````markdown
 # Task Plan
-Created: 2025-01-28
+Created: [YYYY-MM-DD]
 Generator: plan-agent
 
 ## Task List
-​```bash
+```bash
 # Independent tasks that can run in parallel
 auth: OAuth2.0 login system implementation (estimated: 2h)
 payment: Stripe payment integration (estimated: 3h)  
 search: Elasticsearch search feature (estimated: 2h)
-​```
+```
 
 ## Common Context
 - Use TypeScript
@@ -82,11 +82,11 @@ search: Elasticsearch search feature (estimated: 2h)
 ## Notes
 - Based on plan-agent research findings
 - Applies current best practices
-```
+````
 
 ## Workflow Sequence
 
-```
+```text
 /worktree-plan → plan-agent analysis → PLAN.md generation → /worktree-distribute → Parallel execution
 ```
 

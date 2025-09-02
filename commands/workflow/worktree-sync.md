@@ -51,7 +51,7 @@ Keep environment files, dependencies, and configurations consistent across all p
 
 ## Example Output
 
-```
+```text
 🔄 Syncing environment files...
 
 Checking: auth

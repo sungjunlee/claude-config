@@ -47,7 +47,7 @@ Parse `.worktrees/PLAN.md` and create isolated worktrees for parallel developmen
 
 Expected format at `.worktrees/PLAN.md`:
 
-```markdown
+````markdown
 # Task Plan
 
 ## Task List
@@ -66,7 +66,7 @@ search: Add Elasticsearch full-text search (2h)
 ## Task Dependencies
 - All tasks can run independently
 - Merge order: auth → payment → search
-```
+````
 
 ## Output Structure
 

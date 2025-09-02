@@ -42,7 +42,7 @@ When users request parallel work:
 4. Execute distribution via `worktree-manager.sh`
 
 ### PLAN.md Format
-```markdown
+````markdown
 # Task Plan
 
 ## Task List
@@ -66,7 +66,7 @@ search: Add Elasticsearch full-text search (2h)
 ## Notes
 - Based on current architecture patterns
 - Each task includes migration guide
-```
+````
 
 ### Task Distribution Process
 1. Create worktree for each task: `feature/[task-name]`

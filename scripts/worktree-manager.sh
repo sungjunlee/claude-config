@@ -127,14 +127,16 @@ copy_env_files() {
     
     # Symlink node_modules (if exists)
     if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
-        local abs_node_modules=$(cd "$root_path" && pwd)/node_modules
+        local abs_node_modules
+        abs_node_modules="$(cd "$root_path" && pwd)"/node_modules
         ln -s "$abs_node_modules" "$worktree_path/node_modules"
         echo "    ✓ Linked node_modules"
     fi
     
     # Symlink Python venv
     if [[ -d "$root_path/venv" && ! -e "$worktree_path/venv" ]]; then
-        local abs_venv=$(cd "$root_path" && pwd)/venv
+        local abs_venv
+        abs_venv="$(cd "$root_path" && pwd)"/venv
         ln -s "$abs_venv" "$worktree_path/venv"
         echo "    ✓ Linked venv"
     fi
@@ -154,7 +156,10 @@ distribute_tasks() {
     fi
     
     # Create tasks directory
-    mkdir -p "$WORKTREES_DIR/tasks"
+    if ! mkdir -p "$WORKTREES_DIR/tasks"; then
+        echo -e "${RED}✗ Failed to create $WORKTREES_DIR/tasks${NC}"
+        return 1
+    fi
     
     echo -e "${BLUE}📋 Parsing PLAN.md...${NC}\n"
     
@@ -163,16 +168,17 @@ distribute_tasks() {
     
     # Parse PLAN.md
     while IFS= read -r line; do
-        if [[ "$line" == '```bash' ]]; then
+        if [[ "$line" =~ ^\`\`\`(bash)?[[:space:]]*$ ]]; then
             in_block=true
-        elif [[ "$line" == '```' ]]; then
+        elif [[ "$in_block" == true && "$line" =~ ^\`\`\`[[:space:]]*$ ]]; then
             in_block=false
-        elif [[ "$in_block" == true ]] && [[ "$line" =~ ^([a-z][a-z0-9-]*):\ *(.+)$ ]]; then
-            local task_name="${BASH_REMATCH[1]}"
-            local task_desc="${BASH_REMATCH[2]}"
-            
+        elif [[ "$in_block" == true ]]; then
             # Skip comment lines
-            if [[ "$line" =~ ^#.*$ ]]; then
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            if [[ "$line" =~ ^([a-z][a-z0-9-]*):\ *(.+)$ ]]; then
+                local task_name="${BASH_REMATCH[1]}"
+                local task_desc="${BASH_REMATCH[2]}"
+            else
                 continue
             fi
             
@@ -188,11 +194,17 @@ distribute_tasks() {
             else
                 # Check if branch already exists
                 if git show-ref --verify --quiet "refs/heads/$branch_name"; then
-                    git worktree add "$worktree_path" "$branch_name" 2>/dev/null
-                    echo "    ✓ Added worktree (existing branch)"
+                    if ! git worktree add "$worktree_path" "$branch_name" 2>&1 | grep -q .; then
+                        echo "    ✓ Added worktree (existing branch)"
+                    else
+                        echo -e "    ${YELLOW}⚠ Could not add worktree for $branch_name (branch may be checked out elsewhere)${NC}"
+                    fi
                 else
-                    git worktree add "$worktree_path" -b "$branch_name" 2>/dev/null
-                    echo "    ✓ Created worktree (new branch)"
+                    if ! git worktree add "$worktree_path" -b "$branch_name" 2>&1 | grep -q "fatal"; then
+                        echo "    ✓ Created worktree (new branch)"
+                    else
+                        echo -e "    ${RED}✗ Failed to create worktree/branch $branch_name${NC}"
+                    fi
                 fi
             fi
             
@@ -224,8 +236,8 @@ claude
 ## 📁 File Locations
 - **Working Directory**: \`$worktree_path\`
 - **Branch**: \`$branch_name\`
-- **Common Context**: \`../$WORKTREES_DIR/CONTEXT.md\`
-- **Task Plan**: \`../$WORKTREES_DIR/PLAN.md\`
+- **Common Context**: \`../CONTEXT.md\`
+- **Task Plan**: \`../PLAN.md\`
 
 ## ✅ Completion Criteria
 - [ ] Feature implementation complete
@@ -263,8 +275,9 @@ EOF
     # Display list of created worktrees
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
-            local task_name=$(basename "$dir")
-            echo "  cd $dir && claude"
+            local task_name
+            task_name="$(basename "$dir")"
+            echo "  cd .worktrees/$task_name && claude"
         fi
     done
     

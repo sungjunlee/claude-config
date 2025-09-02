@@ -30,7 +30,7 @@ Monitor progress across all parallel development worktrees, providing visibility
 
 ## Output Format
 
-```
+```text
 ═══════════════════════════════
      Worktree Status
 ═══════════════════════════════

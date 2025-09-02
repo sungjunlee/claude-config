@@ -54,7 +54,7 @@ Plan git operations:
 
 ### 5. Quality Gates & Automation
 Define automatic triggers:
-```
+```text
 Subagent Invocation Points:
 - test-runner: When test files modified or tests fail
 - code-reviewer: Before PR creation
@@ -62,7 +62,7 @@ Subagent Invocation Points:
 - handoff: At 80% context usage
 
 External Tool Integration:
-- CodeRabbit: Wait 5-20 minutes for PR review
+- CodeRabbit: Wait for PR review completion
 - CI/CD: Monitor pipeline results
 - Linting: Auto-fix before commits
 ```
@@ -126,9 +126,9 @@ Ready to execute? The plan will guide the implementation.
 
 When invoked via `/worktree-plan`, generate `.worktrees/PLAN.md` in this format:
 
-```markdown
+````markdown
 # Task Plan
-Created: [Date]
+Created: [YYYY-MM-DD]
 Generator: plan-agent
 
 ## Task List
@@ -148,7 +148,7 @@ search: Elasticsearch search feature (2h)
 
 ## Notes
 [Additional notes from research]
-```
+````
 
 Key considerations for parallel work planning:
 - Identify truly independent tasks
