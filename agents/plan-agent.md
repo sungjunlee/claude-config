@@ -127,11 +127,11 @@ Ready to execute? The plan will guide the implementation.
 When invoked via `/worktree-plan`, generate `.worktrees/PLAN.md` in this format:
 
 ```markdown
-# 작업 계획
-생성일: [Date]
-생성자: plan-agent
+# Task Plan
+Created: [Date]
+Generator: plan-agent
 
-## 작업 목록
+## Task List
 ```bash
 # Format: task-name: description (estimated time)
 # Only include tasks that can run in parallel
@@ -140,13 +140,13 @@ payment: Stripe payment integration (3h)
 search: Elasticsearch search feature (2h)
 ```
 
-## 공통 컨텍스트
+## Common Context
 [Shared requirements and standards]
 
-## 작업 의존성
+## Task Dependencies
 [Dependencies between tasks, if any]
 
-## 참고사항
+## Notes
 [Additional notes from research]
 ```
 

@@ -1,17 +1,38 @@
-# Command: /worktree-plan
+---
+description: Automatically generate PLAN.md for parallel task distribution using plan-agent
+---
 
-Automatically generate PLAN.md for parallel tasks using plan-agent
+# Worktree Planning
 
-## Usage
+Generate parallel task plan using plan-agent for: $ARGUMENTS
 
-```bash
-/worktree-plan [task description]
-```
+## Purpose
+Leverage plan-agent to analyze complex requirements, identify parallelizable work units, and generate structured PLAN.md for worktree distribution.
 
-## Description
+## Process
 
-Calls plan-agent to analyze tasks, splits them into independent tasks that can be executed in parallel,
-and automatically generates `.worktrees/PLAN.md` file.
+1. **Invoke plan-agent**:
+   - Analyze task complexity and scope
+   - Research best practices if needed
+   - Identify independent work units
+   - Assess parallelization opportunities
+
+2. **Task Analysis**:
+   - Split work into independent units
+   - Verify no file conflicts between tasks
+   - Consider resource constraints
+   - Estimate time for each task
+
+3. **Generate PLAN.md**:
+   - Create `.worktrees/PLAN.md` structure
+   - Define task list with descriptions
+   - Document common context
+   - Specify dependencies if any
+
+4. **Prepare for Distribution**:
+   - Validate branch name availability
+   - Check for existing worktrees
+   - Ready for `/worktree-distribute`
 
 ## Examples
 
@@ -26,24 +47,15 @@ and automatically generates `.worktrees/PLAN.md` file.
 /worktree-plan "Fix bugs found in login, payment, and search"
 ```
 
-## Process
+## Integration with plan-agent
 
-1. **Call plan-agent**
-   - Evaluate task complexity
-   - Split into units that can run in parallel
-   - Verify independence of each task
+This command leverages plan-agent's capabilities:
+- **Complexity Assessment**: Evaluate overall project complexity
+- **Task Division**: Intelligent splitting into parallel units
+- **Research Integration**: Apply best practices from web/Context7
+- **Risk Analysis**: Identify potential conflicts or blockers
 
-2. **Generate PLAN.md**
-   - Create task list in standard format
-   - Define common context
-   - Specify dependencies between tasks
-
-3. **Prepare automatic distribution**
-   - Prepare for `/worktree-distribute` execution
-   - Determine branch names for each task
-   - Estimate task duration
-
-## Generated PLAN.md Format
+## Generated PLAN.md Structure
 
 ```markdown
 # Task Plan
@@ -72,39 +84,39 @@ search: Elasticsearch search feature (estimated: 2h)
 - Applies current best practices
 ```
 
-## Integration with Plan-agent
+## Workflow Sequence
 
-This command leverages the following plan-agent capabilities:
-
-1. **Complexity Assessment**: Analyze overall task complexity
-2. **Task Division**: Break down into parallel-executable units
-3. **Research**: Web search and Context7 queries when needed
-4. **Risk Assessment**: Identify risk factors for each task
-
-## Workflow
-
-```mermaid
-/worktree-plan → plan-agent → Generate PLAN.md → /worktree-distribute → Parallel tasks
 ```
+/worktree-plan → plan-agent analysis → PLAN.md generation → /worktree-distribute → Parallel execution
+```
+
+## Success Indicators
+
+- PLAN.md created at `.worktrees/PLAN.md`
+- All tasks truly independent (no file conflicts)
+- Clear time estimates provided
+- Common context properly documented
+- Ready for immediate distribution
 
 ## Benefits
 
-- **Automation**: No need to manually write PLAN.md
-- **Optimization**: plan-agent performs optimal task division
-- **Consistency**: Generated in standardized format
-- **Research-based**: Applies latest best practices
+- **Intelligent Division**: AI-powered task splitting
+- **Best Practices**: Research-informed planning
+- **Time Savings**: Automated PLAN.md generation
+- **Conflict Prevention**: Ensures task independence
+
+## Error Handling
+
+- **Complex Dependencies**: Warn if tasks can't be parallelized
+- **File Conflicts**: Identify overlapping file modifications
+- **Resource Constraints**: Note port/database conflicts
+- **Existing Plans**: Prompt before overwriting
 
 ## Related Commands
 
-- `/plan` - General task planning (not parallel execution)
-- `/worktree-distribute` - Distribute tasks based on PLAN.md
-- `/worktree-status` - Check parallel task progress
+- `/plan` - General strategic planning
+- `/worktree-distribute` - Execute task distribution
+- `/worktree-status` - Monitor progress
+- `/worktree-sync` - Synchronize environments
 
-## Implementation
-
-```bash
-# 1. Call plan-agent to analyze tasks
-# 2. Split into parallel-executable tasks
-# 3. Generate .worktrees/PLAN.md
-# 4. Guide user to next steps
-```
+Execute plan-agent now to analyze and generate parallel task plan.

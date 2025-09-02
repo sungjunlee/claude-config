@@ -3,17 +3,17 @@
 
 set -euo pipefail
 
-# 색상 정의
+# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 설정
+# Configuration
 WORKTREES_DIR=".worktrees"
 
-# 도움말
+# Help function
 show_help() {
     cat <<EOF
 Worktree Manager - Git Worktree task distribution tool
@@ -125,14 +125,14 @@ copy_env_files() {
         fi
     done
     
-    # node_modules 심링크 (존재하는 경우)
+    # Symlink node_modules (if exists)
     if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
         local abs_node_modules=$(cd "$root_path" && pwd)/node_modules
         ln -s "$abs_node_modules" "$worktree_path/node_modules"
         echo "    ✓ Linked node_modules"
     fi
     
-    # Python venv 심링크
+    # Symlink Python venv
     if [[ -d "$root_path/venv" && ! -e "$worktree_path/venv" ]]; then
         local abs_venv=$(cd "$root_path" && pwd)/venv
         ln -s "$abs_venv" "$worktree_path/venv"
@@ -153,7 +153,7 @@ distribute_tasks() {
         return 1
     fi
     
-    # tasks 디렉토리 생성
+    # Create tasks directory
     mkdir -p "$WORKTREES_DIR/tasks"
     
     echo -e "${BLUE}📋 Parsing PLAN.md...${NC}\n"
@@ -161,7 +161,7 @@ distribute_tasks() {
     local task_count=0
     local in_block=false
     
-    # PLAN.md 파싱
+    # Parse PLAN.md
     while IFS= read -r line; do
         if [[ "$line" == '```bash' ]]; then
             in_block=true
@@ -171,7 +171,7 @@ distribute_tasks() {
             local task_name="${BASH_REMATCH[1]}"
             local task_desc="${BASH_REMATCH[2]}"
             
-            # 주석 라인 스킵
+            # Skip comment lines
             if [[ "$line" =~ ^#.*$ ]]; then
                 continue
             fi
@@ -179,14 +179,14 @@ distribute_tasks() {
             echo -e "${BLUE}📦 Setting up: $task_name${NC}"
             echo "   Description: $task_desc"
             
-            # Worktree 생성
+            # Create worktree
             local worktree_path="$WORKTREES_DIR/$task_name"
             local branch_name="feature/$task_name"
             
             if [[ -d "$worktree_path" ]]; then
                 echo -e "    ${YELLOW}⚠ Worktree already exists${NC}"
             else
-                # Branch가 이미 존재하는지 확인
+                # Check if branch already exists
                 if git show-ref --verify --quiet "refs/heads/$branch_name"; then
                     git worktree add "$worktree_path" "$branch_name" 2>/dev/null
                     echo "    ✓ Added worktree (existing branch)"
@@ -291,7 +291,7 @@ show_status() {
             worktree_found=true
             local task_name=$(basename "$dir")
             
-            # Working Directory로 이동
+            # Change to working directory
             pushd "$dir" > /dev/null
             
             local branch=$(git branch --show-current)
@@ -313,7 +313,7 @@ show_status() {
             echo "   Commits: $commits"
             echo "   Last: $last_commit"
             
-            # Task 파일 확인
+            # Check task file
             if [[ -f "../tasks/$task_name.md" ]]; then
                 echo "   Task: ../tasks/$task_name.md"
             fi
@@ -380,9 +380,9 @@ sync_env_files() {
     fi
 }
 
-# 메인 함수
+# Main function
 main() {
-    # Git repository 확인
+    # Check Git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         echo -e "${RED}✗ Not a git repository${NC}"
         echo "Please run this script in a git repository"
@@ -408,5 +408,5 @@ main() {
     esac
 }
 
-# 스크립트 실행
+# Execute script
 main "$@"
