@@ -3,17 +3,17 @@
 
 set -euo pipefail
 
-# 색상 정의
+# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 설정
+# Configuration
 WORKTREES_DIR=".worktrees"
 
-# 도움말
+# Help function
 show_help() {
     cat <<EOF
 Worktree Manager - Git Worktree task distribution tool
@@ -125,16 +125,18 @@ copy_env_files() {
         fi
     done
     
-    # node_modules 심링크 (존재하는 경우)
+    # Symlink node_modules (if exists)
     if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
-        local abs_node_modules=$(cd "$root_path" && pwd)/node_modules
+        local abs_node_modules
+        abs_node_modules="$(cd "$root_path" && pwd)"/node_modules
         ln -s "$abs_node_modules" "$worktree_path/node_modules"
         echo "    ✓ Linked node_modules"
     fi
     
-    # Python venv 심링크
+    # Symlink Python venv
     if [[ -d "$root_path/venv" && ! -e "$worktree_path/venv" ]]; then
-        local abs_venv=$(cd "$root_path" && pwd)/venv
+        local abs_venv
+        abs_venv="$(cd "$root_path" && pwd)"/venv
         ln -s "$abs_venv" "$worktree_path/venv"
         echo "    ✓ Linked venv"
     fi
@@ -153,46 +155,56 @@ distribute_tasks() {
         return 1
     fi
     
-    # tasks 디렉토리 생성
-    mkdir -p "$WORKTREES_DIR/tasks"
+    # Create tasks directory
+    if ! mkdir -p "$WORKTREES_DIR/tasks"; then
+        echo -e "${RED}✗ Failed to create $WORKTREES_DIR/tasks${NC}"
+        return 1
+    fi
     
     echo -e "${BLUE}📋 Parsing PLAN.md...${NC}\n"
     
     local task_count=0
     local in_block=false
     
-    # PLAN.md 파싱
+    # Parse PLAN.md
     while IFS= read -r line; do
-        if [[ "$line" == '```bash' ]]; then
+        if [[ "$line" =~ ^\`\`\`(bash)?[[:space:]]*$ ]]; then
             in_block=true
-        elif [[ "$line" == '```' ]]; then
+        elif [[ "$in_block" == true && "$line" =~ ^\`\`\`[[:space:]]*$ ]]; then
             in_block=false
-        elif [[ "$in_block" == true ]] && [[ "$line" =~ ^([a-z][a-z0-9-]*):\ *(.+)$ ]]; then
-            local task_name="${BASH_REMATCH[1]}"
-            local task_desc="${BASH_REMATCH[2]}"
-            
-            # 주석 라인 스킵
-            if [[ "$line" =~ ^#.*$ ]]; then
+        elif [[ "$in_block" == true ]]; then
+            # Skip comment lines
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            if [[ "$line" =~ ^([a-z][a-z0-9-]*):\ *(.+)$ ]]; then
+                local task_name="${BASH_REMATCH[1]}"
+                local task_desc="${BASH_REMATCH[2]}"
+            else
                 continue
             fi
             
             echo -e "${BLUE}📦 Setting up: $task_name${NC}"
             echo "   Description: $task_desc"
             
-            # Worktree 생성
+            # Create worktree
             local worktree_path="$WORKTREES_DIR/$task_name"
             local branch_name="feature/$task_name"
             
             if [[ -d "$worktree_path" ]]; then
                 echo -e "    ${YELLOW}⚠ Worktree already exists${NC}"
             else
-                # Branch가 이미 존재하는지 확인
+                # Check if branch already exists
                 if git show-ref --verify --quiet "refs/heads/$branch_name"; then
-                    git worktree add "$worktree_path" "$branch_name" 2>/dev/null
-                    echo "    ✓ Added worktree (existing branch)"
+                    if ! git worktree add "$worktree_path" "$branch_name" 2>&1 | grep -q .; then
+                        echo "    ✓ Added worktree (existing branch)"
+                    else
+                        echo -e "    ${YELLOW}⚠ Could not add worktree for $branch_name (branch may be checked out elsewhere)${NC}"
+                    fi
                 else
-                    git worktree add "$worktree_path" -b "$branch_name" 2>/dev/null
-                    echo "    ✓ Created worktree (new branch)"
+                    if ! git worktree add "$worktree_path" -b "$branch_name" 2>&1 | grep -q "fatal"; then
+                        echo "    ✓ Created worktree (new branch)"
+                    else
+                        echo -e "    ${RED}✗ Failed to create worktree/branch $branch_name${NC}"
+                    fi
                 fi
             fi
             
@@ -224,8 +236,8 @@ claude
 ## 📁 File Locations
 - **Working Directory**: \`$worktree_path\`
 - **Branch**: \`$branch_name\`
-- **Common Context**: \`../$WORKTREES_DIR/CONTEXT.md\`
-- **Task Plan**: \`../$WORKTREES_DIR/PLAN.md\`
+- **Common Context**: \`../CONTEXT.md\`
+- **Task Plan**: \`../PLAN.md\`
 
 ## ✅ Completion Criteria
 - [ ] Feature implementation complete
@@ -263,8 +275,9 @@ EOF
     # Display list of created worktrees
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
-            local task_name=$(basename "$dir")
-            echo "  cd $dir && claude"
+            local task_name
+            task_name="$(basename "$dir")"
+            echo "  cd .worktrees/$task_name && claude"
         fi
     done
     
@@ -291,7 +304,7 @@ show_status() {
             worktree_found=true
             local task_name=$(basename "$dir")
             
-            # Working Directory로 이동
+            # Change to working directory
             pushd "$dir" > /dev/null
             
             local branch=$(git branch --show-current)
@@ -313,7 +326,7 @@ show_status() {
             echo "   Commits: $commits"
             echo "   Last: $last_commit"
             
-            # Task 파일 확인
+            # Check task file
             if [[ -f "../tasks/$task_name.md" ]]; then
                 echo "   Task: ../tasks/$task_name.md"
             fi
@@ -380,9 +393,9 @@ sync_env_files() {
     fi
 }
 
-# 메인 함수
+# Main function
 main() {
-    # Git repository 확인
+    # Check Git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         echo -e "${RED}✗ Not a git repository${NC}"
         echo "Please run this script in a git repository"
@@ -408,5 +421,5 @@ main() {
     esac
 }
 
-# 스크립트 실행
+# Execute script
 main "$@"
