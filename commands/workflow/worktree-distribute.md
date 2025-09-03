@@ -1,71 +1,117 @@
-# Command: /worktree-distribute
+---
+description: Distribute parallel tasks to independent git worktrees based on PLAN.md
+---
 
-Distribute tasks to worktrees based on PLAN.md
+# Worktree Distribution
 
-## Usage
+Distribute tasks from PLAN.md to independent git worktrees for: $ARGUMENTS
 
-```bash
-/worktree-distribute
-```
+## Purpose
+Parse `.worktrees/PLAN.md` and create isolated worktrees for parallel development, enabling multiple Claude instances to work simultaneously without interference.
 
-## Description
+## Process
 
-Parses `.worktrees/PLAN.md` file and distributes each task to independent git worktrees.
-Automatically copies environment files (.env, package.json, etc.) to make them immediately ready for work.
+1. **Validate Prerequisites**:
+   - Verify git repository exists
+   - Check `.worktrees/PLAN.md` file presence
+   - Ensure no conflicting branches exist
 
-## Actions
+2. **Parse Task Plan**:
+   - Read `.worktrees/PLAN.md` structure
+   - Extract task definitions and descriptions
+   - Identify common context and dependencies
 
-1. Parse `.worktrees/PLAN.md`
-2. Create worktree for each task (branch name: `feature/task-name`)
-3. Automatically copy environment files (.env, package.json, lock files, etc.)
-4. Generate task instructions in `tasks/` folder
-5. Guide how to run Claude in each worktree
+3. **Create Worktrees**:
+   - Generate worktree for each task
+   - Branch naming: `feature/[task-name]`
+   - Handle existing branches gracefully
 
-## Prerequisites
+4. **Environment Setup**:
+   - Copy environment files (.env, package.json, lock files)
+   - Create node_modules symlinks for efficiency
+   - Link Python venv if present
+   - Copy 17+ config file types automatically
 
-- Git repository
-- `.worktrees/PLAN.md` 파일 존재
+5. **Generate Documentation**:
+   - Create task instruction at `.worktrees/tasks/[task-name].md`
+   - Include acceptance criteria
+   - Document Claude invocation commands
+   - Add troubleshooting guidance
 
-## PLAN.md Format
+6. **Provide Launch Instructions**:
+   - Display commands for each worktree
+   - Suggest terminal/tab organization
+   - Indicate parallel execution capability
 
-```markdown
+## PLAN.md Structure
+
+Expected format at `.worktrees/PLAN.md`:
+
+````markdown
 # Task Plan
 
 ## Task List
-​```bash
-# Format: task-name: task description
-auth: Implement user authentication system
-payment: Implement payment module
-search: Implement search feature
-​```
+```bash
+# Format: task-name: task description (estimated time)
+auth: Implement OAuth2.0 authentication (2h)
+payment: Integrate Stripe payment processing (3h)
+search: Add Elasticsearch full-text search (2h)
+```
 
 ## Common Context
-- Use TypeScript
-- Include test code
-```
+- TypeScript with strict mode
+- Jest for testing (min 80% coverage)
+- Follow REST API conventions
 
-## Output
+## Task Dependencies
+- All tasks can run independently
+- Merge order: auth → payment → search
+````
 
-For each task:
-- Create `.worktrees/[task-name]/` directory
-- Generate `.worktrees/tasks/[task-name].md` task instructions
-- Copy necessary environment files
+## Output Structure
 
-## Example
+Creates for each task:
+- `.worktrees/[task-name]/` - Independent worktree directory
+- `.worktrees/tasks/[task-name].md` - Detailed task instructions
+- Environment files copied and symlinks created
+- Branch `feature/[task-name]` ready for work
+
+## Success Indicators
+
+- All worktrees created successfully
+- Environment files properly copied
+- Task instructions generated
+- No branch conflicts
+- Clear launch commands provided
+
+## Error Handling
+
+Common issues and solutions:
+- **Branch exists**: Check and clean existing branches
+- **PLAN.md missing**: Create template or use `/worktree-plan`
+- **Permission denied**: Check script execution permissions
+- **Disk space**: Verify sufficient space before distribution
+
+## Integration Points
+
+- Use after `/worktree-plan` for automatic planning
+- Monitor with `/worktree-status`
+- Synchronize with `/worktree-sync`
+- Clean up with `git worktree remove`
+
+## Example Workflow
 
 ```bash
-# 1. Write PLAN.md
-vim .worktrees/PLAN.md
+# Generate plan (if not exists)
+/worktree-plan "implement auth, payment, and search"
 
-# 2. Execute distribution
+# Distribute tasks
 /worktree-distribute
 
-# 3. Work in each worktree
+# Work in parallel (different terminals)
 cd .worktrees/auth && claude
+cd .worktrees/payment && claude
+cd .worktrees/search && claude
 ```
 
-## Implementation
-
-```bash
-scripts/worktree-manager.sh distribute
-```
+Execute worktree distribution now using `scripts/worktree-manager.sh distribute`.
