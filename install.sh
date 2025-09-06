@@ -3,10 +3,28 @@
 # Claude Code Configuration Installer
 # https://github.com/sungjunlee/claude-config
 #
-# This script installs Claude Code configuration files for consistent
-# development environment across machines, including headless Linux servers.
+# This script installs Claude Code account-level configuration
+# for consistent development environment across machines.
 
 set -euo pipefail
+
+# Get script directory (works both standalone and from repo)
+if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+    SCRIPT_DIR="$(pwd)"
+fi
+
+# Check if running from repo or standalone
+if [[ -d "$SCRIPT_DIR/profiles/account" ]]; then
+    # Running from repo
+    REPO_DIR="$SCRIPT_DIR"
+    PROFILE_DIR="$SCRIPT_DIR/profiles/account"
+else
+    # Running standalone (downloaded via curl)
+    REPO_DIR=""
+    PROFILE_DIR=""
+fi
 
 # Configuration
 CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
@@ -131,29 +149,34 @@ install_config() {
     mkdir -p "$CLAUDE_CONFIG_DIR"
     
     # Check if running from local directory or need to download
-    if [ -d "agents" ] && [ -d "commands" ]; then
-        # Local installation - files exist in current directory
-        log "Installing from local directory..."
+    if [ -n "$PROFILE_DIR" ] && [ -d "$PROFILE_DIR" ]; then
+        # Local installation from repo
+        log "Installing from local repository..."
         
-        # Copy configuration files
-        if [ -d "agents" ]; then
+        # Copy configuration files from account profile
+        if [ -d "$PROFILE_DIR/agents" ]; then
             log "Installing agents..."
-            cp -r agents "$CLAUDE_CONFIG_DIR/"
+            cp -r "$PROFILE_DIR/agents" "$CLAUDE_CONFIG_DIR/"
         fi
         
-        if [ -d "commands" ]; then
+        if [ -d "$PROFILE_DIR/commands" ]; then
             log "Installing commands..."
-            cp -r commands "$CLAUDE_CONFIG_DIR/"
+            cp -r "$PROFILE_DIR/commands" "$CLAUDE_CONFIG_DIR/"
         fi
         
-        if [ -d "scripts" ]; then
+        if [ -d "$PROFILE_DIR/scripts" ]; then
             log "Installing scripts..."
-            cp -r scripts "$CLAUDE_CONFIG_DIR/"
+            cp -r "$PROFILE_DIR/scripts" "$CLAUDE_CONFIG_DIR/"
         fi
         
-        if [ -f "CLAUDE.md" ]; then
+        if [ -f "$PROFILE_DIR/CLAUDE.md" ]; then
             log "Installing CLAUDE.md..."
-            cp CLAUDE.md "$CLAUDE_CONFIG_DIR/"
+            cp "$PROFILE_DIR/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
+        fi
+        
+        if [ -f "$PROFILE_DIR/llm-models-latest.md" ]; then
+            log "Installing llm-models-latest.md..."
+            cp "$PROFILE_DIR/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
         fi
         
         # Handle settings.json with merge logic
@@ -191,21 +214,23 @@ install_config() {
             exit 1
         fi
         
-        # Copy files from temp directory
+        # Copy files from account profile
+        local source_dir="$temp_dir/profiles/account"
+        
         log "Installing agents..."
-        cp -r "$temp_dir/agents" "$CLAUDE_CONFIG_DIR/"
+        cp -r "$source_dir/agents" "$CLAUDE_CONFIG_DIR/"
         
         log "Installing commands..."
-        cp -r "$temp_dir/commands" "$CLAUDE_CONFIG_DIR/"
+        cp -r "$source_dir/commands" "$CLAUDE_CONFIG_DIR/"
         
         log "Installing scripts..."
-        cp -r "$temp_dir/scripts" "$CLAUDE_CONFIG_DIR/"
+        cp -r "$source_dir/scripts" "$CLAUDE_CONFIG_DIR/"
         
         log "Installing CLAUDE.md..."
-        cp "$temp_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
+        cp "$source_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
         
         log "Installing llm-models-latest.md..."
-        cp "$temp_dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
+        cp "$source_dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
         
         # Handle settings.json with merge logic
         if [ -f "$CLAUDE_CONFIG_DIR/settings.json" ]; then
