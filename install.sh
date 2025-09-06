@@ -37,12 +37,14 @@ if [ -t 1 ]; then
     GREEN='\033[0;32m'
     YELLOW='\033[1;33m'
     BLUE='\033[0;34m'
+    CYAN='\033[0;36m'
     NC='\033[0m' # No Color
 else
     RED=''
     GREEN=''
     YELLOW=''
     BLUE=''
+    CYAN=''
     NC=''
 fi
 
@@ -51,6 +53,11 @@ log() { echo -e "${GREEN}[+]${NC} $1"; }
 warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 error() { echo -e "${RED}[✗]${NC} $1" >&2; }
 info() { echo -e "${BLUE}[i]${NC} $1"; }
+debug() { 
+    if [[ "${DEBUG:-0}" == "1" ]]; then
+        echo -e "${CYAN}[D]${NC} $1" >&2
+    fi
+}
 
 # Detect OS
 detect_os() {
@@ -157,26 +164,36 @@ install_config() {
         if [ -d "$PROFILE_DIR/agents" ]; then
             log "Installing agents..."
             cp -r "$PROFILE_DIR/agents" "$CLAUDE_CONFIG_DIR/"
+        else
+            warn "Agents directory not found in profile"
         fi
         
         if [ -d "$PROFILE_DIR/commands" ]; then
             log "Installing commands..."
             cp -r "$PROFILE_DIR/commands" "$CLAUDE_CONFIG_DIR/"
+        else
+            warn "Commands directory not found in profile"
         fi
         
         if [ -d "$PROFILE_DIR/scripts" ]; then
             log "Installing scripts..."
             cp -r "$PROFILE_DIR/scripts" "$CLAUDE_CONFIG_DIR/"
+        else
+            debug "Scripts directory not found (optional)"
         fi
         
         if [ -f "$PROFILE_DIR/CLAUDE.md" ]; then
             log "Installing CLAUDE.md..."
             cp "$PROFILE_DIR/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
+        else
+            warn "CLAUDE.md not found in profile"
         fi
         
         if [ -f "$PROFILE_DIR/llm-models-latest.md" ]; then
             log "Installing llm-models-latest.md..."
             cp "$PROFILE_DIR/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
+        else
+            debug "llm-models-latest.md not found (optional)"
         fi
         
         # Handle settings.json with merge logic

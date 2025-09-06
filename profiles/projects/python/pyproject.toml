@@ -17,8 +17,13 @@ dev = [
     "pre-commit>=3.0",
 ]
 
-[tool.setuptools]
-packages = ["src"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
 
 [tool.ruff]
 # Extend the default configuration

@@ -61,6 +61,12 @@ load_profile() {
     local profile_name="$1"
     local profile_type="${2:-projects}"
     
+    # Validate profile name to prevent path traversal
+    if [[ "$profile_name" =~ \.\. ]] || [[ "$profile_name" =~ / ]]; then
+        error "Invalid profile name: $profile_name"
+        return 1
+    fi
+    
     local profile_dir="$(get_profile_dir $profile_type)/$profile_name"
     local profile_yaml="$profile_dir/profile.yaml"
     

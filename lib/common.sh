@@ -119,13 +119,26 @@ get_absolute_path() {
     fi
 }
 
-# Parse YAML value (simple implementation)
+# Parse YAML value (robust implementation with yq fallback)
 parse_yaml_value() {
     local file="$1"
     local key="$2"
     
-    if [[ -f "$file" ]]; then
-        grep "^${key}:" "$file" | sed "s/^${key}:[[:space:]]*//" | sed 's/[[:space:]]*#.*//'
+    if [[ ! -f "$file" ]]; then
+        return 1
+    fi
+    
+    # Try yq if available (more robust)
+    if command_exists yq; then
+        yq eval ".${key}" "$file" 2>/dev/null || echo ""
+    else
+        # Fallback to grep/sed with better handling
+        # Remove comments, trim whitespace, handle quotes
+        grep "^${key}:" "$file" 2>/dev/null | \
+            sed "s/^${key}:[[:space:]]*//" | \
+            sed 's/[[:space:]]*#.*//' | \
+            sed 's/^["'\'']\(.*\)["'\'']$/\1/' | \
+            sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
     fi
 }
 
