@@ -128,9 +128,25 @@ EOF
     log "Created .gitignore"
 fi
 
+# Install Claude commands
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(pwd)"
+CLAUDE_DIR="${PROJECT_ROOT}/.claude"
+
+if [[ -d "${SCRIPT_DIR}/.claude/commands" ]]; then
+    mkdir -p "${CLAUDE_DIR}/commands"
+    cp -r "${SCRIPT_DIR}/.claude/commands/"* "${CLAUDE_DIR}/commands/" 2>/dev/null || true
+    log "Installed Claude Code project commands"
+fi
+
 log "Python profile installation complete!"
 info "Next steps:"
 echo "  1. Review and customize pyproject.toml"
 echo "  2. Run 'pre-commit install' if not already done"
 echo "  3. Run 'pytest' to test your setup"
 echo "  4. Run 'ruff check .' to lint your code"
+echo ""
+info "Available Claude commands:"
+echo "  /optimize - Python-specific performance optimization"
+echo "  /pytest   - Smart pytest runner with coverage"
+echo "  /venv     - Virtual environment management"
