@@ -66,7 +66,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/scripts/git_status.sh"
+            "command": "$CLAUDE_PROJECT_DIR/scripts/hooks/session_start.sh"
           }
         ]
       }
@@ -88,7 +88,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if command -v osascript > /dev/null 2>&1; then osascript -e 'display notification \"Claude Code session completed\" with title \"Claude Code\"'; elif command -v powershell > /dev/null 2>&1; then powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Claude Code session completed', 'Claude Code')\"; else echo 'Claude Code session completed' >> ~/.claude/session-log.txt; fi"
+            "command": "$CLAUDE_PROJECT_DIR/scripts/hooks/session_stop.sh"
           }
         ]
       }

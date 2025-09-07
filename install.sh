@@ -3,10 +3,28 @@
 # Claude Code Configuration Installer
 # https://github.com/sungjunlee/claude-config
 #
-# This script installs Claude Code configuration files for consistent
-# development environment across machines, including headless Linux servers.
+# This script installs Claude Code account-level configuration
+# for consistent development environment across machines.
 
 set -euo pipefail
+
+# Get script directory (works both standalone and from repo)
+if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+    SCRIPT_DIR="$(pwd)"
+fi
+
+# Check if running from repo or standalone
+if [[ -d "$SCRIPT_DIR/profiles/account" ]]; then
+    # Running from repo
+    REPO_DIR="$SCRIPT_DIR"
+    PROFILE_DIR="$SCRIPT_DIR/profiles/account"
+else
+    # Running standalone (downloaded via curl)
+    REPO_DIR=""
+    PROFILE_DIR=""
+fi
 
 # Configuration
 CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
@@ -19,12 +37,14 @@ if [ -t 1 ]; then
     GREEN='\033[0;32m'
     YELLOW='\033[1;33m'
     BLUE='\033[0;34m'
+    CYAN='\033[0;36m'
     NC='\033[0m' # No Color
 else
     RED=''
     GREEN=''
     YELLOW=''
     BLUE=''
+    CYAN=''
     NC=''
 fi
 
@@ -33,6 +53,11 @@ log() { echo -e "${GREEN}[+]${NC} $1"; }
 warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 error() { echo -e "${RED}[✗]${NC} $1" >&2; }
 info() { echo -e "${BLUE}[i]${NC} $1"; }
+debug() { 
+    if [[ "${DEBUG:-0}" == "1" ]]; then
+        echo -e "${CYAN}[D]${NC} $1" >&2
+    fi
+}
 
 # Detect OS
 detect_os() {
@@ -78,13 +103,26 @@ check_prerequisites() {
 
 # Check if Claude Code is installed
 check_claude_installation() {
+    local force="${1:-false}"
+    
     if command -v claude &> /dev/null; then
         log "Claude Code is already installed ($(claude --version 2>/dev/null || echo 'version unknown'))"
         return 0
     else
         warn "Claude Code is not installed"
+        
+        # If force flag is set, install without prompting
+        if [[ "$force" == "true" ]]; then
+            install_claude_code
+            return
+        fi
+        
         info "Would you like to install it now? (y/N)"
-        read -r response < /dev/tty
+        if [ -t 0 ]; then
+            read -r response
+        else
+            response="${CI_RESPONSE:-n}"
+        fi
         if [[ "$response" =~ ^[Yy]$ ]]; then
             install_claude_code
         else
@@ -131,29 +169,47 @@ install_config() {
     mkdir -p "$CLAUDE_CONFIG_DIR"
     
     # Check if running from local directory or need to download
-    if [ -d "agents" ] && [ -d "commands" ]; then
-        # Local installation - files exist in current directory
-        log "Installing from local directory..."
+    if [ -n "$PROFILE_DIR" ] && [ -d "$PROFILE_DIR" ]; then
+        # Local installation from repo
+        log "Installing from local repository..."
         
-        # Copy configuration files
-        if [ -d "agents" ]; then
+        # Copy configuration files from account profile
+        if [ -d "$PROFILE_DIR/agents" ]; then
             log "Installing agents..."
-            cp -r agents "$CLAUDE_CONFIG_DIR/"
+            cp -r "$PROFILE_DIR/agents" "$CLAUDE_CONFIG_DIR/"
+        else
+            warn "Agents directory not found in profile"
         fi
         
-        if [ -d "commands" ]; then
+        if [ -d "$PROFILE_DIR/commands" ]; then
             log "Installing commands..."
-            cp -r commands "$CLAUDE_CONFIG_DIR/"
+            cp -r "$PROFILE_DIR/commands" "$CLAUDE_CONFIG_DIR/"
+        else
+            warn "Commands directory not found in profile"
         fi
         
-        if [ -d "scripts" ]; then
+        if [ -d "$PROFILE_DIR/scripts" ]; then
             log "Installing scripts..."
-            cp -r scripts "$CLAUDE_CONFIG_DIR/"
+            cp -r "$PROFILE_DIR/scripts" "$CLAUDE_CONFIG_DIR/"
+            # Set execution permissions for all scripts
+            find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
+            find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.py" -exec chmod +x {} \;
+        else
+            debug "Scripts directory not found (optional)"
         fi
         
-        if [ -f "CLAUDE.md" ]; then
+        if [ -f "$PROFILE_DIR/CLAUDE.md" ]; then
             log "Installing CLAUDE.md..."
-            cp CLAUDE.md "$CLAUDE_CONFIG_DIR/"
+            cp "$PROFILE_DIR/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
+        else
+            warn "CLAUDE.md not found in profile"
+        fi
+        
+        if [ -f "$PROFILE_DIR/llm-models-latest.md" ]; then
+            log "Installing llm-models-latest.md..."
+            cp "$PROFILE_DIR/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
+        else
+            debug "llm-models-latest.md not found (optional)"
         fi
         
         # Handle settings.json with merge logic
@@ -191,21 +247,26 @@ install_config() {
             exit 1
         fi
         
-        # Copy files from temp directory
+        # Copy files from account profile
+        local source_dir="$temp_dir/profiles/account"
+        
         log "Installing agents..."
-        cp -r "$temp_dir/agents" "$CLAUDE_CONFIG_DIR/"
+        cp -r "$source_dir/agents" "$CLAUDE_CONFIG_DIR/"
         
         log "Installing commands..."
-        cp -r "$temp_dir/commands" "$CLAUDE_CONFIG_DIR/"
+        cp -r "$source_dir/commands" "$CLAUDE_CONFIG_DIR/"
         
         log "Installing scripts..."
-        cp -r "$temp_dir/scripts" "$CLAUDE_CONFIG_DIR/"
+        cp -r "$source_dir/scripts" "$CLAUDE_CONFIG_DIR/"
+        # Set execution permissions for all scripts
+        find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
+        find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.py" -exec chmod +x {} \;
         
         log "Installing CLAUDE.md..."
-        cp "$temp_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
+        cp "$source_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
         
         log "Installing llm-models-latest.md..."
-        cp "$temp_dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
+        cp "$source_dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
         
         # Handle settings.json with merge logic
         if [ -f "$CLAUDE_CONFIG_DIR/settings.json" ]; then
@@ -320,14 +381,18 @@ main() {
     check_prerequisites
     
     # Check Claude Code installation
-    check_claude_installation
+    check_claude_installation "$force_install"
     
     # Confirmation prompt (unless --force is used)
     if [ "$force_install" = false ]; then
         echo ""
         warn "This will install Claude Code configuration files to $CLAUDE_CONFIG_DIR"
         echo -n "Continue? (y/N) "
-        read -r response < /dev/tty
+        if [ -t 0 ]; then
+            read -r response
+        else
+            response="${CI_RESPONSE:-n}"
+        fi
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
             info "Installation cancelled"
             exit 0

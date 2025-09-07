@@ -1,26 +1,126 @@
-# Claude Config
+# Claude Config - Profile-Based Development Environment
 
-Personal Claude Code configuration for efficient AI-assisted development.
+🚀 **Unified configuration system for Claude Code** - Supporting both account-level and project-specific settings.
 
-## 🚀 One-line Installation
+## 📋 Overview
 
-### Linux/macOS
+Claude Config provides a flexible profile-based system for managing Claude Code configurations:
+
+- **Account Profile**: Global settings applied to all projects (~/.claude)
+- **Project Profiles**: Language-specific configurations for individual projects
+- **Extensible**: Easy to add new languages and tools
+- **Backward Compatible**: Existing installations continue to work
+
+## 🚀 Quick Start
+
+### One-line Installation (Account-level)
+
+#### Linux/macOS
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
 ```
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 ```powershell
 irm https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 | iex
 ```
 
+### Initialize Project (NEW!)
+
+```bash
+# Auto-detect project type
+ccfg init auto
+
+# Or specify explicitly
+ccfg init python
+ccfg init javascript
+ccfg init rust
+```
+
 ## ✨ What You Get
 
-- **4 Core Agents**: Code reviewer, test runner, debugger, time-aware
-- **10 Essential Commands**: `/commit`, `/test`, `/debug`, `/review`, etc.
-- **Minimal Global Config**: Lean CLAUDE.md for all projects
+### Account-level Configuration
+- **6 Core Agents**: code-reviewer, test-runner, debugger, plan-agent, time-aware, worktree-coordinator
+- **16 Workflow Commands**: `/commit`, `/test`, `/debug`, `/review`, `/handoff`, `/resume`, etc.
+- **Context Management**: Session continuity with handoff/resume system
 - **Automatic DateTime Context**: Injects current time into every prompt
 - **Headless Ready**: Works on remote Linux servers
+
+### Project Profiles (NEW!)
+- **Python**: Ruff, mypy, pytest, pre-commit hooks
+- **JavaScript**: (Coming soon) ESLint, Prettier, Jest, Husky
+- **Rust**: (Coming soon) Cargo, Clippy, rustfmt
+
+## 🗂️ New Profile System Structure
+
+```
+claude-config/
+├── profiles/
+│   ├── account/         # Account-level configuration
+│   │   ├── agents/      # AI agents
+│   │   ├── commands/    # Workflow commands
+│   │   ├── scripts/     # Supporting scripts
+│   │   └── CLAUDE.md    # Global preferences
+│   └── projects/        # Project-specific profiles
+│       ├── _base/       # Base configuration
+│       ├── python/      # Python environment
+│       ├── javascript/  # JS/Node environment
+│       └── rust/        # Rust environment
+├── lib/                 # Common libraries
+├── scripts/             # Management scripts
+├── ccfg                # Unified CLI (NEW!)
+└── install.sh          # Backward compatible installer
+```
+
+## 🛠️ CLI Commands
+
+### `ccfg install`
+Install or update account-level configuration (same as running `install.sh`).
+
+### `ccfg init <language>` (NEW!)
+Initialize a project with language-specific profile.
+
+```bash
+ccfg init python           # Python project
+ccfg init auto            # Auto-detect project type
+ccfg init javascript --force  # Force overwrite
+```
+
+### `ccfg inject <profiles>` (NEW!)
+Inject specific profiles into current project.
+
+```bash
+ccfg inject python         # Single profile
+ccfg inject python+testing # Multiple profiles
+```
+
+### `ccfg list` (NEW!)
+List all available profiles.
+
+## 📦 Python Profile Features
+
+When you run `ccfg init python`, you get:
+
+- **Modern Linting**: Ruff (replaces Black, Flake8, isort, pyupgrade)
+- **Type Checking**: mypy configuration
+- **Testing**: pytest with coverage
+- **Pre-commit Hooks**: Automated quality checks
+- **Package Management**: Support for uv (Rust-based) and pip
+- **Claude Integration**: Python-specific agents and commands
+
+Example structure created:
+```
+your-project/
+├── .claude/
+│   ├── agents/
+│   │   └── python-test-runner.md
+│   └── commands/
+│       └── pytest.md
+├── pyproject.toml       # Modern Python configuration
+├── ruff.toml           # Linter settings
+├── .pre-commit-config.yaml  # Git hooks
+└── .gitignore          # Python-specific ignores
+```
 
 ## 🎯 Key Commands
 
@@ -30,101 +130,108 @@ irm https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 
 | `/test` | Auto-fix test failures |
 | `/debug` | Systematic debugging |
 | `/review` | Security & quality review |
+| `/handoff` | Save session state |
+| `/resume` | Restore session |
 | `/plan` | Task planning |
+| `/pytest` | Python testing (with Python profile) |
 
-## 📁 What Gets Installed
+## 🔄 Migration & Updates
 
-```
-~/.claude/                     # Linux/macOS
-%USERPROFILE%\.claude\         # Windows
-├── agents/           # 4 specialized agents
-├── commands/         # 10 workflow commands
-├── CLAUDE.md         # Global preferences
-└── settings.json     # Configuration
-```
+The new profile system is **100% backward compatible**:
 
-## ⚙️ Alternative Installation
+1. Existing installations continue to work unchanged
+2. Run `install.sh` again to get the new features
+3. Use `ccfg init` in projects to add language profiles
 
-### Linux/macOS
+### Update Commands
+
+#### Linux/macOS
 ```bash
-# Clone and review first
-git clone https://github.com/sungjunlee/claude-config.git
-cd claude-config
-./install.sh
-
-# For servers via SSH
-ssh user@server "bash -s" < install.sh
+curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
 ```
 
-### Windows
+#### Windows
 ```powershell
-# Clone and review first
-git clone https://github.com/sungjunlee/claude-config.git
-cd claude-config
-.\install.ps1
-
-# Or download and run
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 -OutFile install.ps1
-.\install.ps1
+irm https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 | iex
 ```
 
 ## 🕐 Automatic DateTime Context
 
-Claude Code automatically injects current datetime into every prompt via the UserPromptSubmit hook. This prevents Claude from defaulting to outdated dates in searches and ensures time-aware responses.
+Claude Code automatically injects current datetime into every prompt:
 
-### Features
-- Auto-detects system timezone across Linux, macOS, and WSL
-- Provides multiple time formats (ISO 8601, Unix timestamp, UTC reference)
-- Zero configuration - works immediately after installation
+- Auto-detects system timezone
+- Provides multiple formats (ISO 8601, Unix timestamp, UTC)
+- Prevents outdated date references in searches
 - Customizable via environment variables
 
-### Customization
 ```bash
-# Override timezone detection
+# Override timezone
 export TZ='Europe/London'
 
 # Show additional timezones
-export CLAUDE_EXTRA_TZ='America/New_York,Asia/Tokyo,Europe/Berlin'
+export CLAUDE_EXTRA_TZ='America/New_York,Asia/Tokyo'
 ```
 
 ## 🔍 Viewing Conversation History
 
 ### claude-code-log Tool
-View and search your Claude Code conversations with HTML output:
-
 ```bash
 # Install
 pip install claude-code-log
 
 # View current project
-claude-code-log ~/.claude/projects/$(basename $(pwd) | sed 's/\//-/g') --open-browser
+claude-code-log ~/.claude/projects/$(basename $(pwd)) --open-browser
 
-# View all projects
-claude-code-log --all-projects --open-browser
-
-# Interactive TUI mode
+# Interactive TUI
 claude-code-log --tui
-
-# Filter by date
-claude-code-log ~/.claude/projects/your-project --from-date "yesterday" --to-date "today"
 ```
 
-Generated HTML files are saved in `.cache/` directory within each project folder.
+## 📁 What Gets Installed
 
-## 🔄 Updates
-
-### Linux/macOS
-```bash
-curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
+### Account Level (~/.claude/)
+```
+~/.claude/                     # Linux/macOS
+%USERPROFILE%\.claude\         # Windows
+├── agents/           # 6 specialized agents
+├── commands/         # 16 workflow commands
+├── scripts/          # Supporting scripts
+├── CLAUDE.md         # Global preferences
+└── settings.json     # Configuration
 ```
 
-### Windows
-```powershell
-irm https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 | iex
+### Project Level (.claude/)
+```
+project/.claude/
+├── agents/           # Language-specific agents
+└── commands/         # Language-specific commands
 ```
 
-Your existing settings are automatically backed up.
+## 🎨 Creating Custom Profiles
+
+Want to add your own language or tool profile? 
+
+1. Create directory: `profiles/projects/myprofile/`
+2. Add `profile.yaml` with metadata
+3. Include configuration files
+4. Submit a PR!
+
+## 🤝 Contributing
+
+Contributions welcome! Priority areas:
+- JavaScript/TypeScript profile
+- Rust profile
+- Go profile
+- Additional language profiles
+
+## 📜 License
+
+MIT - Use freely in your projects.
+
+## 🔗 Links
+
+- [Repository](https://github.com/sungjunlee/claude-config)
+- [Issues](https://github.com/sungjunlee/claude-config/issues)
 
 ---
 
-**License**: MIT
+*Built for developers who value consistency and efficiency in their AI-assisted development.*
