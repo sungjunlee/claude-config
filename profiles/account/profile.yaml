@@ -1,0 +1,28 @@
+name: account
+version: 1.0.0
+description: Account-level Claude Code configuration
+type: account
+
+# Account-level configurations applied globally
+features:
+  - agents          # Specialized AI agents
+  - commands        # Workflow commands
+  - scripts         # Supporting scripts
+  - context-management  # Handoff/Resume system
+
+# Installation configuration
+install:
+  target: ~/.claude
+  backup: true
+  merge_settings: true
+
+# Dependencies
+dependencies:
+  - "git"
+  - "curl"
+  - "python>=3.8"  # For handoff manager
+
+metadata:
+  author: sungjunlee
+  repository: https://github.com/sungjunlee/claude-config
+  license: MIT
