@@ -14,7 +14,15 @@ if [ -f "$SESSION_LOG" ]; then
     # Try to find the last session start time
     LAST_START=$(grep "start:" "$SESSION_LOG" 2>/dev/null | tail -1 | cut -d' ' -f1-2 | tr -d '[]')
     if [ -n "$LAST_START" ]; then
-        START_SECONDS=$(date -j -f "%Y-%m-%d %H:%M:%S" "$LAST_START" +%s 2>/dev/null || date -d "$LAST_START" +%s 2>/dev/null || echo "0")
+        # Cross-platform date parsing
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            START_SECONDS=$(date -j -f "%Y-%m-%d %H:%M:%S" "$LAST_START" +%s 2>/dev/null || echo "0")
+        else
+            # Linux and others
+            START_SECONDS=$(date -d "$LAST_START" +%s 2>/dev/null || echo "0")
+        fi
+        
         if [ "$START_SECONDS" -ne "0" ]; then
             CURRENT_SECONDS=$(date +%s)
             DURATION=$((CURRENT_SECONDS - START_SECONDS))
