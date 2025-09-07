@@ -72,3 +72,82 @@ If you have custom scripts or configurations that reference command file paths:
 - All commands continue to work with `/command-name` syntax
 - Use `/help` to see available commands
 - The command behavior and options remain unchanged
+
+## Project Override System (v2.1)
+
+### What's New
+
+We've introduced a **Project Override System** that allows project-specific commands to override account-level commands. This provides tailored development experiences for different languages and frameworks.
+
+### Key Features
+
+1. **Command Priority**: Project commands > Account commands > Built-in commands
+2. **Language-Specific Profiles**: Pre-configured commands for Python, JavaScript, Rust
+3. **Smart Auto-Detection**: Universal commands that detect project type automatically
+4. **Zero Breaking Changes**: All existing commands continue to work
+
+### New Project Profiles
+
+#### Python Projects
+- `/optimize` - Python-specific performance optimization with profiling
+- `/pytest` - Smart pytest runner with coverage and markers
+- `/venv` - Virtual environment and dependency management
+
+#### JavaScript/TypeScript Projects  
+- `/test` - Detects Jest, Vitest, Mocha, Playwright
+- `/lint` - ESLint, Biome, Prettier, TypeScript checking
+- `/bundle` - Webpack, Vite, Next.js build optimization
+
+#### Rust Projects
+- `/clippy` - Comprehensive Rust linting
+- `/bench` - Benchmarking with cargo bench and criterion
+- `/cargo-test` - Advanced testing with features and coverage
+
+#### Universal Smart Commands
+- `/smart-test` - Auto-detects test framework for 8+ languages
+- `/smart-lint` - Auto-detects linters and formatters
+- `/smart-build` - Auto-detects build systems
+
+### Installation
+
+```bash
+# Auto-detect and install appropriate profile
+ccfg init auto
+
+# Or specify manually
+ccfg init python
+ccfg init javascript
+ccfg init rust
+```
+
+### Creating Custom Overrides
+
+Create `.claude/commands/dev/my-command.md` in your project:
+
+```markdown
+---
+description: Project-specific build process
+---
+
+# Build My Project
+
+> **Project Override**: This overrides the account-level build
+
+Custom build logic for: $ARGUMENTS
+```
+
+### Migration Path
+
+**For existing users**: No action required! Your current setup continues to work.
+
+**To add project overrides**:
+1. Run `ccfg init auto` in your project directory
+2. Project-specific commands will be added to `.claude/commands/`
+3. These commands take priority over account-level commands
+
+### Benefits
+
+- **Language-Specific Optimization**: Commands tailored to your tech stack
+- **Team Consistency**: Share project commands via version control
+- **No Configuration Overhead**: Smart detection works out of the box
+- **Progressive Enhancement**: Start simple, add complexity as needed
