@@ -232,5 +232,5 @@ rm -rf .worktrees
 ## 🔗 Related Documentation
 
 - [Git Worktree Official Documentation](https://git-scm.com/docs/git-worktree)
-- [Claude Code Commands](../commands/workflow/)
+- [Claude Code Commands](../profiles/account/commands/)
 - [Worktree Coordinator Agent](../agents/worktree-coordinator.md)
