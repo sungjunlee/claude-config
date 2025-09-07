@@ -4,6 +4,10 @@ description: Explain code structure, architecture patterns, and system design
 
 # Code and Architecture Explanation
 
+> **Override Priority**: Project Level > Account Level > Built-in
+> 
+> This is an account-level command that can be overridden by project-specific versions.
+
 Provide comprehensive explanation for: $ARGUMENTS
 
 ## Purpose

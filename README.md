@@ -41,7 +41,11 @@ ccfg init rust
 
 ### Account-level Configuration
 - **6 Core Agents**: code-reviewer, test-runner, debugger, plan-agent, time-aware, worktree-coordinator
-- **16 Workflow Commands**: `/commit`, `/test`, `/debug`, `/review`, `/handoff`, `/resume`, etc.
+- **16+ Commands** organized by purpose:
+  - **Development** (`dev/`): `/commit`, `/test`, `/debug`, `/review`, `/refactor`, `/optimize`, `/explain`
+  - **Workflow** (`flow/`): `/plan`, `/handoff`, `/resume`, `/scaffold`, `/fix-errors`, `/reflection`
+  - **GitHub** (`gh/`): `/pr`, `/docs`
+  - **Worktree** (`worktree/`): `/distribute`, `/status`, `/sync`
 - **Context Management**: Session continuity with handoff/resume system
 - **Automatic DateTime Context**: Injects current time into every prompt
 - **Headless Ready**: Works on remote Linux servers
@@ -58,7 +62,11 @@ claude-config/
 ├── profiles/
 │   ├── account/         # Account-level configuration
 │   │   ├── agents/      # AI agents
-│   │   ├── commands/    # Workflow commands
+│   │   ├── commands/    # Commands organized by purpose
+│   │   │   ├── dev/     # Development tasks
+│   │   │   ├── flow/    # Workflow management
+│   │   │   ├── gh/      # GitHub operations
+│   │   │   └── worktree/# Git worktree management
 │   │   ├── scripts/     # Supporting scripts
 │   │   └── CLAUDE.md    # Global preferences
 │   └── projects/        # Project-specific profiles
@@ -70,6 +78,20 @@ claude-config/
 ├── scripts/             # Management scripts
 ├── ccfg                # Unified CLI (NEW!)
 └── install.sh          # Backward compatible installer
+```
+
+## 🔧 Installing the CLI
+
+```bash
+# Download and install ccfg CLI
+curl -LO https://raw.githubusercontent.com/sungjunlee/claude-config/main/ccfg
+chmod +x ccfg
+
+# Option 1: Move to PATH
+sudo mv ccfg /usr/local/bin/
+
+# Option 2: Add current directory to PATH
+export PATH="$PATH:$(pwd)"
 ```
 
 ## 🛠️ CLI Commands
