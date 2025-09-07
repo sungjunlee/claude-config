@@ -12,20 +12,20 @@ Auto-detect and build for: $ARGUMENTS
 ```bash
 # Next.js
 if [[ -f "next.config.js" ]] || [[ -f "next.config.mjs" ]]; then
-    npm run build || yarn build
+    bun run build || pnpm run build || yarn build || npm run build
     
 # Vite
 elif [[ -f "vite.config.js" ]] || [[ -f "vite.config.ts" ]]; then
-    npm run build || yarn build
+    bun run build || pnpm run build || yarn build || npm run build
     
 # Webpack
 elif [[ -f "webpack.config.js" ]]; then
-    npx webpack --mode production
+    bunx webpack --mode production || pnpm webpack --mode production || npx webpack --mode production
     
-# Generic npm/yarn
+# Generic package.json build
 elif [[ -f "package.json" ]]; then
     if grep -q '"build":' package.json; then
-        npm run build || yarn build
+        bun run build || pnpm run build || yarn build || npm run build
     fi
 fi
 ```

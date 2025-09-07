@@ -23,26 +23,34 @@ npx tsc --noEmit
 
 ### Step 2: Lint
 ```bash
-# ESLint with auto-fix
-npx eslint . --fix
+# ESLint with auto-fix (modern-first)
+bunx eslint . --fix
 # pnpm eslint . --fix
-# bunx eslint . --fix
+# yarn eslint . --fix
+# npx eslint . --fix
 
 # CI mode (fail on warnings)
-# npx eslint . --max-warnings=0
+# bunx eslint . --max-warnings=0
+# pnpm eslint . --max-warnings=0
 
 # Or Biome
-npx biome check --apply .
+bunx biome check --apply .
 # pnpm biome check --apply .
+# npx biome check --apply .
 ```
 
 ### Step 3: Format
 ```bash
-# Prettier
-npx prettier --write .
+# Prettier (modern-first)
+bunx prettier --write .
+# pnpm prettier --write .
+# yarn prettier --write .
+# npx prettier --write .
 
 # Or Biome format
-npx biome format --write .
+bunx biome format --write .
+# pnpm biome format --write .
+# npx biome format --write .
 ```
 
 ## Common Issues to Fix

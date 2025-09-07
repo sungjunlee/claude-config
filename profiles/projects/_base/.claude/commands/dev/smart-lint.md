@@ -10,24 +10,24 @@ Auto-detect and run appropriate linters for: $ARGUMENTS
 
 ### JavaScript/TypeScript
 ```bash
-# ESLint
-if [[ -f ".eslintrc.json" ]] || [[ -f ".eslintrc.js" ]]; then
-    npx eslint . --fix
+# ESLint (modern-first)
+if [[ -f ".eslintrc.json" ]] || [[ -f ".eslintrc.js" ]] || [[ -f "eslint.config.js" ]] || [[ -f "eslint.config.mjs" ]]; then
+    bunx eslint . --fix || pnpm eslint . --fix || yarn eslint . --fix || npx eslint . --fix
 fi
 
 # Biome
 if [[ -f "biome.json" ]]; then
-    npx biome check --apply .
+    bunx biome check --apply . || pnpm biome check --apply . || npx biome check --apply .
 fi
 
 # Prettier (check multiple config formats)
 if [[ -f ".prettierrc" ]] || [[ -f ".prettierrc.json" ]] || [[ -f ".prettierrc.js" ]] || [[ -f "prettier.config.js" ]] || [[ -f "prettier.config.cjs" ]]; then
-    npx prettier --write .
+    bunx prettier --write . || pnpm prettier --write . || yarn prettier --write . || npx prettier --write .
 fi
 
 # TypeScript
 if [[ -f "tsconfig.json" ]]; then
-    npx tsc --noEmit
+    bunx tsc --noEmit || pnpm tsc --noEmit || yarn tsc --noEmit || npx tsc --noEmit
 fi
 ```
 

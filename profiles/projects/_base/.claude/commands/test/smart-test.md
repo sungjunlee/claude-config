@@ -11,15 +11,15 @@ Automatically detect and run tests for: $ARGUMENTS
 ### 1. JavaScript/TypeScript
 ```bash
 if [[ -f "package.json" ]]; then
-    # Check for test script
+    # Check for test script (modern-first approach)
     if grep -q '"test":' package.json; then
-        npm test
+        bun test || pnpm test || yarn test || npm test
     elif grep -q '"jest"' package.json; then
-        npx jest
+        bunx jest || pnpm jest || npx jest
     elif grep -q '"vitest"' package.json; then
-        npx vitest
+        bunx vitest || pnpm vitest || npx vitest
     elif grep -q '"mocha"' package.json; then
-        npx mocha
+        bunx mocha || pnpm mocha || npx mocha
     fi
 fi
 ```

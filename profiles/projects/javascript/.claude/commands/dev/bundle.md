@@ -48,14 +48,14 @@ npx vite-bundle-visualizer
 ## Build Commands
 
 ```bash
-# Development build
-npm run build:dev
+# Development build (modern-first)
+bun run build:dev || pnpm run build:dev || yarn build:dev || npm run build:dev
 
 # Production build
-npm run build
+bun run build || pnpm run build || yarn build || npm run build
 
 # Build with analysis
-ANALYZE=true npm run build
+ANALYZE=true bun run build || ANALYZE=true pnpm run build || ANALYZE=true yarn build || ANALYZE=true npm run build
 ```
 
 Execute appropriate build process with optimizations.
