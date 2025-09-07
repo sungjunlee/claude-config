@@ -51,9 +51,22 @@ ccfg init rust
 - **Headless Ready**: Works on remote Linux servers
 
 ### Project Profiles (NEW!)
-- **Python**: Ruff, mypy, pytest, pre-commit hooks
-- **JavaScript**: (Coming soon) ESLint, Prettier, Jest, Husky
-- **Rust**: (Coming soon) Cargo, Clippy, rustfmt
+- **Python**: Ruff, mypy, pytest, pre-commit hooks + custom commands
+  - `/optimize` - Python-specific performance optimization
+  - `/pytest` - Smart pytest runner with coverage
+  - `/venv` - Virtual environment management
+- **JavaScript**: ESLint, Prettier, testing frameworks + custom commands
+  - `/test` - Smart test runner (Jest, Vitest, Mocha)
+  - `/lint` - Intelligent linting and formatting
+  - `/bundle` - Build and bundle optimization
+- **Rust**: Cargo, Clippy, rustfmt + custom commands
+  - `/clippy` - Rust linting with clippy
+  - `/bench` - Benchmarking with cargo bench
+  - `/cargo-test` - Comprehensive testing
+- **Base**: Universal smart commands for any project
+  - `/smart-test` - Auto-detects and runs appropriate test framework
+  - `/smart-lint` - Auto-detects and runs appropriate linters
+  - `/smart-build` - Auto-detects and runs appropriate build system
 
 ## 🗂️ New Profile System Structure
 
