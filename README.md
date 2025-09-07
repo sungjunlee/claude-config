@@ -80,6 +80,20 @@ claude-config/
 └── install.sh          # Backward compatible installer
 ```
 
+## 🔧 Installing the CLI
+
+```bash
+# Download and install ccfg CLI
+curl -LO https://raw.githubusercontent.com/sungjunlee/claude-config/main/ccfg
+chmod +x ccfg
+
+# Option 1: Move to PATH
+sudo mv ccfg /usr/local/bin/
+
+# Option 2: Add current directory to PATH
+export PATH="$PATH:$(pwd)"
+```
+
 ## 🛠️ CLI Commands
 
 ### `ccfg install`

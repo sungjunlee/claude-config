@@ -25,7 +25,7 @@ set -euo pipefail
 # Configuration
 THRESHOLD_WARNING=${CONTEXT_THRESHOLD_WARNING:-70}
 THRESHOLD_CRITICAL=${CONTEXT_THRESHOLD_CRITICAL:-80}
-THRESHOLD_AUTO_HANDOFF=${CONTEXT_AUTO_HANDOFF:-85}
+THRESHOLD_AUTO_HANDOFF=${CONTEXT_AUTO_HANDOFF:-80}
 
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -363,7 +363,7 @@ fi
           "config": {
             "warning_threshold": 70,
             "critical_threshold": 80,
-            "auto_handoff_threshold": 85
+            "auto_handoff_threshold": 80
           }
         }
       }
