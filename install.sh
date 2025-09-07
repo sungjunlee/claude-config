@@ -182,6 +182,9 @@ install_config() {
         if [ -d "$PROFILE_DIR/scripts" ]; then
             log "Installing scripts..."
             cp -r "$PROFILE_DIR/scripts" "$CLAUDE_CONFIG_DIR/"
+            # Set execution permissions for all scripts
+            find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
+            find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.py" -exec chmod +x {} \;
         else
             debug "Scripts directory not found (optional)"
         fi
@@ -246,6 +249,9 @@ install_config() {
         
         log "Installing scripts..."
         cp -r "$source_dir/scripts" "$CLAUDE_CONFIG_DIR/"
+        # Set execution permissions for all scripts
+        find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
+        find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.py" -exec chmod +x {} \;
         
         log "Installing CLAUDE.md..."
         cp "$source_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
