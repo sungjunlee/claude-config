@@ -4,6 +4,10 @@ description: Python-specific performance optimization with profiling and best pr
 
 # Python Performance Optimization
 
+> **Project Override**: This Python-specific version overrides the account-level `/optimize` command
+> 
+> **Override Priority**: Project Level (this file) > Account Level > Built-in
+
 Analyze and optimize Python performance for: $ARGUMENTS
 
 ## Python-Specific Optimization
@@ -56,9 +60,52 @@ kernprof -l -v your_script.py
 ```
 
 ### Django/Flask Specific
-- Use database query optimization (select_related, prefetch_related)
-- Implement proper caching (Redis, Memcached)
-- Use django-debug-toolbar for analysis
-- Optimize template rendering
+
+#### Django Optimization Examples
+```python
+# Use select_related for foreign keys
+posts = Post.objects.select_related("author").all()
+
+# Use prefetch_related for many-to-many
+posts = Post.objects.prefetch_related("tags", "comments").all()
+
+# Combine for complex queries
+posts = (Post.objects
+         .select_related("author")
+         .prefetch_related("tags", "comments__user")
+         .filter(published=True))
+
+# Use only() to limit fields
+posts = Post.objects.only("title", "published_date").all()
+
+# Enable query debugging
+# In settings.py
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG
+}
+```
+
+#### Flask Optimization Examples
+```python
+# Use Flask-Caching for view caching
+from flask_caching import Cache
+
+cache = Cache(config={'CACHE_TYPE': 'redis'})
+
+@app.route('/expensive')
+@cache.cached(timeout=60, key_prefix='expensive_view')
+def expensive_view():
+    return expensive_computation()
+
+# Use memoization for functions
+@cache.memoize(timeout=300)
+def get_user_data(user_id):
+    return User.query.get(user_id)
+
+# Connection pooling with SQLAlchemy
+app.config['SQLALCHEMY_POOL_SIZE'] = 10
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 3600
+app.config['SQLALCHEMY_POOL_PRE_PING'] = True
+```
 
 Execute Python-optimized performance analysis for: $ARGUMENTS
