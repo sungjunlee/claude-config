@@ -4,6 +4,10 @@ description: Analyze and optimize code performance, queries, and algorithms
 
 # Performance Optimization
 
+> **Override Priority**: Project Level > Account Level > Built-in
+> 
+> This is an account-level command that can be overridden by project-specific versions.
+
 Analyze and optimize performance for: $ARGUMENTS
 
 ## Purpose
