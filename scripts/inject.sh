@@ -10,6 +10,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 LIB_DIR="$ROOT_DIR/lib"
+PROFILES_DIR="$ROOT_DIR/profiles"
 
 # Load common functions
 source "$LIB_DIR/common.sh"
@@ -18,7 +19,7 @@ source "$LIB_DIR/profile.sh"
 # Show usage
 show_usage() {
     cat << EOF
-Usage: claude inject <profiles> [options]
+Usage: ccfg inject <profiles> [options]
 
 Inject specific profiles into the current project.
 
@@ -31,9 +32,9 @@ Options:
   --help      Show this help message
 
 Examples:
-  claude inject python
-  claude inject testing+linting
-  claude inject python --force
+  ccfg inject python
+  ccfg inject testing+linting
+  ccfg inject python --force
 
 EOF
 }

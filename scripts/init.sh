@@ -10,6 +10,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 LIB_DIR="$ROOT_DIR/lib"
+PROFILES_DIR="$ROOT_DIR/profiles"
 
 # Load common functions
 source "$LIB_DIR/common.sh"
@@ -18,7 +19,7 @@ source "$LIB_DIR/profile.sh"
 # Show usage
 show_usage() {
     cat << EOF
-Usage: claude init <language> [options]
+Usage: ccfg init <language> [options]
 
 Initialize a project with a language-specific profile.
 
@@ -34,9 +35,9 @@ Options:
   --help      Show this help message
 
 Examples:
-  claude init python
-  claude init auto
-  claude init javascript --force
+  ccfg init python
+  ccfg init auto
+  ccfg init javascript --force
 
 EOF
 }
@@ -84,7 +85,7 @@ main() {
         
         if [[ "$language" == "unknown" ]]; then
             error "Could not detect project type"
-            info "Please specify explicitly: claude init <language>"
+            info "Please specify explicitly: ccfg init <language>"
             exit 1
         fi
         

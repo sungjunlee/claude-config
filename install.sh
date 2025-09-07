@@ -109,7 +109,11 @@ check_claude_installation() {
     else
         warn "Claude Code is not installed"
         info "Would you like to install it now? (y/N)"
-        read -r response < /dev/tty
+        if [ -t 0 ]; then
+            read -r response
+        else
+            response="${CI_RESPONSE:-n}"
+        fi
         if [[ "$response" =~ ^[Yy]$ ]]; then
             install_claude_code
         else
@@ -369,7 +373,11 @@ main() {
         echo ""
         warn "This will install Claude Code configuration files to $CLAUDE_CONFIG_DIR"
         echo -n "Continue? (y/N) "
-        read -r response < /dev/tty
+        if [ -t 0 ]; then
+            read -r response
+        else
+            response="${CI_RESPONSE:-n}"
+        fi
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
             info "Installation cancelled"
             exit 0

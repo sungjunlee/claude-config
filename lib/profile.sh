@@ -80,11 +80,18 @@ load_profile() {
     export PROFILE_DIR="$profile_dir"
     export PROFILE_YAML="$profile_yaml"
     
-    # Load parent profile if exists
+    # Load parent profile if exists (but don't override current profile vars)
     local parent=$(parse_yaml_value "$profile_yaml" "parent")
     if [[ -n "$parent" ]] && [[ "$parent" != "null" ]]; then
         debug "Loading parent profile: $parent"
+        local saved_profile_name="$PROFILE_NAME"
+        local saved_profile_dir="$PROFILE_DIR"
+        local saved_profile_yaml="$PROFILE_YAML"
         load_profile "$parent" "$profile_type"
+        # Restore current profile vars
+        export PROFILE_NAME="$saved_profile_name"
+        export PROFILE_DIR="$saved_profile_dir"
+        export PROFILE_YAML="$saved_profile_yaml"
     fi
     
     return 0
@@ -178,12 +185,14 @@ apply_profile() {
     fi
     
     # Copy configuration files
-    for config_file in "$PROFILE_DIR"/*.{toml,yaml,yml,json,ini} 2>/dev/null; do
+    shopt -s nullglob
+    for config_file in "$PROFILE_DIR"/*.toml "$PROFILE_DIR"/*.yaml "$PROFILE_DIR"/*.yml "$PROFILE_DIR"/*.json "$PROFILE_DIR"/*.ini; do
         if [[ -f "$config_file" ]] && [[ "$(basename "$config_file")" != "profile.yaml" ]]; then
             cp "$config_file" "$target_dir/"
             success "Copied $(basename "$config_file")"
         fi
     done
+    shopt -u nullglob
     
     # Run install script if exists
     if [[ -f "$PROFILE_DIR/install.sh" ]]; then

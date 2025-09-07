@@ -29,12 +29,12 @@ irm https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.ps1 
 
 ```bash
 # Auto-detect project type
-claude init auto
+ccfg init auto
 
 # Or specify explicitly
-claude init python
-claude init javascript
-claude init rust
+ccfg init python
+ccfg init javascript
+ccfg init rust
 ```
 
 ## ✨ What You Get
@@ -68,38 +68,38 @@ claude-config/
 │       └── rust/        # Rust environment
 ├── lib/                 # Common libraries
 ├── scripts/             # Management scripts
-├── claude              # Unified CLI (NEW!)
+├── ccfg                # Unified CLI (NEW!)
 └── install.sh          # Backward compatible installer
 ```
 
 ## 🛠️ CLI Commands
 
-### `claude install`
+### `ccfg install`
 Install or update account-level configuration (same as running `install.sh`).
 
-### `claude init <language>` (NEW!)
+### `ccfg init <language>` (NEW!)
 Initialize a project with language-specific profile.
 
 ```bash
-claude init python           # Python project
-claude init auto            # Auto-detect project type
-claude init javascript --force  # Force overwrite
+ccfg init python           # Python project
+ccfg init auto            # Auto-detect project type
+ccfg init javascript --force  # Force overwrite
 ```
 
-### `claude inject <profiles>` (NEW!)
+### `ccfg inject <profiles>` (NEW!)
 Inject specific profiles into current project.
 
 ```bash
-claude inject python         # Single profile
-claude inject python+testing # Multiple profiles
+ccfg inject python         # Single profile
+ccfg inject python+testing # Multiple profiles
 ```
 
-### `claude list` (NEW!)
+### `ccfg list` (NEW!)
 List all available profiles.
 
 ## 📦 Python Profile Features
 
-When you run `claude init python`, you get:
+When you run `ccfg init python`, you get:
 
 - **Modern Linting**: Ruff (replaces Black, Flake8, isort, pyupgrade)
 - **Type Checking**: mypy configuration
@@ -141,7 +141,7 @@ The new profile system is **100% backward compatible**:
 
 1. Existing installations continue to work unchanged
 2. Run `install.sh` again to get the new features
-3. Use `claude init` in projects to add language profiles
+3. Use `ccfg init` in projects to add language profiles
 
 ### Update Commands
 

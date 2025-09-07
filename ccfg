@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Claude Config CLI - Unified interface for Claude Code configuration
+# Claude Config CLI (ccfg) - Configuration manager for Claude Code
 # https://github.com/sungjunlee/claude-config
 #
 
@@ -18,9 +18,9 @@ source "$LIB_DIR/profile.sh"
 # Show help
 show_help() {
     cat << EOF
-Claude Config CLI - Manage Claude Code configurations
+Claude Config Manager (ccfg) - Manage Claude Code configurations
 
-Usage: claude <command> [options]
+Usage: ccfg <command> [options]
 
 Commands:
     install                 Install account-level configuration
@@ -31,19 +31,19 @@ Commands:
 
 Examples:
     # Install account-level configuration
-    claude install
+    ccfg install
 
     # Initialize Python project
-    claude init python
+    ccfg init python
 
     # Initialize with options
-    claude init javascript --with-testing --strict
+    ccfg init javascript --with-testing --strict
 
     # Inject multiple profiles
-    claude inject python+testing+strict
+    ccfg inject python+testing+strict
 
     # List available profiles
-    claude list
+    ccfg list
 
 For more information, visit:
 https://github.com/sungjunlee/claude-config
