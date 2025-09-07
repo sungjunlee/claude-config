@@ -11,7 +11,7 @@ features:
 
 # Basic dependencies
 dependencies:
-  - git
+  - "git"
 
 # Installation options
 install:

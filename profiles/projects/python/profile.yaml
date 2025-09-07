@@ -14,8 +14,8 @@ features:
 
 # Dependencies
 dependencies:
-  - python: ">=3.8"
-  - git
+  - "python>=3.8"
+  - "git"
 
 # Recommended tools (optional)
 recommended:

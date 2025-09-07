@@ -50,19 +50,36 @@ info "Installing development dependencies..."
 # Check for package manager preference
 if command -v uv >/dev/null 2>&1; then
     log "Using uv (fast Rust-based package manager)"
-    uv pip install -e ".[dev]" 2>/dev/null || true
+    if ! uv pip install -e ".[dev]" 2>/dev/null; then
+        warn "Failed to install with uv. This is normal if pyproject.toml doesn't exist yet."
+    fi
 elif command -v pip3 >/dev/null 2>&1; then
     log "Using pip"
-    pip3 install -e ".[dev]" 2>/dev/null || true
+    if ! pip3 install -e ".[dev]" 2>/dev/null; then
+        warn "Failed to install with pip. This is normal if pyproject.toml doesn't exist yet."
+    fi
+    
+    # Try to install essential tools directly
+    info "Installing essential Python tools..."
+    if ! pip3 install ruff mypy pytest pytest-cov pre-commit 2>/dev/null; then
+        warn "Some Python tools failed to install. You may need to install them manually:"
+        warn "  pip3 install ruff mypy pytest pytest-cov pre-commit"
+    else
+        log "Essential Python tools installed successfully"
+    fi
 else
     warn "No Python package manager found. Install pip or uv."
+    warn "You'll need to manually install: ruff mypy pytest pytest-cov pre-commit"
 fi
 
 # Set up pre-commit hooks if available
 if [[ -f ".pre-commit-config.yaml" ]]; then
     if command -v pre-commit >/dev/null 2>&1; then
-        pre-commit install
-        log "Pre-commit hooks installed"
+        if pre-commit install 2>/dev/null; then
+            log "Pre-commit hooks installed"
+        else
+            warn "Failed to install pre-commit hooks. You may need to run 'pre-commit install' manually."
+        fi
     else
         info "Install pre-commit with: pip install pre-commit"
         info "Then run: pre-commit install"

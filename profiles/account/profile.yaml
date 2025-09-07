@@ -18,9 +18,9 @@ install:
 
 # Dependencies
 dependencies:
-  - git
-  - curl
-  - python: ">=3.8"  # For handoff manager
+  - "git"
+  - "curl"
+  - "python>=3.8"  # For handoff manager
 
 metadata:
   author: sungjunlee

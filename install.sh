@@ -103,11 +103,20 @@ check_prerequisites() {
 
 # Check if Claude Code is installed
 check_claude_installation() {
+    local force="${1:-false}"
+    
     if command -v claude &> /dev/null; then
         log "Claude Code is already installed ($(claude --version 2>/dev/null || echo 'version unknown'))"
         return 0
     else
         warn "Claude Code is not installed"
+        
+        # If force flag is set, install without prompting
+        if [[ "$force" == "true" ]]; then
+            install_claude_code
+            return
+        fi
+        
         info "Would you like to install it now? (y/N)"
         if [ -t 0 ]; then
             read -r response
@@ -372,7 +381,7 @@ main() {
     check_prerequisites
     
     # Check Claude Code installation
-    check_claude_installation
+    check_claude_installation "$force_install"
     
     # Confirmation prompt (unless --force is used)
     if [ "$force_install" = false ]; then
