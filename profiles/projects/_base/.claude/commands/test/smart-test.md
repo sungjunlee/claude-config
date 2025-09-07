@@ -32,8 +32,9 @@ if [[ -f "pyproject.toml" ]] || [[ -f "setup.py" ]]; then
         pytest
     elif [[ -f "manage.py" ]]; then
         python manage.py test
-    elif command -v python -m unittest >/dev/null; then
-        python -m unittest discover
+    else
+        # Try unittest discovery
+        python -m unittest discover 2>/dev/null || echo "No tests found"
     fi
 fi
 ```

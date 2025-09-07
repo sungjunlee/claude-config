@@ -19,6 +19,9 @@ cargo clippy --all-targets
 # With all features
 cargo clippy --all-features
 
+# Workspace-wide check
+cargo clippy --workspace --all-targets --all-features
+
 # Strict mode (warnings as errors)
 cargo clippy -- -D warnings
 ```

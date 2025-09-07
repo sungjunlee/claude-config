@@ -65,13 +65,17 @@ perf record -g cargo bench
 ## Memory Profiling
 
 ```bash
-# Using valgrind (Linux/macOS)
+# Using valgrind (Linux)
 cargo build --release
 valgrind --tool=massif ./target/release/my_app
 
-# Using heaptrack
+# Using heaptrack (Linux)
 heaptrack ./target/release/my_app
 heaptrack_gui heaptrack.my_app.*.gz
+
+# macOS alternatives (Instruments)
+# instruments -t "Time Profiler" ./target/release/my_app
+# instruments -t "Allocations" ./target/release/my_app
 ```
 
 ## Optimization Workflow

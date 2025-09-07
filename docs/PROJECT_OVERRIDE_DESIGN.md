@@ -4,7 +4,7 @@
 **"Surgical Coding"**: Minimal, targeted overrides that respect existing patterns.
 
 ## Override Hierarchy
-```
+```text
 1. Project Level (.claude/commands/)  ← Highest Priority
 2. Account Level (~/.claude/commands/)
 3. Built-in Commands                  ← Lowest Priority
@@ -13,7 +13,7 @@
 ## Lightweight Project Templates
 
 ### 1. JavaScript/TypeScript Projects
-```
+```text
 profiles/projects/javascript/
 ├── .claude/
 │   └── commands/
@@ -26,7 +26,7 @@ profiles/projects/javascript/
 ```
 
 ### 2. Python Projects  
-```
+```text
 profiles/projects/python/
 ├── .claude/
 │   └── commands/
@@ -39,7 +39,7 @@ profiles/projects/python/
 ```
 
 ### 3. Rust Projects
-```
+```text
 profiles/projects/rust/
 ├── .claude/
 │   └── commands/
@@ -99,13 +99,13 @@ Advanced integrations:
 
 ## Anti-Pattern Prevention
 
-### DON'T:
+### DON'T
 - Create abstract base commands
 - Add unnecessary configuration files
 - Override commands that work well already
 - Build complex inheritance chains
 
-### DO:
+### DO
 - Leverage existing project tools
 - Keep commands focused and simple
 - Document override behavior clearly

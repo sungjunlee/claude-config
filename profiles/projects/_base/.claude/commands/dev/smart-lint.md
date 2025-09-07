@@ -20,8 +20,8 @@ if [[ -f "biome.json" ]]; then
     npx biome check --apply .
 fi
 
-# Prettier
-if [[ -f ".prettierrc" ]]; then
+# Prettier (check multiple config formats)
+if [[ -f ".prettierrc" ]] || [[ -f ".prettierrc.json" ]] || [[ -f ".prettierrc.js" ]] || [[ -f "prettier.config.js" ]] || [[ -f "prettier.config.cjs" ]]; then
     npx prettier --write .
 fi
 
@@ -55,8 +55,12 @@ fi
 
 ### Rust
 ```bash
-# Clippy
-cargo clippy --fix --allow-dirty
+# Clippy (CI mode vs local mode)
+if [[ -n "${CI:-}" ]]; then
+    cargo clippy --all-targets --all-features -- -D warnings
+else
+    cargo clippy --fix --allow-dirty
+fi
 
 # Rustfmt
 cargo fmt

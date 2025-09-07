@@ -38,7 +38,16 @@ fi
 # Install Claude commands
 if [[ -d "${SCRIPT_DIR}/.claude/commands" ]]; then
     mkdir -p "${CLAUDE_DIR}/commands"
-    cp -r "${SCRIPT_DIR}/.claude/commands/"* "${CLAUDE_DIR}/commands/" 2>/dev/null || true
+    # Safe copy with existence check
+    for src in "${SCRIPT_DIR}/.claude/commands/"*; do
+        [[ -e "$src" ]] || continue  # Skip if no files match
+        dest="${CLAUDE_DIR}/commands/$(basename "$src")"
+        if [[ -e "$dest" ]]; then
+            warn "Skipping existing: $(basename "$dest")"
+        else
+            cp -r "$src" "$dest"
+        fi
+    done
     log "Installed Claude Code project commands"
 fi
 
@@ -78,14 +87,14 @@ fi
 # Install useful Rust tools if not present
 info "Checking for Rust development tools..."
 
-# Check and suggest tool installation
+# Check and suggest tool installation using rustup
 tools_to_install=""
 
-if ! command -v cargo-clippy >/dev/null 2>&1; then
+if ! rustup component list --installed 2>/dev/null | grep -q "clippy"; then
     tools_to_install="$tools_to_install clippy"
 fi
 
-if ! command -v cargo-fmt >/dev/null 2>&1; then
+if ! rustup component list --installed 2>/dev/null | grep -q "rustfmt"; then
     tools_to_install="$tools_to_install rustfmt"
 fi
 

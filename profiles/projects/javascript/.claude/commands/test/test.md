@@ -30,17 +30,25 @@ Check for test configuration in this order:
 ## Quick Commands
 
 ```bash
-# Run all tests
-npm test
+# Run all tests (multiple package managers)
+npm test || pnpm test || yarn test || bun test
 
 # Run with coverage
 npm test -- --coverage
+# pnpm test -- --coverage
+# yarn test --coverage
 
 # Run specific file
 npm test -- path/to/test
+# pnpm test -- path/to/test
 
 # Watch mode
 npm test -- --watch
+# pnpm test -- --watch
+
+# E2E tests (Playwright)
+# npx playwright test
+# npx playwright test --ui
 ```
 
 Execute appropriate test command based on project setup.

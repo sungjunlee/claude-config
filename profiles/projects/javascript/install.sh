@@ -17,8 +17,18 @@ echo -e "${GREEN}Installing JavaScript/TypeScript project profile...${NC}"
 # Create .claude directory structure
 mkdir -p "${CLAUDE_DIR}/commands/"{dev,test}
 
-# Copy commands
-cp -r "${SCRIPT_DIR}/.claude/commands/"* "${CLAUDE_DIR}/commands/" 2>/dev/null || true
+# Copy commands safely
+if [[ -d "${SCRIPT_DIR}/.claude/commands" ]]; then
+    for src in "${SCRIPT_DIR}/.claude/commands/"*; do
+        [[ -e "$src" ]] || continue  # Skip if no files match
+        dest="${CLAUDE_DIR}/commands/$(basename "$src")"
+        if [[ -e "$dest" ]]; then
+            echo "⚠ Skipping existing: $(basename "$dest")"
+        else
+            cp -r "$src" "$dest"
+        fi
+    done
+fi
 
 # Detect project type and provide guidance
 echo -e "\n${YELLOW}Detecting JavaScript project setup...${NC}"

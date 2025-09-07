@@ -25,9 +25,15 @@ npx tsc --noEmit
 ```bash
 # ESLint with auto-fix
 npx eslint . --fix
+# pnpm eslint . --fix
+# bunx eslint . --fix
+
+# CI mode (fail on warnings)
+# npx eslint . --max-warnings=0
 
 # Or Biome
 npx biome check --apply .
+# pnpm biome check --apply .
 ```
 
 ### Step 3: Format

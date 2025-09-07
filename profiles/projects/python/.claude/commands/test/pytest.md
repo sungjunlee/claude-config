@@ -30,14 +30,20 @@ pytest tests/test_module.py::test_function
 
 ### With Coverage
 ```bash
-# Run with coverage report
-pytest --cov=src --cov-report=term-missing
+# Run with coverage report (including branch coverage)
+pytest --cov=src --cov-branch --cov-report=term-missing
 
 # Generate HTML coverage
 pytest --cov=src --cov-report=html
 
 # Fail if coverage below threshold
 pytest --cov=src --cov-fail-under=80
+
+# Parallel execution with coverage
+pytest -n auto --cov=src --cov-branch --cov-report=term-missing
+
+# Combine coverage from multiple runs
+# coverage combine && coverage report -m
 ```
 
 ### Using Markers

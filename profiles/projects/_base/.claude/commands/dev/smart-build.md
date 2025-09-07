@@ -79,7 +79,7 @@ fi
 ### C#/.NET
 ```bash
 # .NET build
-if [[ -f "*.csproj" ]] || [[ -f "*.sln" ]]; then
+if compgen -G "*.csproj" > /dev/null || compgen -G "*.sln" > /dev/null; then
     dotnet build --configuration Release
 fi
 ```

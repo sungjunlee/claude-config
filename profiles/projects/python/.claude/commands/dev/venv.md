@@ -20,6 +20,11 @@ Check for environment tools:
 ### Create/Activate Environment
 
 ```bash
+# uv (fast Rust-based)
+uv venv
+source .venv/bin/activate  # Unix
+.venv\Scripts\activate     # Windows
+
 # Poetry
 poetry install
 poetry shell
@@ -45,21 +50,29 @@ conda activate myenv
 poetry add requests
 pipenv install requests
 pip install requests
+# uv
+uv pip install requests
 
 # Add dev dependency
 poetry add --dev pytest
 pipenv install --dev pytest
 pip install -r requirements-dev.txt
+# uv (with pyproject.toml)
+# uv add --dev pytest
 
 # Update dependencies
 poetry update
 pipenv update
 pip install --upgrade -r requirements.txt
+# uv
+# uv pip install -r requirements.txt --upgrade
 
 # Lock dependencies
 poetry lock
 pipenv lock
 pip freeze > requirements.txt
+# uv sync (with pyproject.toml)
+# uv sync
 ```
 
 ### Clean Operations
