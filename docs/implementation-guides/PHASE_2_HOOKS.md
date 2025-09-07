@@ -57,7 +57,7 @@ trigger_auto_handoff() {
     echo "🔄 Auto-triggering handoff at ${1}% context usage..."
     
     # Check if handoff command exists
-    local handoff_cmd="$ACCOUNT_DIR/commands/workflow/handoff.md"
+    local handoff_cmd="$ACCOUNT_DIR/commands/flow/handoff.md"
     if [[ -f "$handoff_cmd" ]]; then
         echo "Executing handoff with --auto flag..."
         # Note: Actual execution would need Claude Code command invocation
