@@ -25,7 +25,7 @@ set -euo pipefail
 # Configuration
 THRESHOLD_WARNING=${CONTEXT_THRESHOLD_WARNING:-70}
 THRESHOLD_CRITICAL=${CONTEXT_THRESHOLD_CRITICAL:-80}
-THRESHOLD_AUTO_HANDOFF=${CONTEXT_AUTO_HANDOFF:-85}
+THRESHOLD_AUTO_HANDOFF=${CONTEXT_AUTO_HANDOFF:-80}
 
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -57,7 +57,7 @@ trigger_auto_handoff() {
     echo "🔄 Auto-triggering handoff at ${1}% context usage..."
     
     # Check if handoff command exists
-    local handoff_cmd="$ACCOUNT_DIR/commands/workflow/handoff.md"
+    local handoff_cmd="$ACCOUNT_DIR/commands/flow/handoff.md"
     if [[ -f "$handoff_cmd" ]]; then
         echo "Executing handoff with --auto flag..."
         # Note: Actual execution would need Claude Code command invocation
@@ -363,7 +363,7 @@ fi
           "config": {
             "warning_threshold": 70,
             "critical_threshold": 80,
-            "auto_handoff_threshold": 85
+            "auto_handoff_threshold": 80
           }
         }
       }
