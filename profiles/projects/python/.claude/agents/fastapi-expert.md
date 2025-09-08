@@ -37,7 +37,7 @@ app/
 
 ### Request/Response Models
 ```python
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -48,8 +48,9 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8)
     
-    @validator('password')
-    def validate_password(cls, v):
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
         if not any(c.isdigit() for c in v):
             raise ValueError('Password must contain at least one digit')
         return v
@@ -59,8 +60,7 @@ class UserInDB(UserBase):
     created_at: datetime
     hashed_password: str
     
-    class Config:
-        from_attributes = True  # SQLAlchemy compatibility
+    model_config = {"from_attributes": True}  # SQLAlchemy compatibility
 
 class UserResponse(UserBase):
     id: int
@@ -190,7 +190,7 @@ class CRUDUser:
         return result.scalars().all()
     
     async def create(self, db: AsyncSession, obj_in: UserCreate):
-        db_obj = User(**obj_in.dict())
+        db_obj = User(**obj_in.model_dump())
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)

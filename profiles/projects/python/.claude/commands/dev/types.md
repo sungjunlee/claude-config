@@ -128,17 +128,33 @@ value = data["key"]  # type: ignore[index]
 
 ## Integration with IDE
 
-### VS Code settings.json
+### VS Code Configuration
+
+**Important:** The `python.linting.*` settings are deprecated in the latest Microsoft Python extension (2024+). You need to install the dedicated Mypy extension instead.
+
+1. **Install the Mypy Type Checker extension:**
+   - Extension ID: `ms-python.mypy-type-checker`
+   - Install from VS Code marketplace or command palette
+
+2. **Update your settings.json:**
 ```json
 {
-    "python.linting.mypyEnabled": true,
-    "python.linting.mypyArgs": [
+    // Mypy Type Checker extension settings (replaces deprecated python.linting.*)
+    "mypy-type-checker.args": [
         "--ignore-missing-imports",
         "--follow-imports=silent",
         "--show-column-numbers"
-    ]
+    ],
+    "mypy-type-checker.path": ["mypy"],
+    "mypy-type-checker.importStrategy": "fromEnvironment",
+    "mypy-type-checker.reportingScope": "file"
 }
 ```
+
+**Migration from old settings:**
+- `python.linting.mypyEnabled` → Install the extension
+- `python.linting.mypyArgs` → `mypy-type-checker.args`
+- `python.linting.mypyPath` → `mypy-type-checker.path`
 
 ## Alternative Type Checkers
 

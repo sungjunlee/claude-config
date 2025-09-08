@@ -7,14 +7,28 @@ Ensures code quality before committing
 import os
 import sys
 import subprocess
+import shlex
 from pathlib import Path
 
 def run_command(cmd):
-    """Run a shell command and return output"""
+    """Run a command and return output
+    
+    Args:
+        cmd: Either a string command or a list of command arguments
+        
+    Returns:
+        tuple: (success, stdout, stderr)
+    """
     try:
+        # Convert string to list if needed
+        if isinstance(cmd, str):
+            cmd_list = shlex.split(cmd)
+        else:
+            cmd_list = cmd
+            
         result = subprocess.run(
-            cmd,
-            shell=True,
+            cmd_list,
+            shell=False,
             capture_output=True,
             text=True,
             timeout=30
@@ -28,7 +42,7 @@ def run_command(cmd):
 def check_formatting():
     """Check if all Python files are formatted"""
     print("🎨 Checking code formatting...")
-    success, output, _ = run_command("ruff format --check .")
+    success, output, _ = run_command(["ruff", "format", "--check", "."])
     
     if not success:
         print("❌ Formatting issues found. Run 'ruff format .' to fix")
@@ -40,7 +54,7 @@ def check_formatting():
 def check_linting():
     """Check for linting issues"""
     print("🔍 Running linter...")
-    success, output, error = run_command("ruff check .")
+    success, output, error = run_command(["ruff", "check", "."])
     
     if not success:
         print("❌ Linting issues found:")
@@ -62,7 +76,7 @@ def check_types():
         print("⚠️  No mypy configuration found, skipping type check")
         return True
     
-    success, output, error = run_command("mypy .")
+    success, output, error = run_command(["mypy", "."])
     
     if not success:
         # Check if it's just missing imports
@@ -90,11 +104,11 @@ def run_tests():
         return True
     
     # Run only fast tests (marked as unit)
-    success, output, _ = run_command("pytest -m unit --tb=short -q")
+    success, output, _ = run_command(["pytest", "-m", "unit", "--tb=short", "-q"])
     
     if not success:
         # Try without markers
-        success, output, _ = run_command("pytest --tb=short -q --maxfail=3")
+        success, output, _ = run_command(["pytest", "--tb=short", "-q", "--maxfail=3"])
     
     if not success:
         print("❌ Tests failed")
@@ -108,11 +122,11 @@ def check_security():
     """Basic security checks"""
     print("🔒 Security check...")
     
-    # Check for hardcoded secrets
+    # Check for hardcoded secrets using grep commands
     patterns = [
-        "grep -r 'api_key.*=.*['\\\"]' --include='*.py' .",
-        "grep -r 'password.*=.*['\\\"]' --include='*.py' .",
-        "grep -r 'secret.*=.*['\\\"]' --include='*.py' .",
+        ["grep", "-r", "api_key.*=.*['\"]", "--include=*.py", "."],
+        ["grep", "-r", "password.*=.*['\"]", "--include=*.py", "."],
+        ["grep", "-r", "secret.*=.*['\"]", "--include=*.py", "."],
     ]
     
     found_issues = False
