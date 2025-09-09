@@ -1,55 +1,293 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "my-project"
-version = "0.1.0"
-description = "A Python project configured with Claude Config"
-requires-python = ">=3.8"
-dependencies = []
+dynamic = ["version"]
+description = "Modern Python project template (2025)"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+maintainers = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+keywords = ["python", "modern", "template"]
+requires-python = ">=3.11"
+dependencies = [
+    # Add your runtime dependencies here
+    # "httpx>=0.25.0",
+    # "pydantic>=2.5.0",
+]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",
     "ruff>=0.1.0",
-    "mypy>=1.0",
-    "pre-commit>=3.0",
+    "mypy>=1.7.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-xdist>=3.3.0",
+    "pre-commit>=3.5.0",
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-xdist>=3.3.0",
+    "pytest-timeout>=2.2.0",
+    "pytest-mock>=3.12.0",
+]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.4.0",
+    "mkdocstrings[python]>=0.24.0",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["src*"]
-exclude = ["tests*"]
+[project.urls]
+Homepage = "https://github.com/username/my-project"
+Repository = "https://github.com/username/my-project.git"
+Documentation = "https://username.github.io/my-project"
+Changelog = "https://github.com/username/my-project/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/username/my-project/issues"
 
-[tool.setuptools.package-dir]
-"" = "src"
+[project.scripts]
+# Define console scripts here
+# my-cli = "my_package.cli:main"
 
+[tool.hatch.version]
+path = "src/my_package/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/my_package"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+    "/pyproject.toml",
+]
+
+# UV specific configuration (if using uv)
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+    "pytest>=7.4.0",
+]
+
+# Ruff - Modern Python Linter/Formatter (2025)
 [tool.ruff]
-# Extend the default configuration
-extend = "./ruff.toml"
+target-version = "py311"
+line-length = 88
+src = ["src", "tests"]
 
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimez
+    "T10",  # flake8-debugger
+    "EM",   # flake8-errmsg
+    "FA",   # flake8-future-annotations
+    "ISC",  # flake8-implicit-str-concat
+    "ICN",  # flake8-import-conventions
+    "PIE",  # flake8-pie
+    "PT",   # flake8-pytest-style
+    "Q",    # flake8-quotes
+    "RSE",  # flake8-raise
+    "RET",  # flake8-return
+    "SLF",  # flake8-self
+    "SLOT", # flake8-slots
+    "TCH",  # flake8-type-checking
+    "ARG",  # flake8-unused-arguments
+    "PTH",  # flake8-use-pathlib
+    "ERA",  # eradicate
+    "PGH",  # pygrep-hooks
+    "PL",   # Pylint
+    "TRY",  # tryceratops
+    "FLY",  # flynt
+    "PERF", # Perflint
+    "RUF",  # Ruff-specific rules
+]
+ignore = [
+    "E501",     # line too long (handled by formatter)
+    "E203",     # whitespace before ':'
+    "D100",     # Missing docstring in public module
+    "D104",     # Missing docstring in public package
+    "ANN101",   # Missing type annotation for self
+    "ANN102",   # Missing type annotation for cls
+    "COM812",   # Conflicts with formatter
+    "ISC001",   # Conflicts with formatter
+]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = ["PLR2004", "S101", "TID252", "ANN"]
+"docs/**/*" = ["D", "ANN"]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["my_package"]
+force-sort-within-sections = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = 72
+
+# MyPy - Type Checking (2025)
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.11"
+strict = true
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_any_unimported = false
-no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
-check_untyped_defs = true
+warn_unreachable = true
+no_implicit_optional = true
+no_implicit_reexport = true
 strict_equality = true
+strict_concatenate = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+disallow_any_expr = false
+disallow_any_decorated = false
+disallow_any_explicit = false
+disallow_any_generics = false
+disallow_subclassing_any = false
+show_error_codes = true
+show_column_numbers = true
+show_error_context = true
+pretty = true
+plugins = []
 
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+strict = false
+
+[[tool.mypy.overrides]]
+module = [
+    # Add third-party modules without type stubs here
+    # "some_untyped_module.*",
+]
+ignore_missing_imports = true
+
+# Pytest - Testing Framework (2025)
 [tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src",
+    "--cov-branch",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=80",
+    "-ra",
+    "--tb=short",
+    "--maxfail=1",
+]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = [
-    "-ra",
-    "--strict-markers",
-    "--cov=src",
-    "--cov-report=term-missing",
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "e2e: marks tests as end-to-end tests",
+    "smoke: marks tests for smoke testing",
 ]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+xfail_strict = true
+log_cli = false
+log_cli_level = "INFO"
+
+# Coverage - Test Coverage Analysis
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__init__.py",
+    "*/migrations/*",
+    "*/config.py",
+    "*/settings.py",
+    "*/.venv/*",
+    "*/venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstract",
+    "@overload",
+    "class .*\\(Protocol\\):",
+]
+precision = 2
+show_missing = true
+skip_covered = false
+skip_empty = true
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+# Black compatibility (if needed for migration)
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+# isort compatibility (if needed for migration)
+[tool.isort]
+profile = "black"
+line_length = 88
