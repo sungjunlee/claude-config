@@ -67,23 +67,23 @@ Check for configuration in order:
 
 ### Format Entire Project
 ```bash
-ruff format .
-ruff check --select I --fix .
+$RUFF format .
+$RUFF check --select I --fix .
 ```
 
 ### Format Changed Files
 ```bash
 # Format only modified files
-git diff --name-only --diff-filter=M | grep '\.py$' | xargs ruff format
+git diff --name-only --diff-filter=M | grep '\.py$' | xargs $RUFF format
 ```
 
 ### Pre-commit Integration
 ```bash
 # Check if formatting is needed
-ruff format --check .
+$RUFF format --check .
 
 # Apply formatting
-ruff format .
+$RUFF format .
 ```
 
 ## Ruff vs Legacy Tools (2025)
