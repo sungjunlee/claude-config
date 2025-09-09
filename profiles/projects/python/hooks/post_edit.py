@@ -11,9 +11,9 @@ import subprocess
 import shlex
 import shutil
 from pathlib import Path
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Union
 
-def run_command(cmd: str | list, timeout: int = 10) -> Tuple[bool, str, str]:
+def run_command(cmd: Union[str, List[str]], timeout: int = 10) -> Tuple[bool, str, str]:
     """
     Run a command securely without shell=True.
     
@@ -69,8 +69,18 @@ def resolve_tool(tool: str) -> List[str]:
     return [tool]  # Best-effort; caller can handle failures
 
 def format_python_file(filepath: str) -> None:
-    """Format Python file with ruff"""
+    """
+    Format Python file with ruff.
+    
+    Args:
+        filepath: Path to the Python file to format
+    """
     ruff = resolve_tool("ruff")
+    
+    # Check if ruff is actually available
+    if ruff == ["ruff"] and not check_tool_availability("ruff"):
+        print("⚠️  Ruff not found. Install with: pip install ruff")
+        return
     
     print(f"🎨 Formatting {filepath}...")
     
@@ -80,7 +90,10 @@ def format_python_file(filepath: str) -> None:
         print("✅ Formatted successfully")
     else:
         error_msg = stderr or stdout
-        print(f"⚠️  Formatting failed: {error_msg}")
+        if "not found" in error_msg.lower():
+            print("⚠️  Ruff not found. Install with: pip install ruff")
+        else:
+            print(f"⚠️  Formatting failed: {error_msg}")
     
     # Fix imports and safe issues
     success, stdout, stderr = run_command([*ruff, "check", "--fix", filepath])
@@ -115,6 +128,8 @@ def check_async_patterns(filepath: str) -> None:
             ('requests.', 'Use httpx or aiohttp for async requests'),
             ('open(', 'Consider using aiofiles for async file operations'),
             ('sqlite3.', 'Use aiosqlite for async SQLite operations'),
+            ('urllib.', 'Use httpx or aiohttp for async HTTP requests'),
+            ('input(', 'Blocking input in async function - consider async alternatives'),
         ]
         
         for pattern, suggestion in blocking_patterns:
