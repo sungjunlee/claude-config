@@ -12,35 +12,47 @@ Format Python code in: $ARGUMENTS
 
 ## Formatting Strategy
 
-### 1. Check for ruff
+### 1. Tool Resolution (2025 Best Practice)
 ```bash
-# Check if ruff is available
-if command -v ruff &> /dev/null; then
-    echo "Using ruff formatter"
-elif command -v uv &> /dev/null; then
-    echo "Using uv run ruff"
+# Prefer uvx for isolated execution (no project pollution)
+if command -v uvx &> /dev/null; then
+    RUFF="uvx ruff"
+    echo "Using uvx ruff (isolated execution)"
+elif command -v ruff &> /dev/null; then
+    RUFF="ruff"
+    echo "Using system ruff"
 else
-    echo "Installing ruff..."
-    pip install ruff
+    echo "❌ Ruff not found. Install with: 'pip install ruff' or 'brew install ruff'"
+    echo "   Or install uv for better isolation: 'curl -LsSf https://astral.sh/uv/install.sh | sh'"
+    exit 1
 fi
 ```
 
 ### 2. Format Code
 ```bash
-# Format all Python files
-ruff format .
+# Format all Python files in current directory
+$RUFF format .
 
 # Format specific file/directory
-ruff format $ARGUMENTS
+$RUFF format $ARGUMENTS
 
-# With line length configuration
-ruff format --line-length 88 $ARGUMENTS
+# Check formatting without applying (CI/pre-commit)
+$RUFF format --check $ARGUMENTS
+
+# Show diff of what would change
+$RUFF format --diff $ARGUMENTS
 ```
 
-### 3. Sort Imports
+### 3. Fix Imports & Safe Issues
 ```bash
-# Ruff includes isort functionality
-ruff check --select I --fix $ARGUMENTS
+# Ruff combines formatting + import sorting + safe fixes
+$RUFF check --fix $ARGUMENTS
+
+# Only fix import sorting (isort replacement)
+$RUFF check --select I --fix $ARGUMENTS
+
+# Fix all safe issues and format
+$RUFF check --fix $ARGUMENTS && $RUFF format $ARGUMENTS
 ```
 
 ## Configuration Detection
@@ -74,11 +86,29 @@ ruff format --check .
 ruff format .
 ```
 
-## Alternative Formatters
+## Ruff vs Legacy Tools (2025)
 
-If ruff is not available, fall back to:
-1. `black` - The uncompromising formatter
-2. `autopep8` - PEP 8 compliant formatter
-3. `yapf` - Google's formatter
+**Ruff replaces these tools:**
+- ✅ Black (formatting) → `ruff format`
+- ✅ isort (import sorting) → `ruff check --select I --fix`
+- ✅ Flake8 (linting) → `ruff check`
+- ✅ pyupgrade (syntax upgrades) → `ruff check --select UP --fix`
+- ✅ autoflake (unused imports) → `ruff check --select F401 --fix`
 
-Execute appropriate formatter based on project configuration.
+**Performance comparison:**
+- Ruff: ~10-100x faster than Black
+- Black: ~2-5 seconds for large codebases
+- Ruff: ~0.1-0.5 seconds for same codebases
+
+## Example Workflow
+
+```bash
+# Complete formatting workflow
+$RUFF check --fix . && $RUFF format .
+
+# Format only changed files in git
+git diff --name-only --diff-filter=AM | grep '\.py$' | xargs $RUFF format
+
+# Pre-commit check
+$RUFF format --check . && $RUFF check .
+```

@@ -238,16 +238,20 @@ print(f"Best score: {grid_search.best_score_:.4f}")
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# Classification metrics
+# Classification metrics (for classification tasks)
+# Assuming 'model' is already trained (e.g., from grid_search.best_estimator_)
+model = grid_search.best_estimator_  # or your trained model
 y_pred = model.predict(X_test)
-print(classification_report(y_test, y_pred))
-print(confusion_matrix(y_test, y_pred))
-print(f"ROC-AUC: {roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]):.4f}")
 
-# Regression metrics
-print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}")
-print(f"MAE: {mean_absolute_error(y_test, y_pred):.4f}")
-print(f"R²: {r2_score(y_test, y_pred):.4f}")
+if hasattr(model, 'predict_proba'):  # Classification task
+    print(classification_report(y_test, y_pred))
+    print(confusion_matrix(y_test, y_pred))
+    y_proba = model.predict_proba(X_test)[:, 1]
+    print(f"ROC-AUC: {roc_auc_score(y_test, y_proba):.4f}")
+else:  # Regression task
+    print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}")
+    print(f"MAE: {mean_absolute_error(y_test, y_pred):.4f}")
+    print(f"R²: {r2_score(y_test, y_pred):.4f}")
 ```
 
 ### Feature Importance
@@ -345,9 +349,22 @@ with mlflow.start_run():
     # Train model
     model.fit(X_train, y_train)
     
-    # Log metrics
-    mlflow.log_metric("accuracy", accuracy)
-    mlflow.log_metric("auc", auc)
+    # Calculate and log metrics
+    y_pred = model.predict(X_test)
+    
+    if hasattr(model, 'predict_proba'):  # Classification
+        from sklearn.metrics import accuracy_score, roc_auc_score
+        accuracy = accuracy_score(y_test, y_pred)
+        y_proba = model.predict_proba(X_test)[:, 1]
+        auc = roc_auc_score(y_test, y_proba)
+        mlflow.log_metric("accuracy", accuracy)
+        mlflow.log_metric("auc", auc)
+    else:  # Regression
+        from sklearn.metrics import mean_squared_error, r2_score
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        r2 = r2_score(y_test, y_pred)
+        mlflow.log_metric("rmse", rmse)
+        mlflow.log_metric("r2", r2)
     
     # Log model
     mlflow.sklearn.log_model(model, "model")
