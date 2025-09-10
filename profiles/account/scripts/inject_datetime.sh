@@ -57,27 +57,5 @@ detect_timezone() {
 TZ=$(detect_timezone)
 export TZ
 
-# Provide comprehensive time context
-echo "[System Context]"
-echo "Current time: $(date +'%Y-%m-%d %H:%M:%S %Z (%z)')"
-echo "Day: $(date +'%A, %B %d, %Y')"
-echo "Week: $(date +'Week %V of %Y')"
-echo "Timezone: $TZ"
-echo "Unix timestamp: $(date +%s)"
-
-# Add UTC reference for global context
-echo "UTC: $(TZ=UTC date +'%Y-%m-%d %H:%M:%S')"
-
-# Optional: Show major timezones if CLAUDE_EXTRA_TZ is set
-if [ -n "${CLAUDE_EXTRA_TZ:-}" ]; then
-    echo "---"
-    IFS=',' read -ra ZONES <<< "$CLAUDE_EXTRA_TZ"
-    for zone in "${ZONES[@]}"; do
-        zone=$(echo "$zone" | xargs)  # Trim whitespace
-        if [ -n "$zone" ]; then
-            echo "$zone: $(TZ="$zone" date +'%H:%M %Z' 2>/dev/null || echo 'Invalid timezone')"
-        fi
-    done
-fi
-
-echo ""
+# Provide concise time context
+echo "🕐 $(date +'%Y-%m-%d %H:%M:%S %Z') • $(date +'%A')"

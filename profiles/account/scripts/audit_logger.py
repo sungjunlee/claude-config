@@ -123,7 +123,7 @@ def main():
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write(log_entry + '\n')
         
-        print(f"Audit log updated: {log_file}")
+        # Silent operation - no output unless error
         
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON input: {e}", file=sys.stderr)

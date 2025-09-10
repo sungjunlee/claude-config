@@ -161,6 +161,88 @@ backup_existing_config() {
     fi
 }
 
+# Handle settings.json merge interactively
+handle_settings_merge() {
+    local source_file="$1"
+    local target_file="$2"
+    local force_mode="${3:-false}"
+    
+    if [ ! -f "$target_file" ]; then
+        # No existing file, just copy
+        log "Installing settings.json..."
+        cp "$source_file" "$target_file"
+        return 0
+    fi
+    
+    # Existing file found
+    warn "Existing settings.json detected at $target_file"
+    
+    # If force mode, default to backup
+    if [ "$force_mode" = "true" ]; then
+        warn "Force mode: backing up existing and installing new"
+        cp "$target_file" "${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
+        cp "$source_file" "$target_file"
+        return 0
+    fi
+    
+    # Show options
+    echo ""
+    info "Configuration file conflict detected. What would you like to do?"
+    echo "  [K]eep existing settings (default)"
+    echo "  [R]eplace with new settings"
+    echo "  [B]ackup existing and install new"
+    echo "  [D]iff - show differences"
+    echo "  [N]ew - save as settings.json.new for manual merge"
+    echo -n "Choice [K/r/b/d/n]: "
+    
+    local response
+    if [ -t 0 ]; then
+        read -r response
+    else
+        response="${CI_RESPONSE:-k}"
+    fi
+    
+    # Convert to lowercase for compatibility (macOS bash 3.2)
+    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+    case "$response" in
+        r|replace)
+            warn "Replacing existing settings.json"
+            cp "$source_file" "$target_file"
+            ;;
+        b|backup)
+            local backup_name="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
+            log "Backing up to $backup_name"
+            cp "$target_file" "$backup_name"
+            cp "$source_file" "$target_file"
+            info "Previous settings backed up to: $backup_name"
+            ;;
+        d|diff)
+            info "Showing differences (existing < > new):"
+            echo "----------------------------------------"
+            if command -v diff &> /dev/null; then
+                diff -u "$target_file" "$source_file" || true
+            else
+                warn "diff command not available"
+            fi
+            echo "----------------------------------------"
+            # Recursive call to ask again after showing diff
+            handle_settings_merge "$source_file" "$target_file" "$force_mode"
+            ;;
+        n|new)
+            warn "Saving new settings as settings.json.new"
+            cp "$source_file" "${target_file}.new"
+            info "Please manually merge ${target_file}.new with your existing settings.json"
+            ;;
+        k|keep|"")
+            log "Keeping existing settings.json"
+            info "New settings available at: $source_file (temporary)"
+            ;;
+        *)
+            warn "Invalid choice. Keeping existing settings."
+            ;;
+    esac
+}
+
 # Install configuration files
 install_config() {
     log "Installing Claude Code configuration..."
@@ -212,23 +294,16 @@ install_config() {
             debug "llm-models-latest.md not found (optional)"
         fi
         
-        # Handle settings.json with merge logic
-        if [ -f "settings.json" ]; then
-            if [ -f "$CLAUDE_CONFIG_DIR/settings.json" ]; then
-                warn "settings.json already exists, creating settings.json.new"
-                cp settings.json "$CLAUDE_CONFIG_DIR/settings.json.new"
-                info "Please manually merge settings.json.new with your existing settings.json"
-            else
-                log "Installing settings.json..."
-                cp settings.json "$CLAUDE_CONFIG_DIR/"
-            fi
+        # Handle settings.json with interactive merge
+        if [ -f "$PROFILE_DIR/settings.json" ]; then
+            handle_settings_merge "$PROFILE_DIR/settings.json" "$CLAUDE_CONFIG_DIR/settings.json" "$force_install"
         fi
         
         # Create settings.local.json from example if it exists
-        if [ -f "settings.local.json.example" ]; then
+        if [ -f "$PROFILE_DIR/settings.local.json.example" ]; then
             if [ ! -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]; then
                 log "Creating settings.local.json from example..."
-                cp settings.local.json.example "$CLAUDE_CONFIG_DIR/settings.local.json"
+                cp "$PROFILE_DIR/settings.local.json.example" "$CLAUDE_CONFIG_DIR/settings.local.json"
                 warn "Please edit $CLAUDE_CONFIG_DIR/settings.local.json with your personal settings"
             fi
         fi
@@ -268,20 +343,13 @@ install_config() {
         log "Installing llm-models-latest.md..."
         cp "$source_dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
         
-        # Handle settings.json with merge logic
-        if [ -f "$CLAUDE_CONFIG_DIR/settings.json" ]; then
-            warn "settings.json already exists, creating settings.json.new"
-            cp "$temp_dir/settings.json" "$CLAUDE_CONFIG_DIR/settings.json.new"
-            info "Please manually merge settings.json.new with your existing settings.json"
-        else
-            log "Installing settings.json..."
-            cp "$temp_dir/settings.json" "$CLAUDE_CONFIG_DIR/"
-        fi
+        # Handle settings.json with interactive merge
+        handle_settings_merge "$source_dir/settings.json" "$CLAUDE_CONFIG_DIR/settings.json" "$force_install"
         
         # Create settings.local.json from example
         if [ ! -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]; then
             log "Creating settings.local.json from example..."
-            cp "$temp_dir/settings.local.json.example" "$CLAUDE_CONFIG_DIR/settings.local.json"
+            cp "$source_dir/settings.local.json.example" "$CLAUDE_CONFIG_DIR/settings.local.json"
             warn "Please edit $CLAUDE_CONFIG_DIR/settings.local.json with your personal settings"
         fi
         
