@@ -1,0 +1,27 @@
+{
+  "name": "Python Project Settings",
+  "description": "Claude Code settings for Python development",
+  "hooks": {
+    "PostToolUse": {
+      "command": "python ${CLAUDE_PROFILE_PATH}/hooks/post_edit.py",
+      "description": "Format and check Python files after editing",
+      "tools": ["Edit", "Write", "MultiEdit"]
+    },
+    "PreCommit": {
+      "command": "python ${CLAUDE_PROFILE_PATH}/hooks/pre_commit.py",
+      "description": "Run quality checks before committing",
+      "enabled": false
+    }
+  },
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONUNBUFFERED": "1"
+  },
+  "preferences": {
+    "formatter": "ruff",
+    "linter": "ruff",
+    "type_checker": "mypy",
+    "test_runner": "pytest",
+    "package_manager": "uv"
+  }
+}
