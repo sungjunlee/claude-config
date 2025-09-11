@@ -138,7 +138,7 @@ install_claude_code() {
     # Check for Node.js/npm first
     if command -v npm &> /dev/null; then
         log "Installing via npm..."
-        npm install -g @anthropic-ai/claude-code
+        npm install -g @anthropic/claude-code
     else
         log "Installing via official script..."
         curl -fsSL https://claude.ai/install.sh | bash
@@ -210,7 +210,8 @@ handle_settings_merge() {
             cp "$source_file" "$target_file"
             ;;
         b|backup)
-            local backup_name="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
+            local backup_name
+            backup_name="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
             log "Backing up to $backup_name"
             cp "$target_file" "$backup_name"
             cp "$source_file" "$target_file"

@@ -118,8 +118,9 @@ def main():
         # Format and write log entry
         log_entry = format_log_entry(input_data, git_info, system_info)
         
-        # Append to audit log
+        # Ensure log directory exists and append to audit log
         log_file = Path.home() / '.claude' / 'command-audit.log'
+        log_file.parent.mkdir(parents=True, exist_ok=True)
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write(log_entry + '\n')
         
