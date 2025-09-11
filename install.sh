@@ -138,7 +138,7 @@ install_claude_code() {
     # Check for Node.js/npm first
     if command -v npm &> /dev/null; then
         log "Installing via npm..."
-        npm install -g @anthropic/claude-code
+        npm install -g @anthropic-ai/claude-code
     else
         log "Installing via official script..."
         curl -fsSL https://claude.ai/install.sh | bash
