@@ -60,17 +60,6 @@
         ]
       }
     ],
-    "SessionStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/scripts/hooks/session_start.sh"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -78,17 +67,6 @@
           {
             "type": "command",
             "command": "$HOME/.claude/scripts/audit_logger.py"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/scripts/hooks/session_stop.sh"
           }
         ]
       }
