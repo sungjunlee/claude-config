@@ -2,5 +2,5 @@
 # Minimal datetime injector for Claude Code
 # Adds current timestamp to user prompts
 
-# Simply output current date/time
-date +'%Y-%m-%d %H:%M:%S %Z'
+# Output timestamp in ISO 8601 format with UTC for consistency
+TZ=UTC date +'%Y-%m-%dT%H:%M:%SZ'
