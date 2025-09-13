@@ -185,7 +185,7 @@ flutter build apk --release
 # SDK version issues
 # Update android/app/build.gradle:
 # minSdkVersion 21
-# targetSdkVersion 33
+# targetSdkVersion 34
 ```
 
 #### iOS Issues

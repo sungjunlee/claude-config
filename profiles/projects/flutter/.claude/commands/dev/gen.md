@@ -45,19 +45,19 @@ fi
 #### One-time Generation
 ```bash
 # Generate code once
-flutter pub run build_runner build
+dart run build_runner build
 
 # Force regeneration (delete existing)
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 #### Watch Mode (Auto-regenerate)
 ```bash
 # Watch for changes and regenerate
-flutter pub run build_runner watch
+dart run build_runner watch
 
 # Watch with conflict resolution
-flutter pub run build_runner watch --delete-conflicting-outputs
+dart run build_runner watch --delete-conflicting-outputs
 ```
 
 ### 3. Specific Generators
@@ -84,7 +84,7 @@ class User with _$User {
 
 ```bash
 # Generate freezed models
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 #### JSON Serialization
@@ -109,7 +109,7 @@ class Product {
 
 ```bash
 # Generate JSON serialization
-flutter pub run build_runner build
+dart run build_runner build
 ```
 
 #### Injectable (Dependency Injection)
@@ -133,7 +133,7 @@ abstract class AppModule {
 
 ```bash
 # Generate dependency injection
-flutter pub run build_runner build
+dart run build_runner build
 ```
 
 #### Auto Route (Navigation)
@@ -153,7 +153,7 @@ class $AppRouter {}
 
 ```bash
 # Generate navigation
-flutter pub run build_runner build
+dart run build_runner build
 ```
 
 ### 4. Localization Generation
@@ -171,7 +171,7 @@ flutter gen-l10n
 #### Easy Localization
 ```bash
 # Generate translation keys
-flutter pub run easy_localization:generate -S assets/translations -f keys -o locale_keys.g.dart
+dart run easy_localization:generate -S assets/translations -f keys -o locale_keys.g.dart
 ```
 
 ### 5. Asset Generation
@@ -179,10 +179,7 @@ flutter pub run easy_localization:generate -S assets/translations -f keys -o loc
 #### Flutter Gen
 ```bash
 # Generate type-safe asset references
-flutter pub run flutter_gen
-
-# Or with build_runner
-flutter pub run build_runner build
+dart run build_runner build # flutter_gen uses build_runner
 ```
 
 Configuration in `pubspec.yaml`:
@@ -200,12 +197,12 @@ flutter_gen:
 
 ```bash
 # Clean generated files
-flutter pub run build_runner clean
+dart run build_runner clean
 
 # Full clean and regenerate
 flutter clean
 flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 ### 7. Optimization & Troubleshooting
@@ -213,10 +210,10 @@ flutter pub run build_runner build --delete-conflicting-outputs
 #### Performance Tips
 ```bash
 # Use build filters for faster generation
-flutter pub run build_runner build --build-filter="lib/models/*.dart"
+dart run build_runner build --build-filter="lib/models/*.dart"
 
 # Parallel generation
-flutter pub run build_runner build --low-resources-mode
+dart run build_runner build --low-resources-mode
 ```
 
 #### Common Issues & Fixes

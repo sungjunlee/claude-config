@@ -121,7 +121,7 @@ lib/
 #### iOS
 - Handle notch/Dynamic Island
 - Implement proper Info.plist permissions
-- Support iOS 12+ (or client requirement)
+- Support iOS 13+ (Firebase/modern plugins requirement)
 - CocoaPods dependency management
 
 #### Android
