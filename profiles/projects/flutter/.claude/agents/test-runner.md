@@ -70,11 +70,14 @@ flutter test --update-goldens
 
 #### Integration Tests
 ```bash
-# Run on connected device
+# Preferred: Modern integration_test package
 flutter test integration_test/app_test.dart
 
-# Run with driver
-flutter drive --target=test_driver/app.dart
+# Run on specific device
+flutter test integration_test/app_test.dart -d <device-id>
+
+# Legacy (deprecated): flutter_driver - migrate to integration_test
+# flutter drive --target=test_driver/app.dart
 
 # Run on Firebase Test Lab
 gcloud firebase test android run \

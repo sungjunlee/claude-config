@@ -50,9 +50,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
     xcode-select --install
     brew install --cask android-studio
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Linux
-    sudo apt-get install lib32stdc++6
+elif [[ "$OSTYPE" == "linux-gnu"* ]] && command -v apt-get >/dev/null; then
+    # Ubuntu/Debian
+    sudo apt-get update
+    sudo apt-get install -y lib32stdc++6 lib32z1
 fi
 
 # Accept Android licenses
