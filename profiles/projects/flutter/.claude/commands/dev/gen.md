@@ -116,6 +116,7 @@ dart run build_runner build
 ```dart
 // Example injectable service
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @singleton
 class AuthService {
@@ -212,7 +213,7 @@ dart run build_runner build --delete-conflicting-outputs
 # Use build filters for faster generation
 dart run build_runner build --build-filter="lib/models/*.dart"
 
-# Parallel generation
+# Low resource mode (reduces memory usage, may be slower)
 dart run build_runner build --low-resources-mode
 ```
 
@@ -220,16 +221,16 @@ dart run build_runner build --low-resources-mode
 ```bash
 # Fix version conflicts
 flutter pub upgrade
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 
 # Fix analyzer issues
 dart analyze
-flutter pub run build_runner clean
-flutter pub run build_runner build
+dart run build_runner clean
+dart run build_runner build
 
 # Fix import issues
 dart fix --apply
-flutter pub run build_runner build
+dart run build_runner build
 ```
 
 ## Generation Configuration

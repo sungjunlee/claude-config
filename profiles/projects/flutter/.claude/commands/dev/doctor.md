@@ -16,17 +16,13 @@ flutter doctor
 
 # Verbose output with more details
 flutter doctor -v
-
-# Check for specific platforms
-flutter doctor --android-licenses  # Accept Android licenses
 ```
 
 ### 2. Platform-Specific Checks
 
 #### Android
 ```bash
-# Check Android setup
-flutter doctor --android-licenses
+# Configure Android SDK path
 flutter config --android-sdk /path/to/sdk
 flutter config --android-studio-dir /path/to/studio
 ```

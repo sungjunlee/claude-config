@@ -108,9 +108,11 @@ testWidgets('Counter increments', (tester) async {
 testWidgets('Loads data', (tester) async {
   await tester.pumpWidget(MyWidget());
   
-  // Wait for async operation
-  await tester.pumpAndSettle();
-  
+  // Wait for async operation (with timeout to avoid infinite animations)
+  // Note: pumpAndSettle() will timeout with infinite animations (e.g., CircularProgressIndicator)
+  // Use pump(Duration) for such cases
+  await tester.pumpAndSettle(const Duration(seconds: 5));
+
   expect(find.text('Loaded'), findsOneWidget);
 });
 

@@ -327,7 +327,7 @@ dio.interceptors.add(
 - **Network**: [API issues found]
 
 #### 3. Error Logs
-```
+```text
 [Paste relevant error messages]
 [Include stack traces]
 ```

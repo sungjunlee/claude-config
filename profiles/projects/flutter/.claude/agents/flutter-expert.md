@@ -80,7 +80,7 @@ class Counter extends _$Counter {
 ## Best Practices
 
 ### Project Structure (Feature-First)
-```
+```text
 lib/
 ├── core/
 │   ├── constants/
