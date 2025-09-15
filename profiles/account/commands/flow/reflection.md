@@ -34,19 +34,19 @@ Invoke the reflection-agent to analyze Claude's own performance, context usage p
 ### When to Use Reflection
 ```bash
 # End of long development sessions
-/reflection "analyze this debugging session performance"
+/flow:reflection "analyze this debugging session performance"
 
 # Before major handoffs
-/reflection "prepare handoff optimization recommendations"  
+/flow:reflection "prepare handoff optimization recommendations"
 
 # After complex multi-step tasks
-/reflection "evaluate the efficiency of this feature implementation"
+/flow:reflection "evaluate the efficiency of this feature implementation"
 
 # General performance check
-/reflection "current workflow optimization analysis"
+/flow:reflection "current workflow optimization analysis"
 
 # Strategic planning
-/reflection "identify patterns for automation opportunities"
+/flow:reflection "identify patterns for automation opportunities"
 ```
 
 ### Automatic Triggers
@@ -127,10 +127,10 @@ The reflection-agent will provide:
 ### With Arguments for Focused Analysis
 ```bash
 # Focus on specific aspects
-/reflection "tool usage patterns"
-/reflection "context management efficiency" 
-/reflection "debugging workflow analysis"
-/reflection "agent collaboration effectiveness"
+/flow:reflection "tool usage patterns"
+/flow:reflection "context management efficiency"
+/flow:reflection "debugging workflow analysis"
+/flow:reflection "agent collaboration effectiveness"
 ```
 
 ### Integration with Planning

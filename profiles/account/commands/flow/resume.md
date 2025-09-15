@@ -260,8 +260,8 @@ This provides immediate orientation without reading entire handoff, enabling fas
 ```markdown
 No handoff found. Options:
 1. Start fresh with strategic planning: Use plan-agent
-2. Create initial handoff: /handoff
-3. Begin new work: /plan [requirements]
+2. Create initial handoff: /flow:handoff
+3. Begin new work: /flow:plan [requirements]
 ```
 
 ### Outdated Handoff:
@@ -276,18 +276,18 @@ This will research current best practices and update approach.
 
 ```bash
 # Resume with automatic planning for complex work
-/resume
+/flow:resume
 # → Detects modernization work
 # → "Use plan-agent for strategic planning"
 # → Plan-agent automatically handles research and planning
 
 # Resume simple task
-/resume
+/flow:resume
 # → Detects simple fix
 # → Shows direct continuation
 
 # Resume with verification
-/resume --verify
+/flow:resume --verify
 # → Checks conflicts
 # → Assesses complexity
 # → Suggests appropriate path
