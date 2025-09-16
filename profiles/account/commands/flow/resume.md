@@ -259,9 +259,8 @@ This provides immediate orientation without reading entire handoff, enabling fas
 ### Missing Handoff:
 ```markdown
 No handoff found. Options:
-1. Start fresh with strategic planning: Use plan-agent
+1. Start fresh with strategic planning: /flow:plan [requirements]
 2. Create initial handoff: /flow:handoff
-3. Begin new work: /flow:plan [requirements]
 ```
 
 ### Outdated Handoff:
@@ -291,6 +290,10 @@ This will research current best practices and update approach.
 # → Checks conflicts
 # → Assesses complexity
 # → Suggests appropriate path
+
+# List available handoffs
+/flow:resume --list
+# → Displays available handoffs and allows selection
 ```
 
 ## Best Practices
