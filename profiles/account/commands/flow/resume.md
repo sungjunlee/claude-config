@@ -290,10 +290,12 @@ This will research current best practices and update approach.
 # → Checks conflicts
 # → Assesses complexity
 # → Suggests appropriate path
+# Example output: "Detected conflicts: 2 files (README.md, app.py)"
 
 # List available handoffs
 /flow:resume --list
 # → Displays available handoffs and allows selection
+# Note: In CI/non-TTY environments, only lists without interactive selection
 ```
 
 ## Best Practices

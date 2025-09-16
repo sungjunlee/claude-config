@@ -96,7 +96,7 @@ Create handoff at `docs/handoff/HANDOFF-[YYYYMMDD-HHMM].md` with:
 
 ## Integration with Other Commands
 
-### With `/plan`:
+### With `/flow:plan`:
 - Include reference to active plan document
 - Update progress on plan items
 - Carry forward incomplete tasks
