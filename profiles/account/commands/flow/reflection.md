@@ -134,9 +134,9 @@ The reflection-agent will provide:
 ```
 
 ### Integration with Planning
-- Use before `/plan` commands for strategic insights
-- Combine with `/handoff` for optimization recommendations
-- Include in `/resume` workflow for continuous improvement
+- Use before `/flow:plan` commands for strategic insights
+- Combine with `/flow:handoff` for optimization recommendations
+- Include in `/flow:resume` workflow for continuous improvement
 - Leverage for `/worktree` efficiency analysis
 
 Execute reflection-agent analysis for: $ARGUMENTS
