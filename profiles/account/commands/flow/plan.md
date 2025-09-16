@@ -77,7 +77,7 @@ Produces comprehensive plans including:
 
 ## Usage Examples
 
-```bash
+```text
 # Plan a modernization task
 /flow:plan modernize authentication system to use JWT
 # → plan-agent researches JWT best practices

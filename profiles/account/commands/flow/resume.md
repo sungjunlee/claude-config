@@ -274,7 +274,7 @@ This will research current best practices and update approach.
 
 ## Usage Examples
 
-```bash
+```text
 # Resume with automatic planning for complex work
 /flow:resume
 # → Detects modernization work

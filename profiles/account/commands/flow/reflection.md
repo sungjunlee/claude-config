@@ -32,7 +32,7 @@ Invoke the reflection-agent to analyze Claude's own performance, context usage p
 ## Usage Scenarios
 
 ### When to Use Reflection
-```bash
+```text
 # End of long development sessions
 /flow:reflection "analyze this debugging session performance"
 
@@ -125,7 +125,7 @@ The reflection-agent will provide:
 ## Advanced Usage
 
 ### With Arguments for Focused Analysis
-```bash
+```text
 # Focus on specific aspects
 /flow:reflection "tool usage patterns"
 /flow:reflection "context management efficiency"
