@@ -77,24 +77,24 @@ Produces comprehensive plans including:
 
 ## Usage Examples
 
-```bash
+```text
 # Plan a modernization task
-/plan modernize authentication system to use JWT
+/flow:plan modernize authentication system to use JWT
 # → plan-agent researches JWT best practices
 # → Generates migration strategy
 # → Sets up testing and review workflows
 
 # Plan a new feature
-/plan implement user dashboard with analytics
+/flow:plan implement user dashboard with analytics
 # → plan-agent analyzes requirements
 # → Researches dashboard patterns
 # → Creates phased implementation plan
 
 # Plan from resume context
-/resume
+/flow:resume
 # → Complex work detected
-# → /plan automatically suggested
-/plan
+# → /flow:plan automatically suggested
+/flow:plan
 # → plan-agent imports handoff context
 # → Continues planning from previous state
 ```
@@ -106,7 +106,7 @@ Produces comprehensive plans including:
 - Complete requirements analysis
 - Standalone planning
 
-### When suggested by /resume:
+### When suggested by /flow:resume:
 - Automatic context import from handoff
 - Continuation of previous work
 - Focused forward planning
