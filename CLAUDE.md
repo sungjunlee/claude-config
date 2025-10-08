@@ -11,12 +11,12 @@ Profile-based Claude Code configuration system with two-tier architecture:
 ## Core Architecture
 
 ### Command Resolution Order
-```
+```text
 Project (.claude/commands/) → Account (~/.claude/commands/) → Built-in
 ```
 
 ### Profile System Structure
-```
+```text
 profiles/
 ├── account/                    # Global configuration
 │   ├── agents/                # 7 AI agents (code-reviewer, test-runner, debugger, etc.)

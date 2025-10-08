@@ -52,7 +52,8 @@ case "$TASK" in
       echo "⚠️ Codex not available. Using Claude."
       echo "💡 Install: npm install -g @openai/codex@latest"
       echo ""
-      echo "Proceeding with Claude: $TASK"
+      # Fallback: Process with Claude Code directly
+      echo "$TASK"
     fi
     ;;
 
@@ -65,7 +66,8 @@ case "$TASK" in
     else
       echo "⚠️ Codex not available. Using Claude."
       echo ""
-      echo "Proceeding with Claude: $TASK"
+      # Fallback: Process with Claude Code directly
+      echo "Debug and fix: $TASK"
     fi
     ;;
 
@@ -78,7 +80,8 @@ case "$TASK" in
     else
       echo "⚠️ Gemini not installed. Using Claude."
       echo ""
-      echo "Proceeding with Claude: $TASK"
+      # Fallback: Process with Claude Code directly
+      echo "$TASK"
     fi
     ;;
 
@@ -91,7 +94,8 @@ case "$TASK" in
     else
       echo "⚠️ Gemini not installed. Using Claude."
       echo ""
-      echo "Proceeding with Claude: $TASK"
+      # Fallback: Process with Claude Code directly
+      echo "$TASK"
     fi
     ;;
 
@@ -100,6 +104,7 @@ case "$TASK" in
     echo "📝 Task: General"
     echo "🎯 Using: Claude Code (balanced)"
     echo ""
+    # Process with Claude Code directly
     echo "$TASK"
     ;;
 esac

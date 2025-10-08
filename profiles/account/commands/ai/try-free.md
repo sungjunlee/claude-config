@@ -26,22 +26,31 @@ echo ""
 if command -v gemini &> /dev/null; then
   echo "🆓 Using Gemini (free tier)"
   echo "   - 60 requests/min, 1,000 requests/day"
-  gemini "$ARGUMENTS"
-  exit 0
+  if gemini "$ARGUMENTS"; then
+    exit $?
+  fi
+  echo "⚠️ Gemini failed, trying next model..."
+  echo ""
 fi
 
 # Try Qwen if available
 if command -v qwen &> /dev/null; then
   echo "🆓 Using Qwen (free tier)"
-  qwen "$ARGUMENTS"
-  exit 0
+  if qwen "$ARGUMENTS"; then
+    exit $?
+  fi
+  echo "⚠️ Qwen failed, trying next model..."
+  echo ""
 fi
 
 # Escalate to paid models
 if command -v codex &> /dev/null && codex auth status &>/dev/null; then
   echo "💳 Escalating to Codex (ChatGPT subscription)"
-  codex "$ARGUMENTS"
-  exit 0
+  if codex "$ARGUMENTS"; then
+    exit $?
+  fi
+  echo "⚠️ Codex failed, falling back to Claude..."
+  echo ""
 fi
 
 # Final fallback to Claude
@@ -51,6 +60,8 @@ echo "💡 Tip: Install free models to save costs:"
 echo "   npm install -g @google/gemini-cli"
 echo "   gemini login  # Free with Google account!"
 echo ""
+# Process with Claude Code directly
+echo "$ARGUMENTS"
 ```
 
 ## Installation Guide
