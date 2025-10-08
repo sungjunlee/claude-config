@@ -43,7 +43,7 @@ ccfg init rust
 - **6 Core Agents**: code-reviewer, test-runner, debugger, plan-agent, time-aware, worktree-coordinator
 - **20+ Commands** organized by purpose:
   - **Development** (`dev/`): `/commit`, `/test`, `/debug`, `/review`, `/refactor`, `/optimize`, `/explain`
-  - **Workflow** (`flow/`): `/plan`, `/handoff`, `/resume`, `/scaffold`, `/fix-errors`, `/reflection`
+  - **Workflow** (`flow/`): `/plan`, `/handoff`, `/resume`, `/scaffold`, `/fix-errors`, `/reflection`, `/qa` 🆕
   - **GitHub** (`gh/`): `/pr`, `/docs`
   - **Worktree** (`worktree/`): `/distribute`, `/status`, `/sync`
   - **AI Models** (`ai/`) 🆕: `/gemini`, `/codex`, `/try-free`, `/route`, `/consensus`, `/pipeline`
@@ -168,6 +168,7 @@ your-project/
 | `/test` | Auto-fix test failures |
 | `/debug` | Systematic debugging |
 | `/review` | Security & quality review |
+| `/qa` 🆕 | **Integrated QA gate (review + test + build + lint)** |
 | `/handoff` | Save session state |
 | `/resume` | Restore session |
 | `/plan` | Task planning |
@@ -198,6 +199,39 @@ codex auth login
 ```
 
 📚 **[Full AI Commands Guide](profiles/account/commands/ai/README.md)**
+
+### 🚦 Quality Assurance Gate (NEW!)
+
+The `/flow:qa` command provides comprehensive PR readiness verification with parallel execution:
+
+**Features:**
+- 🔍 Code review (security, logic, performance, quality)
+- 🧪 Test execution with automatic fixes
+- 🔨 Build verification (auto-detects build system)
+- 🎨 Linting & formatting (auto-detects tools)
+- 🐛 Conditional debugging (triggered on failures)
+- 📚 Best practices validation (web search, library docs)
+
+**Usage:**
+```bash
+# Standard QA check (all stages)
+/flow:qa
+
+# Fast mode (skip context enhancement)
+/flow:qa --fast
+
+# Check specific path
+/flow:qa src/core/
+```
+
+**Supported Ecosystems:**
+- **Node.js**: npm/yarn/pnpm/bun build, ESLint, Prettier
+- **Python**: poetry/uv build, ruff, mypy
+- **Rust**: cargo build, clippy
+- **Go**: go build, golangci-lint
+- **Java**: Maven, Gradle
+
+**Expected Time**: 2-5 minutes with parallel agent execution
 
 ## 🔄 Migration & Updates
 
