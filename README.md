@@ -41,11 +41,13 @@ ccfg init rust
 
 ### Account-level Configuration
 - **6 Core Agents**: code-reviewer, test-runner, debugger, plan-agent, time-aware, worktree-coordinator
-- **16+ Commands** organized by purpose:
+- **20+ Commands** organized by purpose:
   - **Development** (`dev/`): `/commit`, `/test`, `/debug`, `/review`, `/refactor`, `/optimize`, `/explain`
   - **Workflow** (`flow/`): `/plan`, `/handoff`, `/resume`, `/scaffold`, `/fix-errors`, `/reflection`
   - **GitHub** (`gh/`): `/pr`, `/docs`
   - **Worktree** (`worktree/`): `/distribute`, `/status`, `/sync`
+  - **AI Models** (`ai/`) 🆕: `/gemini`, `/codex`, `/try-free`, `/route`, `/consensus`, `/pipeline`
+- **Multi-Model Integration**: Access Gemini (free) and Codex for specialized tasks
 - **Context Management**: Session continuity with handoff/resume system
 - **Automatic DateTime Context**: Injects current time into every prompt
 - **Headless Ready**: Works on remote Linux servers
@@ -79,7 +81,8 @@ claude-config/
 │   │   │   ├── dev/     # Development tasks
 │   │   │   ├── flow/    # Workflow management
 │   │   │   ├── gh/      # GitHub operations
-│   │   │   └── worktree/# Git worktree management
+│   │   │   ├── worktree/# Git worktree management
+│   │   │   └── ai/      # Multi-model AI integration (NEW!)
 │   │   ├── scripts/     # Supporting scripts
 │   │   └── CLAUDE.md    # Global preferences
 │   └── projects/        # Project-specific profiles
@@ -169,6 +172,32 @@ your-project/
 | `/resume` | Restore session |
 | `/plan` | Task planning |
 | `/pytest` | Python testing (with Python profile) |
+
+### 🤖 Multi-Model AI Commands (NEW!)
+
+Access specialized AI models for cost savings and task optimization:
+
+| Command | Model | Cost | Best For |
+|---------|-------|------|----------|
+| `/ai:gemini` | Google Gemini | 🆓 Free | Large files, architecture (1000+ lines) |
+| `/ai:codex` | OpenAI Codex | 💳 Paid | Algorithms, debugging (ChatGPT Plus/Pro) |
+| `/ai:try-free` | Auto (free→paid) | 🆓→💳 | Cost optimization (~50% savings) |
+| `/ai:route` | Auto (task-based) | 🆓→💳 | Smart routing (~70% token savings) |
+| `/ai:consensus` | Multi-model | 🆓+💳 | Critical decisions (multiple perspectives) |
+| `/ai:pipeline` | Sequential | 🆓+💳 | Complex projects (multi-stage analysis) |
+
+**Quick Setup:**
+```bash
+# Install Gemini (Free!)
+npm install -g @google/gemini-cli
+gemini login
+
+# Install Codex (ChatGPT Plus/Pro)
+npm install -g @openai/codex@latest
+codex auth login
+```
+
+📚 **[Full AI Commands Guide](profiles/account/commands/ai/README.md)**
 
 ## 🔄 Migration & Updates
 
