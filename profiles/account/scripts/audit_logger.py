@@ -33,7 +33,16 @@ def run_command(cmd, cwd=None, timeout=5):
 def get_git_info(cwd):
     """Get Git repository information"""
     git_info = {}
-    
+
+    # Check if directory exists
+    if not os.path.exists(cwd):
+        return {
+            'repo': 'unknown',
+            'branch': 'unknown',
+            'commit': 'unknown',
+            'dirty': False
+        }
+
     # Repository name
     repo_name = run_command("basename `git rev-parse --show-toplevel`", cwd)
     git_info['repo'] = repo_name or "unknown"
@@ -107,10 +116,20 @@ def main():
     try:
         # Read JSON input from stdin
         input_data = json.load(sys.stdin)
-        
+
         # Get current working directory
-        cwd = input_data.get('cwd', os.getcwd())
-        
+        cwd = input_data.get('cwd')
+        if not cwd:
+            try:
+                cwd = os.getcwd()
+            except OSError:
+                # Current directory doesn't exist
+                cwd = os.path.expanduser("~")
+
+        # Validate and fallback to home if cwd doesn't exist
+        if not os.path.exists(cwd):
+            cwd = os.path.expanduser("~")
+
         # Collect information
         git_info = get_git_info(cwd)
         system_info = get_system_info()
@@ -118,12 +137,13 @@ def main():
         # Format and write log entry
         log_entry = format_log_entry(input_data, git_info, system_info)
         
-        # Append to audit log
+        # Ensure log directory exists and append to audit log
         log_file = Path.home() / '.claude' / 'command-audit.log'
+        log_file.parent.mkdir(parents=True, exist_ok=True)
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write(log_entry + '\n')
         
-        print(f"Audit log updated: {log_file}")
+        # Silent operation - no output unless error
         
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON input: {e}", file=sys.stderr)

@@ -130,34 +130,34 @@ function Install-Configuration {
         
         # Copy files from temp directory
         Write-Success "Installing agents..."
-        Copy-Item -Path "$tempDir\agents" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        Copy-Item -Path "$tempDir\profiles\account\agents" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
         
         Write-Success "Installing commands..."
-        Copy-Item -Path "$tempDir\commands" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        Copy-Item -Path "$tempDir\profiles\account\commands" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
         
         Write-Success "Installing scripts..."
-        Copy-Item -Path "$tempDir\scripts" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        Copy-Item -Path "$tempDir\profiles\account\scripts" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
         
         Write-Success "Installing CLAUDE.md..."
-        Copy-Item -Path "$tempDir\CLAUDE.md" -Destination "$CLAUDE_CONFIG_DIR\" -Force
+        Copy-Item -Path "$tempDir\profiles\account\CLAUDE.md" -Destination "$CLAUDE_CONFIG_DIR\" -Force
         
         Write-Success "Installing llm-models-latest.md..."
-        Copy-Item -Path "$tempDir\llm-models-latest.md" -Destination "$CLAUDE_CONFIG_DIR\" -Force
+        Copy-Item -Path "$tempDir\profiles\account\llm-models-latest.md" -Destination "$CLAUDE_CONFIG_DIR\" -Force
         
         # Handle settings.json with merge logic
         if (Test-Path "$CLAUDE_CONFIG_DIR\settings.json") {
             Write-Warning "settings.json already exists, creating settings.json.new"
-            Copy-Item -Path "$tempDir\settings.json" -Destination "$CLAUDE_CONFIG_DIR\settings.json.new" -Force
+            Copy-Item -Path "$tempDir\profiles\account\settings.json" -Destination "$CLAUDE_CONFIG_DIR\settings.json.new" -Force
             Write-Info "Please manually merge settings.json.new with your existing settings.json"
         } else {
             Write-Success "Installing settings.json..."
-            Copy-Item -Path "$tempDir\settings.json" -Destination "$CLAUDE_CONFIG_DIR\" -Force
+            Copy-Item -Path "$tempDir\profiles\account\settings.json" -Destination "$CLAUDE_CONFIG_DIR\" -Force
         }
         
         # Create settings.local.json from example
         if (-not (Test-Path "$CLAUDE_CONFIG_DIR\settings.local.json")) {
             Write-Success "Creating settings.local.json from example..."
-            Copy-Item -Path "$tempDir\settings.local.json.example" -Destination "$CLAUDE_CONFIG_DIR\settings.local.json" -Force
+            Copy-Item -Path "$tempDir\profiles\account\settings.local.json.example" -Destination "$CLAUDE_CONFIG_DIR\settings.local.json" -Force
             Write-Warning "Please edit $CLAUDE_CONFIG_DIR\settings.local.json with your personal settings"
         }
         

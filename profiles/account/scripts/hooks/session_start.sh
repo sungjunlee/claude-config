@@ -13,8 +13,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Optional: Display git status if in a git repository
 if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then
-    echo "📊 Git Status:"
-    git status --short --branch
+    BRANCH=$(git branch --show-current 2>/dev/null || echo "detached")
+    UNCOMMITTED=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+    
+    echo -n "📊 Git: branch '$BRANCH'"
+    if [ "$UNCOMMITTED" -gt 0 ]; then
+        echo " (${UNCOMMITTED} uncommitted changes)"
+    else
+        echo " (clean)"
+    fi
     echo ""
 fi
 

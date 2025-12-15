@@ -259,9 +259,8 @@ This provides immediate orientation without reading entire handoff, enabling fas
 ### Missing Handoff:
 ```markdown
 No handoff found. Options:
-1. Start fresh with strategic planning: Use plan-agent
-2. Create initial handoff: /handoff
-3. Begin new work: /plan [requirements]
+1. Start fresh with strategic planning: /flow:plan [requirements]
+2. Create initial handoff: /flow:handoff
 ```
 
 ### Outdated Handoff:
@@ -274,23 +273,29 @@ This will research current best practices and update approach.
 
 ## Usage Examples
 
-```bash
+```text
 # Resume with automatic planning for complex work
-/resume
+/flow:resume
 # → Detects modernization work
 # → "Use plan-agent for strategic planning"
 # → Plan-agent automatically handles research and planning
 
 # Resume simple task
-/resume
+/flow:resume
 # → Detects simple fix
 # → Shows direct continuation
 
 # Resume with verification
-/resume --verify
+/flow:resume --verify
 # → Checks conflicts
 # → Assesses complexity
 # → Suggests appropriate path
+# Example output: "Detected conflicts: 2 files (README.md, app.py)"
+
+# List available handoffs
+/flow:resume --list
+# → Displays available handoffs and allows selection
+# Note: In CI/non-TTY environments, only lists without interactive selection
 ```
 
 ## Best Practices
