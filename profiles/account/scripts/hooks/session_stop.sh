@@ -41,10 +41,8 @@ fi
 # Send notification
 "$SCRIPT_DIR/session_notify.sh" "stop" "$MESSAGE"
 
-# Optional: Display session summary
-echo ""
+# Display session summary
 echo "👋 Session ended at: $(date '+%Y-%m-%d %H:%M:%S')"
-if [ -n "${DURATION_MIN:-}" ]; then
+if [ -n "${DURATION_MIN:-}" ] && [ "$DURATION_MIN" -gt 0 ]; then
     echo "⏱️  Duration: ${DURATION_MIN} minutes"
 fi
-echo ""

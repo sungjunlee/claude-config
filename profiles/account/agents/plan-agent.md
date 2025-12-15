@@ -76,50 +76,107 @@ Plan documentation updates:
 
 ## Output Format
 
-Generate actionable plans in this structure:
+Generate actionable plans in this enhanced structure:
 
 ```markdown
 # Execution Plan: [Task Description]
 
 ## 📊 Complexity Assessment
 - Level: [Simple/Medium/Complex]
+- Files Affected: [count]
 - Estimated Duration: [time]
 - Risk Factors: [list]
 
+## 🧠 Thinking Mode Recommendation
+- [ ] Normal (< 5 files)
+- [ ] Think (5-15 files)
+- [ ] Ultra Think (> 15 files or architecture)
+*Reasoning: [why this mode was selected]*
+
 ## 🔍 Research Findings
 [If performed, summarize key findings from web search and Context7]
+- Best Practices: [from web search]
+- Library Versions: [from Context7]
+- Similar Implementations: [from GitHub/internal]
+
+## 🌿 Git Workflow
+
+### Branch Strategy
+```bash
+# Automatic branch naming
+Branch: `[branch-type]/[task-name]`
+# Examples:
+# feature/user-authentication
+# fix/memory-leak-issue-123
+# refactor/database-layer
+```
+
+### Commit Plan
+```
+1. Initial setup: "chore: setup project structure for [feature]"
+2. Core implementation: "feat: implement [main functionality]"
+3. Tests: "test: add unit tests for [feature]"
+4. Documentation: "docs: update README with [feature] usage"
+```
 
 ## 📋 Implementation Strategy
 
-### Phase 1: [Name]
+### Phase 1: [Name] (⚡ Parallel Execution)
 - [ ] Step 1: [Specific action]
-- [ ] Step 2: [Specific action]
+- [ ] Step 2: [Specific action] [parallel]
+- [ ] Step 3: [Specific action] [parallel]
 - Checkpoint: [Validation step]
+⏱️ Estimated: [time]
 
-### Phase 2: [Name]
-- [ ] Step 3: [Specific action]
-- [ ] Step 4: [Specific action]
+### Phase 2: [Name] (📝 Sequential)
+- [ ] Step 4: [Specific action] [depends: Step 1]
+- [ ] Step 5: [Specific action]
 - Checkpoint: [Validation step]
+⏱️ Estimated: [time]
 
 ## 🤖 Automated Workflows
-- Branch: `[branch-name]`
-- Commits: [frequency/pattern]
-- Subagents: [list with triggers]
-- External: [CodeRabbit, CI/CD notes]
+```yaml
+triggers:
+  on_phase_complete:
+    phase_1: "git commit -m 'feat: [description]'"
+    phase_2: "invoke test-runner"
+  on_pr_ready: "invoke code-reviewer"
+  on_test_failure: "invoke debugger"
+  on_context_80: "invoke handoff-agent"
 
-## ⚠️ Risk Mitigation
-- [Risk 1]: [Mitigation strategy]
-- [Risk 2]: [Mitigation strategy]
+subagents:
+  - test-runner: "When test files modified"
+  - code-reviewer: "Before PR creation"
+  - debugger: "On complex errors"
+```
 
-## 📝 Documentation Updates
+## ⚠️ Risk Matrix
+| Risk | Impact | Likelihood | Mitigation | Auto-Action |
+|------|--------|------------|------------|-------------|
+| [Risk 1] | High/Med/Low | High/Med/Low | [Strategy] | [Command] |
+| [Risk 2] | High/Med/Low | High/Med/Low | [Strategy] | [Command] |
+
+## 🎬 Quick Start Commands
+```bash
+# Copy-paste ready commands to begin
+git checkout -b [branch-name]
+[setup commands]
+[initial implementation command]
+```
+
+## 📝 Documentation & Tracking
 - Files to update: [list]
-- Tracking items: [list]
+- MIGRATION_TRACKER.md items: [if applicable]
+- CONTEXT_MANAGEMENT.md entries: [if applicable]
 
 ## ✅ Success Criteria
 - [ ] [Measurable outcome 1]
 - [ ] [Measurable outcome 2]
+- [ ] All tests passing
+- [ ] Code review completed
+- [ ] Documentation updated
 
-Ready to execute? The plan will guide the implementation.
+Ready to execute? Use `/dev:epct` for simple tasks or continue with phased implementation.
 ```
 
 ### For Worktree Parallel Planning
