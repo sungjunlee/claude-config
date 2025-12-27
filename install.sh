@@ -280,6 +280,13 @@ install_config() {
         else
             debug "Scripts directory not found (optional)"
         fi
+
+        if [ -d "$PROFILE_DIR/skills" ]; then
+            log "Installing skills..."
+            cp -r "$PROFILE_DIR/skills" "$CLAUDE_CONFIG_DIR/"
+        else
+            info "Skills directory not found (optional)"
+        fi
         
         if [ -f "$PROFILE_DIR/CLAUDE.md" ]; then
             log "Installing CLAUDE.md..."
@@ -337,7 +344,12 @@ install_config() {
         # Set execution permissions for all scripts
         find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
         find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.py" -exec chmod +x {} \;
-        
+
+        if [ -d "$source_dir/skills" ]; then
+            log "Installing skills..."
+            cp -r "$source_dir/skills" "$CLAUDE_CONFIG_DIR/"
+        fi
+
         log "Installing CLAUDE.md..."
         cp "$source_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
         
@@ -389,7 +401,13 @@ verify_installation() {
         warn "✗ Scripts not found"
         success=false
     fi
-    
+
+    if [ -d "$CLAUDE_CONFIG_DIR/skills" ]; then
+        info "✓ Skills installed ($(find "$CLAUDE_CONFIG_DIR/skills" -name "SKILL.md" | wc -l) skills)"
+    else
+        info "Skills not installed (optional)"
+    fi
+
     if [ -f "$CLAUDE_CONFIG_DIR/CLAUDE.md" ]; then
         info "✓ CLAUDE.md installed"
     else

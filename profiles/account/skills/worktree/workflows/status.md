@@ -1,10 +1,6 @@
 ---
 description: Check status of all parallel git worktrees
-deprecated: true
-deprecated-by: skills/worktree/workflows/status.md
 ---
-
-> **DEPRECATED** (v2.0 removal planned): Migrated to `skills/worktree/workflows/status.md`
 
 # Worktree Status
 
@@ -74,17 +70,9 @@ Git Worktree Summary:
 
 ## Integration Points
 
-- After `/worktree-distribute` to verify setup
+- After `/worktree:distribute` to verify setup
 - Before merging to check completion
 - During work to monitor progress
-- With `/worktree-sync` to identify sync needs
-
-## Advanced Options
-
-Future enhancements could include:
-- Filter by status (complete/in-progress)
-- Show test results per worktree
-- Display merge conflict warnings
-- Track time spent per task
+- With `/worktree:sync` to identify sync needs
 
 Execute status check now using `scripts/worktree-manager.sh status`.
