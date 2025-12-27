@@ -214,4 +214,3 @@ jobs:
 ## References
 
 - [Git Worktree Documentation](https://git-scm.com/docs/git-worktree)
-- [Pro Git - Git Worktree](https://git-scm.com/book/en/v2/Git-Tools-Working-with-Worktrees)

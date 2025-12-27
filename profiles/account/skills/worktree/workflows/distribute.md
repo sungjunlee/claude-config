@@ -30,7 +30,7 @@ Parse `.worktrees/PLAN.md` and create isolated worktrees for parallel developmen
    - Copy environment files (.env, package.json, lock files)
    - Create node_modules symlinks for efficiency
    - Link Python venv if present
-   - Copy 17+ config file types automatically
+   - Copy 25+ config file types automatically
 
 5. **Generate Documentation**:
    - Create task instruction at `.worktrees/tasks/[task-name].md`
@@ -88,25 +88,25 @@ Creates for each task:
 
 Common issues and solutions:
 - **Branch exists**: Check and clean existing branches
-- **PLAN.md missing**: Create template or use `/worktree-plan`
+- **PLAN.md missing**: Create template or use `/worktree:plan`
 - **Permission denied**: Check script execution permissions
 - **Disk space**: Verify sufficient space before distribution
 
 ## Integration Points
 
-- Use after `/worktree-plan` for automatic planning
-- Monitor with `/worktree-status`
-- Synchronize with `/worktree-sync`
+- Use after `/worktree:plan` for automatic planning
+- Monitor with `/worktree:status`
+- Synchronize with `/worktree:sync`
 - Clean up with `git worktree remove`
 
 ## Example Workflow
 
 ```bash
 # Generate plan (if not exists)
-/worktree-plan "implement auth, payment, and search"
+/worktree:plan "implement auth, payment, and search"
 
 # Distribute tasks
-/worktree-distribute
+/worktree:distribute
 
 # Work in parallel (different terminals)
 cd .worktrees/auth && claude

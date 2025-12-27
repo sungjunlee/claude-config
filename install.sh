@@ -285,7 +285,7 @@ install_config() {
             log "Installing skills..."
             cp -r "$PROFILE_DIR/skills" "$CLAUDE_CONFIG_DIR/"
         else
-            debug "Skills directory not found (optional)"
+            info "Skills directory not found (optional)"
         fi
         
         if [ -f "$PROFILE_DIR/CLAUDE.md" ]; then
@@ -405,7 +405,7 @@ verify_installation() {
     if [ -d "$CLAUDE_CONFIG_DIR/skills" ]; then
         info "✓ Skills installed ($(find "$CLAUDE_CONFIG_DIR/skills" -name "SKILL.md" | wc -l) skills)"
     else
-        debug "Skills not installed (optional)"
+        info "Skills not installed (optional)"
     fi
 
     if [ -f "$CLAUDE_CONFIG_DIR/CLAUDE.md" ]; then

@@ -4,7 +4,7 @@ deprecated: true
 deprecated-by: skills/worktree/workflows/status.md
 ---
 
-> **DEPRECATED**: Migrated to `skills/worktree/workflows/status.md`
+> **DEPRECATED** (v2.0 removal planned): Migrated to `skills/worktree/workflows/status.md`
 
 # Worktree Status
 

@@ -7,6 +7,7 @@ description: |
   Triggers: "worktree", "parallel work", "multiple features", "병렬 작업",
   "동시에 작업", "워크트리"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+model: sonnet
 ---
 
 # Worktree Management Skill
@@ -50,7 +51,7 @@ Git worktrees를 활용해 여러 기능을 동시에 개발할 수 있게 해�
 ## Workflow Sequence
 
 ```text
-/worktree:plan → PLAN.md 생성 → /worktree:distribute → 병렬 실행 → /worktree:status
+/worktree:plan → PLAN.md 생성 → /worktree:distribute → 병렬 실행 → /worktree:sync → /worktree:status
 ```
 
 ## PLAN.md Format
@@ -143,3 +144,9 @@ Common issues and solutions:
 - 각 병렬 작업에 대한 명확한 문서
 - 효율적인 리소스 공유 (symlinks 작동)
 - 완료 후 원활한 병합 프로세스
+
+## Resources
+
+상세 가이드 및 참조 문서:
+- `context/worktree-guide.md` - Git worktree 명령어 및 트러블슈팅 가이드
+- `scripts/worktree-manager.sh` - Worktree 자동화 스크립트

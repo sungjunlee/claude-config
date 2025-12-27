@@ -7,9 +7,10 @@ deprecated: true
 deprecated-by: skills/worktree/SKILL.md
 ---
 
-> **DEPRECATED**: This agent has been migrated to `skills/worktree/SKILL.md`.
+> **DEPRECATED** (v2.0 removal planned)
+>
+> This agent has been migrated to `skills/worktree/SKILL.md`.
 > Use the skill-based workflow instead: `/worktree:plan`, `/worktree:distribute`, etc.
-> This file will be removed in a future version.
 
 # Worktree Coordination Agent
 
