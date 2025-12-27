@@ -1,10 +1,6 @@
 ---
 description: Automatically generate PLAN.md for parallel task distribution using plan-agent
-deprecated: true
-deprecated-by: skills/worktree/workflows/plan.md
 ---
-
-> **DEPRECATED** (v2.0 removal planned): Migrated to `skills/worktree/workflows/plan.md`
 
 # Worktree Planning
 
@@ -36,19 +32,19 @@ Leverage plan-agent to analyze complex requirements, identify parallelizable wor
 4. **Prepare for Distribution**:
    - Validate branch name availability
    - Check for existing worktrees
-   - Ready for `/worktree-distribute`
+   - Ready for `/worktree:distribute`
 
 ## Examples
 
 ```bash
 # Example 1: E-commerce site core features
-/worktree-plan "Add authentication, payment, and search features to e-commerce site"
+/worktree:plan "Add authentication, payment, and search features to e-commerce site"
 
 # Example 2: Large-scale refactoring
-/worktree-plan "Migrate from React 16 to 18 while introducing TypeScript"
+/worktree:plan "Migrate from React 16 to 18 while introducing TypeScript"
 
 # Example 3: Bug fixes
-/worktree-plan "Fix bugs found in login, payment, and search"
+/worktree:plan "Fix bugs found in login, payment, and search"
 ```
 
 ## Integration with plan-agent
@@ -91,7 +87,7 @@ search: Elasticsearch search feature (estimated: 2h)
 ## Workflow Sequence
 
 ```text
-/worktree-plan → plan-agent analysis → PLAN.md generation → /worktree-distribute → Parallel execution
+/worktree:plan → plan-agent analysis → PLAN.md generation → /worktree:distribute → Parallel execution
 ```
 
 ## Success Indicators
@@ -119,8 +115,8 @@ search: Elasticsearch search feature (estimated: 2h)
 ## Related Commands
 
 - `/plan` - General strategic planning
-- `/worktree-distribute` - Execute task distribution
-- `/worktree-status` - Monitor progress
-- `/worktree-sync` - Synchronize environments
+- `/worktree:distribute` - Execute task distribution
+- `/worktree:status` - Monitor progress
+- `/worktree:sync` - Synchronize environments
 
 Execute plan-agent now to analyze and generate parallel task plan.

@@ -1,10 +1,6 @@
 ---
 description: Synchronize environment files and shared context across all worktrees
-deprecated: true
-deprecated-by: skills/worktree/workflows/sync.md
 ---
-
-> **DEPRECATED** (v2.0 removal planned): Migrated to `skills/worktree/workflows/sync.md`
 
 # Worktree Synchronization
 
@@ -37,15 +33,10 @@ Keep environment files, dependencies, and configurations consistent across all p
 
 ## Files Synchronized
 
-### High Priority (Always Sync)
-- `.env`, `.env.local`, `.env.development`
-- Security certificates and keys
-- Shared configuration files
-
-### Medium Priority (Sync if Changed)
-- `package.json` (warn about npm install)
-- `requirements.txt` (warn about pip install)
-- Config files (tsconfig, eslint, prettier)
+Currently syncs the following core files:
+- `.env` - Environment variables
+- `.env.local` - Local environment overrides
+- `package.json` - Node.js dependencies (warn about npm install)
 
 ### Preserved (Never Overwrite)
 - Source code files
@@ -87,13 +78,5 @@ When conflicts detected:
 - Before starting work in worktree
 - After pulling updates from remote
 - Part of regular maintenance workflow
-
-## Advanced Features
-
-Future enhancements:
-- Two-way sync from worktrees to main
-- Automatic dependency installation
-- Config validation after sync
-- Sync history tracking
 
 Execute synchronization now using `scripts/worktree-manager.sh sync`.
