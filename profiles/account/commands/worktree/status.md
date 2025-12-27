@@ -1,6 +1,10 @@
 ---
 description: Check status of all parallel git worktrees
+deprecated: true
+deprecated-by: skills/worktree/workflows/status.md
 ---
+
+> **DEPRECATED**: Migrated to `skills/worktree/workflows/status.md`
 
 # Worktree Status
 

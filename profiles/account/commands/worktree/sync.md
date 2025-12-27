@@ -1,6 +1,10 @@
 ---
 description: Synchronize environment files and shared context across all worktrees
+deprecated: true
+deprecated-by: skills/worktree/workflows/sync.md
 ---
+
+> **DEPRECATED**: Migrated to `skills/worktree/workflows/sync.md`
 
 # Worktree Synchronization
 

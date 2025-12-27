@@ -3,7 +3,13 @@ name: worktree-coordinator
 description: Specialized agent for coordinating multiple git worktrees and distributing parallel tasks. Use PROACTIVELY when users want to work on multiple independent features simultaneously.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
+deprecated: true
+deprecated-by: skills/worktree/SKILL.md
 ---
+
+> **DEPRECATED**: This agent has been migrated to `skills/worktree/SKILL.md`.
+> Use the skill-based workflow instead: `/worktree:plan`, `/worktree:distribute`, etc.
+> This file will be removed in a future version.
 
 # Worktree Coordination Agent
 

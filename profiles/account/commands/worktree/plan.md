@@ -1,6 +1,10 @@
 ---
 description: Automatically generate PLAN.md for parallel task distribution using plan-agent
+deprecated: true
+deprecated-by: skills/worktree/workflows/plan.md
 ---
+
+> **DEPRECATED**: Migrated to `skills/worktree/workflows/plan.md`
 
 # Worktree Planning
 

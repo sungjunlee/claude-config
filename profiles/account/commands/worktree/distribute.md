@@ -1,6 +1,10 @@
 ---
 description: Distribute parallel tasks to independent git worktrees based on PLAN.md
+deprecated: true
+deprecated-by: skills/worktree/workflows/distribute.md
 ---
+
+> **DEPRECATED**: Migrated to `skills/worktree/workflows/distribute.md`
 
 # Worktree Distribution
 
