@@ -1,16 +1,16 @@
 ---
-name: x
+name: my
 description: |
-  Extended development toolkit - AI integration, session management, parallel development.
+  Personal development toolkit - AI integration, session management, parallel development.
   Use when: multi-model AI, session handoff, git worktree operations.
   Triggers: "gemini", "codex", "handoff", "resume", "worktree"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
 ---
 
-# X Skill
+# My Skill
 
-확장 개발 도구 모음입니다. 공식 플러그인에 없는 기능을 제공합니다.
+개인 개발 도구 모음입니다. 공식 플러그인에 없는 기능을 제공합니다.
 
 ## Commands
 
@@ -20,10 +20,10 @@ model: sonnet
 
 | Command | Purpose | Cost |
 |---------|---------|------|
-| `/x:ai-gemini` | Large file analysis (2M context) | Free |
-| `/x:ai-codex` | Algorithm optimization, debugging | Paid |
-| `/x:ai-consensus` | Multi-AI opinions for decisions | Mixed |
-| `/x:ai-pipeline` | Multi-stage project analysis | Mixed |
+| `/my:ai-gemini` | Large file analysis (2M context) | Free |
+| `/my:ai-codex` | Algorithm optimization, debugging | Paid |
+| `/my:ai-consensus` | Multi-AI opinions for decisions | Mixed |
+| `/my:ai-pipeline` | Multi-stage project analysis | Mixed |
 
 **Prerequisites:**
 ```bash
@@ -37,8 +37,8 @@ npm install -g @openai/codex@latest && codex auth login
 
 | Command | Purpose |
 |---------|---------|
-| `/x:handoff` | Save session state before `/clear` |
-| `/x:resume` | Restore previous session context |
+| `/my:handoff` | Save session state before `/clear` |
+| `/my:resume` | Restore previous session context |
 
 **Best Practice:** 80% context 사용 시 handoff 생성
 
@@ -48,10 +48,10 @@ Git worktree를 활용한 병렬 개발:
 
 | Command | Purpose |
 |---------|---------|
-| `/x:wt-plan` | Generate parallel task plan |
-| `/x:wt-distribute` | Distribute tasks to worktrees |
-| `/x:wt-status` | Check all worktree status |
-| `/x:wt-sync` | Sync environment across worktrees |
+| `/my:wt-plan` | Generate parallel task plan |
+| `/my:wt-distribute` | Distribute tasks to worktrees |
+| `/my:wt-status` | Check all worktree status |
+| `/my:wt-sync` | Sync environment across worktrees |
 
 ## Context Files
 
@@ -64,18 +64,18 @@ Git worktree를 활용한 병렬 개발:
 
 ```bash
 # AI: Large codebase analysis (free)
-/x:ai-gemini "analyze entire auth system"
+/my:ai-gemini "analyze entire auth system"
 
 # AI: Critical architecture decision
-/x:ai-consensus "PostgreSQL vs MongoDB?"
+/my:ai-consensus "PostgreSQL vs MongoDB?"
 
 # Session: Save before clearing
-/x:handoff
+/my:handoff
 /clear
-/x:resume
+/my:resume
 
 # Worktree: Parallel feature development
-/x:wt-plan
-/x:wt-distribute
-/x:wt-status
+/my:wt-plan
+/my:wt-distribute
+/my:wt-status
 ```
