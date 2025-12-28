@@ -9,7 +9,7 @@
 ```
 ~/.claude/
 ├── skills/
-│   ├── workflow/     # handoff, resume, plan (공식 대안 없음)
+│   ├── workflow/     # handoff, resume (공식 대안 없음)
 │   └── worktree/     # distribute, plan, status, sync (공식 대안 없음)
 ├── commands/
 │   └── ai/           # multi-model integration (공식 대안 없음)
@@ -30,6 +30,7 @@
 | `/dev:refactor`, `/dev:optimize`, `/dev:explain` | Claude 내장 |
 | `/dev:epct` | `feature-dev` plugin |
 | `/gh:pr` | `feature-dev` plugin + `gh` 직접 사용 |
+| `/flow:plan` | `feature-dev` plugin |
 
 ### 권장 플러그인 설치
 
@@ -59,6 +60,5 @@ rm -rf ~/.claude/commands/{dev,gh}
 | 기능 | 용도 |
 |------|------|
 | `/flow:handoff`, `/flow:resume` | 세션 연속성 (context 제한 극복) |
-| `/flow:plan` | 전략적 계획 수립 |
 | `/worktree:*` | Git worktree 병렬 작업 |
 | `/ai:*` | 멀티모델 통합 (Gemini, Codex 등) |

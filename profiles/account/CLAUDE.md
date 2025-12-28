@@ -22,7 +22,6 @@
 
 ## Custom Skills (공식 대안 없음)
 - `/flow:handoff`, `/flow:resume` → 세션 연속성
-- `/flow:plan` → 전략적 계획 수립
 - `/worktree:*` → Git worktree 병렬 작업
 
 ## Official Plugins (권장)

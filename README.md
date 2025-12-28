@@ -28,7 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 
 | Skill | 명령어 | 용도 |
 |-------|--------|------|
-| `workflow` | `/flow:handoff`, `/flow:resume`, `/flow:plan` | 세션 연속성 |
+| `workflow` | `/flow:handoff`, `/flow:resume` | 세션 연속성 |
 | `worktree` | `/worktree:plan`, `/worktree:distribute`, `/worktree:status`, `/worktree:sync` | Git worktree 병렬 작업 |
 
 ## 멀티모델 명령어
