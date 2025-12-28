@@ -170,18 +170,11 @@ When tests fail:
 3. **Fix**: Apply minimal fix preserving test intent
 4. **Verify**: Re-run to confirm fix
 
-## Auto-Agent Invocation
+## Context Loading
 
-If test failures are found or coverage is low, automatically use the Task tool to invoke the test-runner agent for:
-- Comprehensive failure analysis
-- Automatic test repair
-- Coverage improvement suggestions
-
-## Integration
-
-- Use `context/python.md` for pytest best practices
-- Use `context/javascript.md` for jest/vitest patterns
-- Use `context/rust.md` for cargo test strategies
-- Use `pr-review-toolkit:silent-failure-hunter` for debugging silent failures
+언어 감지 후 상세 가이드가 필요하면 해당 context 파일을 참조:
+- Python → `context/python.md` (pytest best practices)
+- JavaScript/TypeScript → `context/javascript.md` (jest/vitest patterns)
+- Rust → `context/rust.md` (cargo test strategies)
 
 Execute appropriate test command based on project setup now.

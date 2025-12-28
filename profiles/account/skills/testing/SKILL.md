@@ -108,31 +108,28 @@ model: sonnet
 
 ## Integration
 
-### With pr-review-toolkit
-- 디버깅 필요 시 `silent-failure-hunter` 활용
-- PR 생성 전 테스트 검증
+이 스킬은 기존 `/dev:test` 명령어를 대체하며, 글로벌 CLAUDE.md의 auto-invoke 규칙과 연동됩니다.
+
+### Command Mapping
+- `/dev:test` → 이 스킬의 `workflows/test.md` 실행
+- 자연어 트리거: "run tests", "테스트 실행", "pytest", "jest" 등
 
 ### With Other Skills
-- `/dev:test` 명령어와 연동
-- `test-runner` agent 자동 호출
+- `worktree` skill과 함께 병렬 테스트 실행 가능
+- PR 생성 전 테스트 검증 권장
 
-## Example Commands
+## Example Usage
 
 ```bash
-# Run all tests
+# Natural language triggers
+"run tests"
+"테스트 실행해줘"
+"pytest로 테스트"
+
+# Or via command
 /dev:test
-
-# Run specific tests
 /dev:test authentication
-
-# Run with coverage
 /dev:test --coverage
-
-# Run Python tests
-/dev:test pytest
-
-# Run JavaScript tests
-/dev:test jest
 ```
 
 ## Error Handling
@@ -149,10 +146,3 @@ Common issues and solutions:
 - 커버리지 목표 달성 (기본 80%)
 - 실패한 테스트 자동 수정
 - 명확한 리포트 제공
-
-## Resources
-
-상세 가이드 및 참조 문서:
-- `context/python.md` - pytest 상세 가이드
-- `context/javascript.md` - jest/vitest/mocha 가이드
-- `context/rust.md` - cargo test 가이드

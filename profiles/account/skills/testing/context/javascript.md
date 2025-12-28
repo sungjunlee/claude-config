@@ -249,15 +249,15 @@ describe('Button', () => {
 })
 ```
 
-### API Testing
+### API Testing (MSW v2.x)
 ```typescript
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { setupServer } from 'msw/node'
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 
 const server = setupServer(
-  rest.get('/api/users', (req, res, ctx) => {
-    return res(ctx.json([{ id: 1, name: 'John' }]))
+  http.get('/api/users', () => {
+    return HttpResponse.json([{ id: 1, name: 'John' }])
   })
 )
 

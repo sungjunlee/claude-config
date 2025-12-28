@@ -282,7 +282,7 @@ name = "my_crate"
 version = "0.1.0"
 
 [dev-dependencies]
-proptest = "1.0"
+proptest = "1"
 criterion = "0.5"
 tokio = { version = "1", features = ["full", "test-util"] }
 
@@ -309,7 +309,7 @@ cargo test --verbose
 # Cargo.toml - test-only dependencies
 [dev-dependencies]
 tempfile = "3"
-mockall = "0.11"
+mockall = "0.12"
 ```
 
 ### Shared Test Utilities
