@@ -40,18 +40,74 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 | `/ai:route` | 자동 선택 | 작업별 최적 모델 |
 | `/ai:try-free` | 무료→유료 | 비용 최적화 |
 
-## 공식 플러그인 사용 권장
+## 권장 공식 플러그인
 
-아래 기능들은 공식 플러그인 사용을 권장합니다:
+### pr-review-toolkit
+PR 리뷰를 위한 6개 전문 에이전트:
+- `code-reviewer` - 코드 품질 (0-100 confidence score)
+- `pr-test-analyzer` - 테스트 커버리지 분석 (1-10 severity)
+- `silent-failure-hunter` - 에러 핸들링 이슈 탐지
+- `type-design-analyzer` - 타입 설계 분석
+- `comment-analyzer` - 코드 코멘트 검토
+- `code-simplifier` - 복잡도 개선 제안
 
-| 작업 | 공식 플러그인 | 설치 |
-|------|--------------|------|
-| 코드 리뷰 | `pr-review-toolkit` | `/plugin install pr-review-toolkit` |
-| PR 리뷰 | `code-review` | `/plugin install code-review` |
-| 커밋 | `commit-commands` | `/plugin install commit-commands` |
-| 기능 개발 | `feature-dev` | `/plugin install feature-dev` |
-| 문서 생성 | `document-skills` | `/plugin install document-skills@anthropic-agent-skills` |
-| 보안 검사 | `security-guidance` | `/plugin install security-guidance` |
+```bash
+/plugin install pr-review-toolkit
+```
+
+### code-review
+자동 PR 코드 리뷰 (5개 병렬 Sonnet 에이전트):
+- CLAUDE.md 준수 검사
+- 버그 탐지
+- PR 히스토리 분석
+- Confidence 기반 필터링 (기본 80/100)
+
+```bash
+/plugin install code-review
+```
+
+### commit-commands
+Git 워크플로우 자동화:
+- 스마트 커밋 메시지 생성
+- 브랜치 관리
+- PR 생성 자동화
+
+```bash
+/plugin install commit-commands
+```
+
+### feature-dev
+가이드 기능 개발 워크플로우:
+- `code-explorer` - 코드베이스 분석
+- `code-architect` - 아키텍처 설계
+- `code-reviewer` - 품질 리뷰
+
+```bash
+/plugin install feature-dev
+```
+
+### document-skills
+문서 생성 및 편집:
+- PDF - 추출, 생성, 병합/분할
+- DOCX - Word 문서 생성/편집, 변경 추적
+- PPTX - 프레젠테이션 생성
+- XLSX - 스프레드시트, 수식, 차트
+
+```bash
+/plugin install document-skills@anthropic-agent-skills
+```
+
+### security-guidance
+실시간 보안 패턴 모니터링:
+- Command injection 탐지
+- XSS 취약점
+- Eval 사용
+- Pickle deserialization
+- os.system 호출 등
+
+```bash
+/plugin install security-guidance
+```
 
 ## 업데이트
 
