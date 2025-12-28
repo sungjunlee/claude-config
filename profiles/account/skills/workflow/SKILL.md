@@ -1,34 +1,31 @@
 ---
 name: workflow
 description: |
-  Session management and strategic planning skill.
-  Use when: managing session handoffs, resuming work, creating plans.
-  Triggers: "handoff", "resume", "plan", "핸드오프", "플랜"
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Task
+  Session management skill for context continuity.
+  Use when: managing session handoffs, resuming work.
+  Triggers: "handoff", "resume", "핸드오프", "재개"
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
 ---
 
 # Workflow Skill
 
-세션 관리 및 전략적 플래닝을 위한 스킬입니다. Context 연속성 유지 및 복잡한 작업 계획 수립을 지원합니다.
+세션 관리를 위한 스킬입니다. Context 연속성 유지를 지원합니다.
 
 ## Overview
 
 공식 플러그인에 없는 기능을 제공합니다:
 - **Session Continuity**: Context handoff로 세션 간 상태 유지
-- **Strategic Planning**: 복잡한 작업의 전략적 계획 수립
+
+> **Note**: 기능 개발 계획은 `feature-dev` 플러그인 사용을 권장합니다.
+> `/plugin install feature-dev`
 
 ## Capabilities
 
-### 1. Session Management
+### Session Management
 - Context handoff 시스템으로 세션 간 상태 유지
 - `/clear` 전 자동 저장 권장
 - Scratch notes를 통한 경량 working memory
-
-### 2. Strategic Planning
-- 복잡도 기반 계획 수립 (Simple/Medium/Complex)
-- 웹 리서치 및 Context7을 통한 최신 best practices 조사
-- 자동화된 Git 워크플로우 설정
 
 ## Workflow Detection
 
@@ -36,7 +33,6 @@ model: sonnet
 |--------|----------|------|
 | "handoff", "핸드오프" | `workflows/handoff.md` | 세션 상태 저장 |
 | "resume", "재개" | `workflows/resume.md` | 이전 작업 복원 |
-| "plan", "플랜", "계획" | `workflows/plan.md` | 전략적 계획 수립 |
 
 ## Handoff System
 
@@ -63,28 +59,19 @@ docs/handoff/
 | 파일 | 용도 |
 |------|------|
 | `context/handoff-template.md` | 핸드오프 문서 템플릿 |
-| `context/planning-guide.md` | 계획 수립 가이드라인 |
 
 ## Command Mapping
 
 - `/flow:handoff` → `workflows/handoff.md`
 - `/flow:resume` → `workflows/resume.md`
-- `/flow:plan` → `workflows/plan.md`
 
 ## Best Practices
 
-### Session Management
 - 80% context에서 핸드오프 생성
 - `.scratch.md`에 실시간 생각 기록
-- 복잡한 작업 전 plan 먼저 수립
-
-### Planning
-- 요구사항을 명확히 제공
-- 리서치 결과 검토
-- 자동화 워크플로우 확인
+- 기능 개발 계획은 `feature-dev` 플러그인 사용
 
 ## Success Metrics
 
 - 세션 연속성 유지
-- 계획 품질 및 실행력
 - Context 효율적 활용
