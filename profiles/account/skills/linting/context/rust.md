@@ -35,8 +35,8 @@ cargo clippy --fix
 # Allow dirty working directory
 cargo clippy --fix --allow-dirty
 
-# Fix with backup
-cargo clippy --fix --backup
+# Fix even with staged changes
+cargo clippy --fix --allow-dirty --allow-staged
 ```
 
 ### Lint Categories

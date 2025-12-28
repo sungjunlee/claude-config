@@ -37,7 +37,7 @@ model: sonnet
 
 | 프로젝트 파일 | 언어 | Context | 도구 |
 |--------------|------|---------|------|
-| `pyproject.toml`, `ruff.toml`, `*.py` | Python | `context/python.md` | ruff |
+| `pyproject.toml`, `ruff.toml`, `.ruff.toml` | Python | `context/python.md` | ruff |
 | `package.json`, `.eslintrc*`, `biome.json` | JavaScript/TypeScript | `context/javascript.md` | eslint, biome, prettier |
 | `Cargo.toml` | Rust | `context/rust.md` | clippy, rustfmt |
 | `go.mod` | Go | (builtin) | gofmt, golangci-lint |

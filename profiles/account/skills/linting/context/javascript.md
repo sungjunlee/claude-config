@@ -85,31 +85,21 @@ bunx biome check .
 
 ### ESLint v9+ (Flat Config)
 ```javascript
-// eslint.config.js
-import js from '@eslint/js';
-import typescript from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
+// eslint.config.mjs
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
-export default [
-  js.configs.recommended,
+export default tseslint.config(
+  eslint.configs.recommended,
+  tseslint.configs.recommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        project: './tsconfig.json',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': typescript,
-    },
     rules: {
-      ...typescript.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
-];
+);
 ```
 
 ### Basic Commands

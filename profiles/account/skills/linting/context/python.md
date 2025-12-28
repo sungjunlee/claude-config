@@ -7,14 +7,6 @@ Python 프로젝트를 위한 Ruff 기반 린팅 가이드입니다.
 **Primary**: Ruff (linting + formatting)
 **Legacy**: Flake8, pylint, black, isort (replaced by Ruff)
 
-## Why Ruff?
-
-- 10-100x faster than Flake8
-- Single tool replaces Flake8 + 50+ plugins
-- Built-in formatter (replaces Black)
-- Built-in import sorting (replaces isort)
-- Written in Rust
-
 ## Tool Resolution
 
 ```bash

@@ -17,8 +17,10 @@ Detect project type and execute appropriate linting tools:
 if [[ -f "pyproject.toml" ]] || [[ -f "ruff.toml" ]] || [[ -f ".ruff.toml" ]]; then
     # Load context/python.md for detailed guidance
     # Ruff (fastest, modern standard)
-    if command -v ruff >/dev/null || command -v uvx >/dev/null; then
+    if command -v uvx >/dev/null; then
         uvx ruff check --fix . && uvx ruff format .
+    elif command -v ruff >/dev/null; then
+        ruff check --fix . && ruff format .
     elif command -v black >/dev/null; then
         black .
     fi
@@ -34,7 +36,7 @@ if [[ -f "package.json" ]]; then
     fi
 
     # ESLint
-    if [[ -f ".eslintrc.json" ]] || [[ -f ".eslintrc.js" ]] || [[ -f "eslint.config.js" ]]; then
+    if [[ -f ".eslintrc.json" ]] || [[ -f ".eslintrc.js" ]] || [[ -f ".eslintrc.cjs" ]] || [[ -f "eslint.config.js" ]] || [[ -f "eslint.config.mjs" ]] || [[ -f "eslint.config.cjs" ]]; then
         bunx eslint . --fix || npx eslint . --fix
     fi
 
