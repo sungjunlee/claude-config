@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 ```
 ~/.claude/
 ├── skills/
-│   └── x/                # 확장 도구 모음 (공식 대안 없음)
+│   └── my/               # 개인 도구 모음 (공식 대안 없음)
 │       ├── commands/     # AI, 세션, 워크트리 명령어
 │       └── context/      # 참조 문서
 │
@@ -22,34 +22,34 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 └── llm-models-latest.md  # LLM 모델 참조
 ```
 
-## X Skill - 확장 도구 모음
+## My Skill - 개인 도구 모음
 
-단일 skill로 통합된 확장 기능입니다.
+단일 skill로 통합된 개인 확장 기능입니다.
 
 ### AI Integration (`ai-*`)
 
 | 명령어 | 용도 |
 |--------|------|
-| `/x:ai-gemini` | 대용량 파일 분석 (무료, 2M 컨텍스트) |
-| `/x:ai-codex` | 알고리즘 최적화, 디버깅 |
-| `/x:ai-consensus` | 중요 결정 시 여러 AI 관점 |
-| `/x:ai-pipeline` | 복잡한 프로젝트 멀티스테이지 분석 |
+| `/my:ai-gemini` | 대용량 파일 분석 (무료, 2M 컨텍스트) |
+| `/my:ai-codex` | 알고리즘 최적화, 디버깅 |
+| `/my:ai-consensus` | 중요 결정 시 여러 AI 관점 |
+| `/my:ai-pipeline` | 복잡한 프로젝트 멀티스테이지 분석 |
 
 ### Session Management
 
 | 명령어 | 용도 |
 |--------|------|
-| `/x:handoff` | 세션 상태 저장 (`/clear` 전) |
-| `/x:resume` | 이전 세션 컨텍스트 복원 |
+| `/my:handoff` | 세션 상태 저장 (`/clear` 전) |
+| `/my:resume` | 이전 세션 컨텍스트 복원 |
 
 ### Worktree (`wt-*`)
 
 | 명령어 | 용도 |
 |--------|------|
-| `/x:wt-plan` | 병렬 작업 계획 생성 |
-| `/x:wt-distribute` | 워크트리에 작업 분배 |
-| `/x:wt-status` | 전체 워크트리 상태 확인 |
-| `/x:wt-sync` | 환경 파일 동기화 |
+| `/my:wt-plan` | 병렬 작업 계획 생성 |
+| `/my:wt-distribute` | 워크트리에 작업 분배 |
+| `/my:wt-status` | 전체 워크트리 상태 확인 |
+| `/my:wt-sync` | 환경 파일 동기화 |
 
 ## 권장 공식 플러그인
 
