@@ -59,7 +59,7 @@ bunx biome check .
 ### Configuration (biome.json)
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/latest/schema.json",
   "organizeImports": { "enabled": true },
   "linter": {
     "enabled": true,
