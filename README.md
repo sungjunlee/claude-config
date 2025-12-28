@@ -37,8 +37,8 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 |--------|------|------|
 | `/ai:gemini` | Google Gemini | 대용량 파일 분석 (무료) |
 | `/ai:codex` | OpenAI Codex | 알고리즘, 디버깅 |
-| `/ai:route` | 자동 선택 | 작업별 최적 모델 |
-| `/ai:try-free` | 무료→유료 | 비용 최적화 |
+| `/ai:consensus` | 다중 AI | 중요 결정 시 여러 관점 |
+| `/ai:pipeline` | 멀티스테이지 | 복잡한 프로젝트 분석 |
 
 ## 권장 공식 플러그인
 
