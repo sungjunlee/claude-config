@@ -6,7 +6,6 @@
 
 ## Workflow
 - Use `/clear` frequently
-- Leverage agents for complex tasks
 - Test before commit
 
 ## Context Management (Handoff)
@@ -21,22 +20,25 @@
 - Functions under 20 lines
 - Clear variable naming
 
+## Custom Skills (공식 대안 없음)
+- `/flow:handoff`, `/flow:resume` → 세션 연속성
+- `/flow:plan` → 전략적 계획 수립
+- `/worktree:*` → Git worktree 병렬 작업
+
+## Official Plugins (권장)
+Use official plugins for common tasks:
+- `pr-review-toolkit` → 코드 리뷰 (6개 전문 에이전트)
+- `code-review` → PR 자동 리뷰
+- `commit-commands` → 커밋 워크플로우
+- `feature-dev` → 기능 개발 가이드
+- `document-skills` → 문서 생성 (PDF, DOCX, PPTX, XLSX)
+- `security-guidance` → 보안 패턴 모니터링
+
+Install: `/plugin install {name}`
+
 ## Auto-invoke
-- Test failures → testing skill or test-runner agent
 - PR creation → pr-review-toolkit plugin
-- Complex errors → silent-failure-hunter plugin
 - Time/date needed → time-aware agent
-
-## Skills
-- `/flow:*` → workflow skill (handoff, resume, plan, fix-errors)
-- `/worktree:*` → worktree skill (distribute, plan, status, sync)
-- `/dev:test` → testing skill with language context
-- `/dev:lint` → linting skill with language context
-
-## Plugins (Official)
-- pr-review-toolkit → code review
-- document-skills → documentation generation
-- silent-failure-hunter → error detection
 
 ## Time Awareness
 - time-aware agent automatically provides current time
@@ -46,7 +48,6 @@
 ## LLM Model Selection
 - Use latest models for API calls: @llm-models-latest.md
 - Avoid outdated models (gpt-4-turbo-preview, claude-3-5-sonnet, etc.)
-- GPT-5 note: No temperature parameter support (use verbosity/reasoning_effort)
 
 ## Note
 Project-specific settings in project CLAUDE.md
