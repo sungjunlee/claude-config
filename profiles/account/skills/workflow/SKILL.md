@@ -48,7 +48,7 @@ model: sonnet
 | "resume", "재개" | `workflows/resume.md` | 이전 작업 복원 |
 | "plan", "플랜", "계획" | `workflows/plan.md` | 전략적 계획 수립 |
 | "fix errors", "에러 수정" | `workflows/fix-errors.md` | 에러 자동 수정 |
-| "reflection", "성찰" | (inline) | 자기 분석 수행 |
+| "reflection", "성찰" | → reflection-agent 호출 | 자기 분석 수행 |
 
 ## Routing Logic
 
@@ -143,7 +143,9 @@ docs/handoff/
 - `/flow:resume` → `workflows/resume.md`
 - `/flow:plan` → `workflows/plan.md`
 - `/flow:fix-errors` → `workflows/fix-errors.md`
-- `/flow:reflection` → Reflection 분석 수행
+- `/flow:reflection` → reflection-agent 직접 호출
+- `/flow:scaffold` → 별도 명령어 유지 (프로젝트 스캐폴딩)
+- `/flow:qa` → 별도 명령어 유지 (PR 품질 게이트)
 
 ## Best Practices
 
