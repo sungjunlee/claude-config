@@ -1,14 +1,13 @@
 # AI Model Integration Commands
 
-Multi-model AI integration commands for cost optimization and specialized tasks.
+Multi-model AI integration commands for specialized tasks.
 
 ## 🎯 Overview
 
 Access multiple AI models directly from Claude Code to:
-- 💰 **Save 50% on AI costs** (free tier first)
-- 🎯 **Save 70% on tokens** (smart routing)
 - ⚡ **Use specialized models** for specific tasks
 - 🆓 **No API keys needed** (CLI-based auth)
+- 🧠 **Get multiple perspectives** on critical decisions
 
 Based on [this proven workflow](https://lgallardo.com/2025/09/06/claude-code-supercharged-mcp-integration/).
 
@@ -35,20 +34,16 @@ codex auth login  # Sign in with ChatGPT
 ```bash
 # In Claude Code
 /ai:gemini "analyze this architecture"
-/ai:route "optimize this algorithm"
-/ai:try-free "format this code"
+/ai:codex "optimize this algorithm"
+/ai:consensus "PostgreSQL vs MongoDB?"
 ```
 
 ## 🚀 Available Commands
-
-### Core Commands
 
 | Command | Purpose | Cost | Best For |
 |---------|---------|------|----------|
 | `/ai:gemini` | Large analysis | 🆓 Free | 1000+ line files, architecture |
 | `/ai:codex` | Code optimization | 💳 Paid | Algorithms, debugging |
-| `/ai:try-free` | Cost optimization | 🆓→💳 | Any task (tries free first) |
-| `/ai:route` | Smart routing | 🆓→💳 | Auto-select best model |
 | `/ai:consensus` | Multi-AI opinions | 🆓+💳 | Critical decisions |
 | `/ai:pipeline` | Multi-stage analysis | 🆓+💳 | Complex projects |
 
@@ -61,13 +56,6 @@ codex auth login  # Sign in with ChatGPT
 # Algorithm optimization (ChatGPT Plus/Pro)
 /ai:codex "optimize this sorting algorithm"
 
-# Cost-optimized (tries free models first)
-/ai:try-free "explain this regex pattern"
-
-# Auto-routing (smart model selection)
-/ai:route "debug authentication errors"
-/ai:route "analyze large_file.py for performance"
-
 # Critical decisions (multiple perspectives)
 /ai:consensus "PostgreSQL vs MongoDB for this use case?"
 
@@ -75,41 +63,6 @@ codex auth login  # Sign in with ChatGPT
 /ai:pipeline auth.py "security audit"
 /ai:pipeline api/ "performance optimization"
 ```
-
-## 💡 Smart Routing Strategy
-
-### Task-Based Routing
-
-The `/ai:route` command automatically selects the best model:
-
-```bash
-# Large files → Gemini (huge context)
-/ai:route "analyze entire codebase"
-
-# Optimization → Codex (coding specialist)
-/ai:route "optimize database queries"
-
-# Debugging → Codex (detailed analysis)
-/ai:route "debug IndexError in algorithm.py"
-
-# Quick questions → Gemini (free tier)
-/ai:route "explain this function"
-
-# General tasks → Claude (balanced)
-/ai:route "review this code"
-```
-
-### Cost Optimization
-
-The `/ai:try-free` command minimizes costs:
-
-```bash
-# Tries in order: Gemini (free) → Qwen (free) → Codex (paid) → Claude (paid)
-/ai:try-free "format this JSON file"
-/ai:try-free "explain this code snippet"
-```
-
-**Result:** ~50% cost reduction per month
 
 ## 🔧 Model Capabilities
 
@@ -169,8 +122,6 @@ codex auth login  # Select 'Sign in with ChatGPT'
 # Step 3: Final synthesis (Claude)
 "Create migration roadmap based on above analyses"
 ```
-
-**Savings:** ~70% tokens vs Claude-only
 
 ### Scenario 2: Critical Architecture Decision
 
@@ -236,16 +187,6 @@ codex auth login  # Select 'Sign in with ChatGPT'
 - Requires ChatGPT subscription
 - Best for code optimization
 
-### `/ai:try-free` ⭐
-- Tries free models before paid ones
-- Automatic fallback chain
-- ~50% cost savings
-
-### `/ai:route` ⭐
-- Analyzes task type
-- Auto-selects best model
-- ~70% token savings
-
 ### `/ai:consensus`
 - Gathers multiple AI opinions
 - Shows diverse perspectives
@@ -277,39 +218,6 @@ codex auth login  # Select 'Sign in with ChatGPT'
 - Final decision-making
 - Team collaboration
 - Balanced analysis
-
-### Cost Optimization Strategy
-
-1. **Always try `/ai:try-free` first** for routine tasks
-2. **Use `/ai:route`** for automatic optimization
-3. **Reserve Claude** for synthesis and decisions
-4. **Use `/ai:consensus`** only for critical choices
-
-### Token Management
-
-**High token tasks → Gemini:**
-- Large file analysis
-- Full codebase review
-- Multi-file refactoring
-
-**Medium tasks → Auto-route:**
-- Single file optimization
-- Bug fixes
-- Code explanations
-
-**Low tasks → Try-free:**
-- Formatting
-- Documentation
-- Simple queries
-
-## 📈 Expected Results
-
-Based on real-world usage:
-
-- **70% token savings** on routine tasks
-- **50% cost reduction** per month
-- **Zero downtime** (model switching)
-- **Specialized capabilities** for each task
 
 ## 🆘 Troubleshooting
 
@@ -361,4 +269,4 @@ cd /path/to/claude-config
 
 ---
 
-**Start saving today:** Install Gemini CLI (free) and use `/ai:try-free` for all tasks!
+**Start using:** Install Gemini CLI (free) and use `/ai:gemini` for large file analysis!
