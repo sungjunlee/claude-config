@@ -13,32 +13,43 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 ```
 ~/.claude/
 ├── skills/
-│   ├── workflow/         # 세션 관리 (공식 대안 없음)
-│   └── worktree/         # 병렬 개발 (공식 대안 없음)
-│
-├── commands/
-│   └── ai/               # 멀티모델 통합 (공식 대안 없음)
+│   └── x/                # 확장 도구 모음 (공식 대안 없음)
+│       ├── commands/     # AI, 세션, 워크트리 명령어
+│       └── context/      # 참조 문서
 │
 ├── agents/               # time-aware
 ├── CLAUDE.md             # 글로벌 설정
 └── llm-models-latest.md  # LLM 모델 참조
 ```
 
-## 커스텀 Skills (공식 대안 없음)
+## X Skill - 확장 도구 모음
 
-| Skill | 명령어 | 용도 |
-|-------|--------|------|
-| `workflow` | `/flow:handoff`, `/flow:resume` | 세션 연속성 |
-| `worktree` | `/worktree:plan`, `/worktree:distribute`, `/worktree:status`, `/worktree:sync` | Git worktree 병렬 작업 |
+단일 skill로 통합된 확장 기능입니다.
 
-## 멀티모델 명령어
+### AI Integration (`ai-*`)
 
-| 명령어 | 모델 | 용도 |
-|--------|------|------|
-| `/ai:gemini` | Google Gemini | 대용량 파일 분석 (무료) |
-| `/ai:codex` | OpenAI Codex | 알고리즘, 디버깅 |
-| `/ai:consensus` | 다중 AI | 중요 결정 시 여러 관점 |
-| `/ai:pipeline` | 멀티스테이지 | 복잡한 프로젝트 분석 |
+| 명령어 | 용도 |
+|--------|------|
+| `/x:ai-gemini` | 대용량 파일 분석 (무료, 2M 컨텍스트) |
+| `/x:ai-codex` | 알고리즘 최적화, 디버깅 |
+| `/x:ai-consensus` | 중요 결정 시 여러 AI 관점 |
+| `/x:ai-pipeline` | 복잡한 프로젝트 멀티스테이지 분석 |
+
+### Session Management
+
+| 명령어 | 용도 |
+|--------|------|
+| `/x:handoff` | 세션 상태 저장 (`/clear` 전) |
+| `/x:resume` | 이전 세션 컨텍스트 복원 |
+
+### Worktree (`wt-*`)
+
+| 명령어 | 용도 |
+|--------|------|
+| `/x:wt-plan` | 병렬 작업 계획 생성 |
+| `/x:wt-distribute` | 워크트리에 작업 분배 |
+| `/x:wt-status` | 전체 워크트리 상태 확인 |
+| `/x:wt-sync` | 환경 파일 동기화 |
 
 ## 권장 공식 플러그인
 
