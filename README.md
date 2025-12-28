@@ -1,14 +1,14 @@
-# Claude Config - Profile-Based Development Environment
+# Claude Config - Skills-Based Development Environment
 
-🚀 **Unified configuration system for Claude Code** - Supporting both account-level and project-specific settings.
+🚀 **Unified configuration system for Claude Code** - Leveraging Skills architecture with integrated commands and agents.
 
 ## 📋 Overview
 
-Claude Config provides a flexible profile-based system for managing Claude Code configurations:
+Claude Config provides a modern Skills-based system for enhancing Claude Code:
 
-- **Account Profile**: Global settings applied to all projects (~/.claude)
-- **Project Profiles**: Language-specific configurations for individual projects
-- **Extensible**: Easy to add new languages and tools
+- **Skills Architecture**: Modular capabilities with SKILL.md, workflows/, and context/
+- **Account-Level Settings**: Global configuration applied to all projects (~/.claude)
+- **Plugin Integration**: Works with official plugins (pr-review-toolkit, document-skills)
 - **Backward Compatible**: Existing installations continue to work
 
 ## 🚀 Quick Start
@@ -39,18 +39,26 @@ ccfg init rust
 
 ## ✨ What You Get
 
-### Account-level Configuration
-- **6 Core Agents**: code-reviewer, test-runner, debugger, plan-agent, time-aware, worktree-coordinator
-- **20+ Commands** organized by purpose:
-  - **Development** (`dev/`): `/commit`, `/test`, `/debug`, `/review`, `/refactor`, `/optimize`, `/explain`
-  - **Workflow** (`flow/`): `/plan`, `/handoff`, `/resume`, `/scaffold`, `/fix-errors`, `/reflection`, `/qa` 🆕
-  - **GitHub** (`gh/`): `/pr`, `/docs`
-  - **Worktree** (`worktree/`): `/distribute`, `/status`, `/sync`
-  - **AI Models** (`ai/`) 🆕: `/gemini`, `/codex`, `/try-free`, `/route`, `/consensus`, `/pipeline`
-- **Multi-Model Integration**: Access Gemini (free) and Codex for specialized tasks
-- **Context Management**: Session continuity with handoff/resume system
-- **Automatic DateTime Context**: Injects current time into every prompt
-- **Headless Ready**: Works on remote Linux servers
+### Skills (Modular Capabilities)
+- **Workflow Skill**: `/flow:handoff`, `/flow:resume`, `/flow:plan`, `/flow:fix-errors`
+- **Worktree Skill**: `/worktree:distribute`, `/worktree:plan`, `/worktree:status`, `/worktree:sync`
+- **Testing Skill**: `/dev:test` with language-specific context (Python, JavaScript, Rust)
+- **Linting Skill**: `/dev:lint` with language-specific context (ruff, ESLint, Clippy)
+- **Frameworks Skill**: FastAPI patterns and async SQLAlchemy guides
+
+### Commands (Standalone Operations)
+- **Development** (`dev/`): `/commit`, `/refactor`, `/optimize`, `/explain`, `/epct`, `/cr`
+- **GitHub** (`gh/`): `/pr`
+- **AI Models** (`ai/`): `/gemini`, `/codex`, `/try-free`, `/route`, `/consensus`, `/pipeline`
+
+### Agents
+- **time-aware**: Automatic datetime context injection
+
+### Plugin Integration
+Works seamlessly with official Claude Code plugins:
+- **pr-review-toolkit**: Comprehensive code review
+- **document-skills**: Documentation generation
+- **silent-failure-hunter**: Error detection
 
 ### Project Profiles (NEW!)
 - **Python**: Ruff, mypy, pytest, pre-commit hooks + custom commands
@@ -70,30 +78,29 @@ ccfg init rust
   - `/smart-lint` - Auto-detects and runs appropriate linters
   - `/smart-build` - Auto-detects and runs appropriate build system
 
-## 🗂️ New Profile System Structure
+## 🗂️ Directory Structure
 
 ```
 claude-config/
 ├── profiles/
-│   ├── account/         # Account-level configuration
-│   │   ├── agents/      # AI agents
-│   │   ├── commands/    # Commands organized by purpose
-│   │   │   ├── dev/     # Development tasks
-│   │   │   ├── flow/    # Workflow management
-│   │   │   ├── gh/      # GitHub operations
-│   │   │   ├── worktree/# Git worktree management
-│   │   │   └── ai/      # Multi-model AI integration (NEW!)
-│   │   ├── scripts/     # Supporting scripts
-│   │   └── CLAUDE.md    # Global preferences
-│   └── projects/        # Project-specific profiles
-│       ├── _base/       # Base configuration
-│       ├── python/      # Python environment
-│       ├── javascript/  # JS/Node environment
-│       └── rust/        # Rust environment
-├── lib/                 # Common libraries
-├── scripts/             # Management scripts
-├── ccfg                # Unified CLI (NEW!)
-└── install.sh          # Backward compatible installer
+│   └── account/              # Account-level configuration (~/.claude/)
+│       ├── skills/           # Skills architecture (NEW!)
+│       │   ├── workflow/     # Handoff, resume, plan, fix-errors
+│       │   ├── worktree/     # Parallel worktree management
+│       │   ├── testing/      # Language-aware testing
+│       │   ├── linting/      # Language-aware linting
+│       │   └── frameworks/
+│       │       └── fastapi/  # FastAPI patterns
+│       ├── commands/         # Standalone commands
+│       │   ├── dev/          # commit, refactor, optimize, explain, epct, cr
+│       │   ├── gh/           # pr
+│       │   └── ai/           # Multi-model AI integration
+│       ├── agents/           # time-aware agent
+│       ├── scripts/          # Supporting scripts
+│       └── CLAUDE.md         # Global preferences
+├── lib/                      # Common libraries
+├── ccfg                      # Unified CLI
+└── install.sh                # Installation script
 ```
 
 ## 🔧 Installing the CLI
@@ -160,19 +167,34 @@ your-project/
 └── .gitignore          # Python-specific ignores
 ```
 
-## 🎯 Key Commands
+## 🎯 Key Commands & Skills
 
+### Skills (Invoke with `/skill:workflow`)
+| Skill | Commands | Description |
+|-------|----------|-------------|
+| `workflow` | `/flow:handoff`, `/flow:resume`, `/flow:plan`, `/flow:fix-errors` | Session management |
+| `worktree` | `/worktree:distribute`, `/worktree:plan`, `/worktree:status`, `/worktree:sync` | Parallel development |
+| `testing` | `/dev:test` | Language-aware testing |
+| `linting` | `/dev:lint` | Language-aware linting |
+| `fastapi` | Automatic context | FastAPI patterns |
+
+### Standalone Commands
 | Command | Description |
 |---------|-------------|
-| `/commit` | Smart conventional commits |
-| `/test` | Auto-fix test failures |
-| `/debug` | Systematic debugging |
-| `/review` | Security & quality review |
-| `/qa` 🆕 | **Integrated QA gate (review + test + build + lint)** |
-| `/handoff` | Save session state |
-| `/resume` | Restore session |
-| `/plan` | Task planning |
-| `/pytest` | Python testing (with Python profile) |
+| `/dev:commit` | Smart conventional commits |
+| `/dev:refactor` | Code refactoring |
+| `/dev:optimize` | Performance optimization |
+| `/dev:explain` | Code explanation |
+| `/dev:epct` | Explore-Plan-Code-Test workflow |
+| `/dev:cr` | CodeRabbit integration hub |
+| `/gh:pr` | Pull request creation |
+
+### Plugin Commands (Official)
+| Plugin | Description |
+|--------|-------------|
+| `/pr-review-toolkit:review-pr` | Comprehensive PR review |
+| `/document-skills:pdf` | PDF manipulation |
+| `/document-skills:docx` | Word document handling |
 
 ### 🤖 Multi-Model AI Commands (NEW!)
 
@@ -200,38 +222,19 @@ codex auth login
 
 📚 **[Full AI Commands Guide](profiles/account/commands/ai/README.md)**
 
-### 🚦 Quality Assurance Gate (NEW!)
+### 🎨 Skills Architecture
 
-The `/flow:qa` command provides comprehensive PR readiness verification with parallel execution:
-
-**Features:**
-- 🔍 Code review (security, logic, performance, quality)
-- 🧪 Test execution with automatic fixes
-- 🔨 Build verification (auto-detects build system)
-- 🎨 Linting & formatting (auto-detects tools)
-- 🐛 Conditional debugging (triggered on failures)
-- 📚 Best practices validation (web search, library docs)
-
-**Usage:**
-```bash
-# Standard QA check (all stages)
-/flow:qa
-
-# Fast mode (skip context enhancement)
-/flow:qa --fast
-
-# Check specific path
-/flow:qa src/core/
+Each skill follows a consistent structure:
+```
+skill-name/
+├── SKILL.md           # Skill definition and metadata
+├── workflows/         # Executable workflows
+│   └── action.md      # Individual workflow files
+└── context/           # Domain knowledge
+    └── guide.md       # Reference documentation
 ```
 
-**Supported Ecosystems:**
-- **Node.js**: npm/yarn/pnpm/bun build, ESLint, Prettier
-- **Python**: poetry/uv build, ruff, mypy
-- **Rust**: cargo build, clippy
-- **Go**: go build, golangci-lint
-- **Java**: Maven, Gradle
-
-**Expected Time**: 2-5 minutes with parallel agent execution
+Skills are invoked using the pattern: `/skill-name:workflow`
 
 ## 🔄 Migration & Updates
 
@@ -290,18 +293,12 @@ claude-code-log --tui
 ```
 ~/.claude/                     # Linux/macOS
 %USERPROFILE%\.claude\         # Windows
-├── agents/           # 6 specialized agents
-├── commands/         # 16 workflow commands
+├── skills/           # 5 skills (workflow, worktree, testing, linting, frameworks)
+├── commands/         # Standalone commands (dev, gh, ai)
+├── agents/           # time-aware agent
 ├── scripts/          # Supporting scripts
 ├── CLAUDE.md         # Global preferences
 └── settings.json     # Configuration
-```
-
-### Project Level (.claude/)
-```
-project/.claude/
-├── agents/           # Language-specific agents
-└── commands/         # Language-specific commands
 ```
 
 ## 🎨 Creating Custom Profiles

@@ -10,8 +10,8 @@
 - Test before commit
 
 ## Context Management (Handoff)
-- Use `/handoff` before `/clear` to save session state
-- Use `/resume` to restore context (auto-invokes plan-agent if complex)
+- Use `/flow:handoff` before `/clear` to save session state
+- Use `/flow:resume` to restore context
 - Handoff modes: quick (default), --detailed, --team
 - Auto-trigger at 80% context usage
 - Handoffs stored in `docs/handoff/` (max 5 recent)
@@ -22,10 +22,21 @@
 - Clear variable naming
 
 ## Auto-invoke
-- Test failures → test-runner
-- PR creation → code-reviewer
-- Complex errors → debugger
-- Time/date needed → time-aware (auto-retrieve current time)
+- Test failures → testing skill or test-runner agent
+- PR creation → pr-review-toolkit plugin
+- Complex errors → silent-failure-hunter plugin
+- Time/date needed → time-aware agent
+
+## Skills
+- `/flow:*` → workflow skill (handoff, resume, plan, fix-errors)
+- `/worktree:*` → worktree skill (distribute, plan, status, sync)
+- `/dev:test` → testing skill with language context
+- `/dev:lint` → linting skill with language context
+
+## Plugins (Official)
+- pr-review-toolkit → code review
+- document-skills → documentation generation
+- silent-failure-hunter → error detection
 
 ## Time Awareness
 - time-aware agent automatically provides current time

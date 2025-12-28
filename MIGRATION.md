@@ -1,5 +1,110 @@
 # Migration Guide
 
+## Skills Architecture Migration (v3.0)
+
+### What Changed
+
+We've migrated from a commands/agents structure to a **Skills-based architecture** that integrates with official Claude Code plugins.
+
+**Old Structure:**
+```
+~/.claude/
+├── agents/       # Multiple agents (code-reviewer, test-runner, etc.)
+├── commands/
+│   ├── dev/      # test, review, debug, etc.
+│   ├── flow/     # handoff, resume, plan, etc.
+│   ├── gh/       # pr, docs
+│   └── worktree/ # distribute, status, sync
+└── scripts/
+```
+
+**New Structure:**
+```
+~/.claude/
+├── skills/           # Skills architecture
+│   ├── workflow/     # handoff, resume, plan, fix-errors
+│   ├── worktree/     # distribute, plan, status, sync
+│   ├── testing/      # test with language context
+│   ├── linting/      # lint with language context
+│   └── frameworks/   # fastapi patterns
+├── commands/         # Standalone commands only
+│   ├── dev/          # commit, refactor, optimize, explain, epct, cr
+│   ├── gh/           # pr
+│   └── ai/           # multi-model integration
+├── agents/           # Only time-aware.md
+└── scripts/
+```
+
+### Removed Commands (Use Official Plugins)
+
+| Old Command | Replacement |
+|-------------|-------------|
+| `/dev:review` | `/pr-review-toolkit:review-pr` |
+| `/dev:debug` | `silent-failure-hunter` plugin or Task tool |
+| `/gh:docs` | `/document-skills:docx` or `/document-skills:pdf` |
+| `/flow:scaffold` | Removed (manual setup) |
+| `/flow:qa` | `/pr-review-toolkit:review-pr` |
+| `/flow:reflection` | `reflection-agent` via Task tool |
+
+### Commands Migrated to Skills
+
+| Old Command | New Command |
+|-------------|-------------|
+| `/flow:handoff` | `/flow:handoff` (skill-based) |
+| `/flow:resume` | `/flow:resume` (skill-based) |
+| `/flow:plan` | `/flow:plan` (skill-based) |
+| `/flow:fix-errors` | `/flow:fix-errors` (skill-based) |
+| `/worktree:*` | `/worktree:*` (skill-based) |
+| `/dev:test` | `/dev:test` (skill-based with context) |
+
+### Removed Agents
+
+| Agent | Replacement |
+|-------|-------------|
+| `code-reviewer.md` | `pr-review-toolkit` plugin |
+| `test-runner.md` | `skills/testing/` |
+| `debugger.md` | `silent-failure-hunter` plugin |
+| `plan-agent.md` | `skills/workflow/` |
+| `reflection-agent.md` | `skills/workflow/` |
+| `worktree-coordinator.md` | `skills/worktree/` |
+
+Only `time-aware.md` remains for datetime context.
+
+### Migration Steps
+
+1. **Update Installation:**
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
+   ```
+
+2. **Install Official Plugins (Recommended):**
+   - `pr-review-toolkit` - Code review
+   - `document-skills` - Documentation
+   - `anthropic-agent-skills` - Additional capabilities
+
+3. **Clean Up Old Files (Optional):**
+   ```bash
+   rm -rf ~/.claude/commands/flow/
+   rm -rf ~/.claude/commands/worktree/
+   rm -f ~/.claude/commands/dev/{review,debug,test}.md
+   rm -f ~/.claude/commands/gh/docs.md
+   rm -f ~/.claude/agents/{code-reviewer,test-runner,debugger,plan-agent,reflection-agent,worktree-coordinator}.md
+   ```
+
+### Skills Architecture
+
+Each skill has this structure:
+```
+skill-name/
+├── SKILL.md           # Skill definition
+├── workflows/         # Executable workflows
+└── context/           # Domain knowledge
+```
+
+Invoke with: `/skill-name:workflow`
+
+---
+
 ## Command Structure Reorganization (v2.0)
 
 ### What Changed
