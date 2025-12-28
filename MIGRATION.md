@@ -12,7 +12,6 @@
 │   └── my/               # 개인 도구 모음
 │       ├── commands/     # AI, 세션, 워크트리 명령어
 │       └── context/      # 참조 문서
-├── agents/               # time-aware만 유지
 └── scripts/
 ```
 

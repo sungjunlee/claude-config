@@ -17,7 +17,6 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 │       ├── commands/     # AI, 세션, 워크트리 명령어
 │       └── context/      # 참조 문서
 │
-├── agents/               # time-aware
 ├── CLAUDE.md             # 글로벌 설정
 └── llm-models-latest.md  # LLM 모델 참조
 ```

@@ -37,10 +37,9 @@ Install: `/plugin install {name}`
 
 ## Auto-invoke
 - PR creation → pr-review-toolkit plugin
-- Time/date needed → time-aware agent
 
 ## Time Awareness
-- time-aware agent automatically provides current time
+- Hook automatically injects current timestamp on every prompt
 - Use current year in web searches (2025, not 2024)
 - Prioritize latest information for docs/version searches
 
