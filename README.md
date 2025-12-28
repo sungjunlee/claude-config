@@ -55,17 +55,6 @@ PR 리뷰를 위한 6개 전문 에이전트:
 /plugin install pr-review-toolkit
 ```
 
-### code-review
-자동 PR 코드 리뷰 (5개 병렬 Sonnet 에이전트):
-- CLAUDE.md 준수 검사
-- 버그 탐지
-- PR 히스토리 분석
-- Confidence 기반 필터링 (기본 80/100)
-
-```bash
-/plugin install code-review
-```
-
 ### commit-commands
 Git 워크플로우 자동화:
 - 스마트 커밋 메시지 생성
