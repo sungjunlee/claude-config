@@ -28,7 +28,6 @@
 ## Official Plugins (권장)
 Use official plugins for common tasks:
 - `pr-review-toolkit` → 코드 리뷰 (6개 전문 에이전트)
-- `code-review` → PR 자동 리뷰
 - `commit-commands` → 커밋 워크플로우
 - `feature-dev` → 기능 개발 가이드
 - `document-skills` → 문서 생성 (PDF, DOCX, PPTX, XLSX)

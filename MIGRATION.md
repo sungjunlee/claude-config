@@ -35,7 +35,6 @@
 
 ```bash
 /plugin install pr-review-toolkit
-/plugin install code-review
 /plugin install commit-commands
 /plugin install feature-dev
 /plugin install document-skills@anthropic-agent-skills
