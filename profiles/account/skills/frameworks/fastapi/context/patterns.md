@@ -357,14 +357,22 @@ async def test_create_user_db(db_session):
 
 ### Response Caching
 ```python
+from contextlib import asynccontextmanager
 from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
 from fastapi_cache.backends.redis import RedisBackend
+import redis.asyncio as aioredis
 
-@app.on_event("startup")
-async def startup():
-    redis = redis.asyncio.from_url("redis://localhost")
-    FastAPICache.init(RedisBackend(redis), prefix="api-cache")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    redis_client = aioredis.from_url("redis://localhost")
+    FastAPICache.init(RedisBackend(redis_client), prefix="api-cache")
+    yield
+    # Shutdown
+    await redis_client.close()
+
+app = FastAPI(lifespan=lifespan)
 
 @router.get("/expensive")
 @cache(expire=60)

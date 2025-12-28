@@ -6,8 +6,8 @@ FastAPI와 함께 사용하는 Async SQLAlchemy 가이드입니다.
 
 ### Engine Configuration
 ```python
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.orm import DeclarativeBase
 
 DATABASE_URL = "postgresql+asyncpg://user:pass@localhost/db"
 
@@ -19,13 +19,14 @@ engine = create_async_engine(
     max_overflow=20      # Extra connections when pool full
 )
 
-AsyncSessionLocal = sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False
 )
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 ```
 
 ### Session Dependency
@@ -41,31 +42,31 @@ async def get_db():
         except Exception:
             await session.rollback()
             raise
-        finally:
-            await session.close()
 ```
 
 ## Model Definition
 
 ### Basic Model
 ```python
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import String, Text, ForeignKey, Table, Column, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
+from datetime import datetime
+from typing import Optional
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
-    username = Column(String(50), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    hashed_password: Mapped[str] = mapped_column(String(255))
+    is_active: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(onupdate=func.now())
 
     # Relationships
-    posts = relationship("Post", back_populates="author", lazy="selectin")
+    posts: Mapped[list["Post"]] = relationship(back_populates="author", lazy="selectin")
 ```
 
 ### Relationship Pattern
@@ -73,15 +74,15 @@ class User(Base):
 class Post(Base):
     __tablename__ = "posts"
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    content = Column(Text)
-    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    content: Mapped[Optional[str]] = mapped_column(Text)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     # Relationship
-    author = relationship("User", back_populates="posts")
-    tags = relationship("Tag", secondary="post_tags", back_populates="posts")
+    author: Mapped["User"] = relationship(back_populates="posts")
+    tags: Mapped[list["Tag"]] = relationship(secondary="post_tags", back_populates="posts")
 
 # Many-to-Many junction table
 post_tags = Table(
@@ -94,10 +95,10 @@ post_tags = Table(
 class Tag(Base):
     __tablename__ = "tags"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True)
 
-    posts = relationship("Post", secondary="post_tags", back_populates="tags")
+    posts: Mapped[list["Post"]] = relationship(secondary="post_tags", back_populates="tags")
 ```
 
 ## CRUD Operations
