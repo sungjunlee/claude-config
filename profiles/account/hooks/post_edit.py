@@ -205,6 +205,7 @@ def _run_cargo_fmt(filepath: str, project_root: str) -> None:
 
 
 def _run_clippy(filepath: str, project_root: str) -> None:
+    """Run clippy on project, show warnings for this file."""
     success, stdout, stderr = run_command(
         ["cargo", "clippy", "--message-format=short", "-q"],
         cwd=project_root, timeout=TIMEOUT_SLOW,
@@ -214,6 +215,10 @@ def _run_clippy(filepath: str, project_root: str) -> None:
         lines = [l for l in output.strip().split("\n") if filepath in l]
         if lines:
             print(f"  ⚠️  clippy: {lines[0][:60]}")
+        elif not success:
+            print(f"  ⚠️  clippy: {output.split(chr(10))[0][:60]}")
+    elif not success:
+        print("  ⚠️  clippy: failed")
 
 
 def handle_rust(filepath: str) -> None:
@@ -256,10 +261,10 @@ def _run_gofmt(filepath: str) -> None:
 
 def _run_golangci_lint(filepath: str) -> None:
     if not has_tool("golangci-lint"):
-        return
+        return  # Optional tool, skip silently
 
     project_root = find_project_root(filepath)
-    if not project_root:
+    if not project_root or not Path(project_root, "go.mod").exists():
         print("  ⚠️  golangci-lint: no go.mod found")
         return
 
@@ -272,6 +277,8 @@ def _run_golangci_lint(filepath: str) -> None:
         if output:
             lines = output.strip().split("\n")
             print(f"  ⚠️  lint: {lines[0][:60]}")
+        else:
+            print("  ⚠️  lint: failed")
 
 
 def handle_go(filepath: str) -> None:
