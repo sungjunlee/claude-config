@@ -117,10 +117,9 @@ def _run_ruff_format(ruff: List[str], filepath: str) -> None:
 def _run_ruff_check(ruff: List[str], filepath: str) -> None:
     success, stdout, stderr = run_command([*ruff, "check", "--fix", "--quiet", filepath])
     if not success:
-        output = stderr or stdout
-        if output:
-            lines = output.strip().split("\n")
-            print(f"  ⚠️  check: {lines[0][:60]}")
+        output = stderr or stdout or "failed"
+        lines = output.strip().split("\n")
+        print(f"  ⚠️  check: {lines[0][:60]}")
 
 
 def _check_python_async(filepath: str) -> None:
@@ -195,13 +194,14 @@ def handle_typescript(filepath: str) -> None:
 # =============================================================================
 
 def _run_cargo_fmt(filepath: str, project_root: str) -> None:
-    success, _, stderr = run_command(
+    success, stdout, stderr = run_command(
         ["cargo", "fmt", "--", filepath], cwd=project_root
     )
     if success:
         print("  ✓ cargo fmt")
-    elif stderr:
-        print(f"  ⚠️  fmt: {stderr[:50]}")
+    else:
+        msg = stderr or stdout or "failed"
+        print(f"  ⚠️  fmt: {msg[:60]}")
 
 
 def _run_clippy(filepath: str, project_root: str) -> None:
@@ -235,23 +235,23 @@ def handle_rust(filepath: str) -> None:
 # Go handler
 # =============================================================================
 
-def _run_gofmt(filepath: str) -> bool:
+def _run_gofmt(filepath: str) -> None:
     if has_tool("gofmt"):
-        success, _, stderr = run_command(["gofmt", "-w", filepath])
+        success, stdout, stderr = run_command(["gofmt", "-w", filepath])
         if success:
             print("  ✓ gofmt")
-        elif stderr:
-            print(f"  ⚠️  gofmt: {stderr[:50]}")
-        return success
+        else:
+            msg = stderr or stdout or "failed"
+            print(f"  ⚠️  gofmt: {msg[:60]}")
     elif has_tool("go"):
-        success, _, stderr = run_command(["go", "fmt", filepath])
+        success, stdout, stderr = run_command(["go", "fmt", filepath])
         if success:
             print("  ✓ go fmt")
-        elif stderr:
-            print(f"  ⚠️  go fmt: {stderr[:50]}")
-        return success
-    print("  ⚠️  gofmt/go not found")
-    return False
+        else:
+            msg = stderr or stdout or "failed"
+            print(f"  ⚠️  go fmt: {msg[:60]}")
+    else:
+        print("  ⚠️  gofmt/go not found")
 
 
 def _run_golangci_lint(filepath: str) -> None:
