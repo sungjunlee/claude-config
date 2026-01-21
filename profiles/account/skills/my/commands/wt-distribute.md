@@ -13,122 +13,105 @@ Parse `.worktrees/PLAN.md` and create isolated worktrees for parallel developmen
 
 1. **Validate Prerequisites**:
    - Verify git repository exists
-   - Check `.worktrees/PLAN.md` file presence
-   - Ensure no conflicting branches exist
+   - Check `.worktrees/PLAN.md` presence (create template if missing)
+   - Ensure no conflicting branches
 
-2. **Parse Task Plan**:
-   - Read `.worktrees/PLAN.md` structure
-   - Extract task definitions and descriptions
-   - Identify common context and dependencies
+2. **Parse PLAN.md**:
+   - Understand task definitions and descriptions
+   - Identify dependencies between tasks
+   - Note common context and conventions
 
-3. **Create Worktrees**:
-   - Generate worktree for each task
-   - Branch naming: `feature/[task-name]`
-   - Handle existing branches gracefully
+3. **Analyze Project Structure**:
+   - Identify project type (Node.js, Python, Rust, etc.)
+   - Find environment files to copy (.env, config files)
+   - Detect package managers and lock files
+   - Note any project-specific setup requirements
 
-4. **Environment Setup**:
-   - Copy environment files (.env, package.json, lock files)
-   - Create node_modules symlinks for efficiency
-   - Link Python venv if present
-   - Copy 25+ config file types automatically
+4. **Create Worktrees**:
+   For each task in PLAN.md:
+   ```bash
+   git worktree add .worktrees/{task-name} -b feature/{task-name}
+   ```
 
-5. **Generate Documentation**:
-   - Create task instruction at `.worktrees/tasks/[task-name].md`
-   - Include acceptance criteria
-   - Document Claude invocation commands
-   - Add troubleshooting guidance
+5. **Setup Environment**:
+   Copy/symlink files based on project analysis:
+   - Environment files (.env, .env.local, etc.)
+   - Config files (tsconfig.json, pyproject.toml, etc.)
+   - Lock files (package-lock.json, yarn.lock, etc.)
+   - Symlink heavy directories (node_modules, venv, target)
 
-6. **Launch Options**:
-   - Default: Display manual commands for each worktree
-   - `--launch=tmux`: Auto-create tmux session with windows per worktree
-   - `--launch=iterm`: Auto-open iTerm tabs per worktree (macOS only)
+6. **Generate Task Instructions**:
+   Create `.worktrees/tasks/{task-name}.md` with:
+   - Task description from PLAN.md
+   - Relevant context for this specific task
+   - Acceptance criteria
+   - Notes on dependencies with other tasks
 
-## PLAN.md Structure
+7. **Provide Next Steps**:
+   - Show created worktrees
+   - Suggest using `/wt-launch tmux` or `/wt-launch iterm` for auto-launch
+   - Or show manual commands for each worktree
 
-Expected format at `.worktrees/PLAN.md`:
+## PLAN.md Template
 
-````markdown
+If `.worktrees/PLAN.md` doesn't exist, create:
+
+```markdown
 # Task Plan
 
 ## Task List
-```bash
-# Format: task-name: task description (estimated time)
-auth: Implement OAuth2.0 authentication (2h)
-payment: Integrate Stripe payment processing (3h)
-search: Add Elasticsearch full-text search (2h)
-```
+\`\`\`bash
+# Format: task-name: description
+auth: Implement user authentication (OAuth2.0, JWT)
+payment: Integrate payment processing (Stripe)
+search: Add full-text search (Elasticsearch)
+\`\`\`
 
 ## Common Context
-- TypeScript with strict mode
-- Jest for testing (min 80% coverage)
-- Follow REST API conventions
+- [Project conventions and standards]
+- [Testing requirements]
+- [API patterns]
 
-## Task Dependencies
-- All tasks can run independently
-- Merge order: auth → payment → search
-````
-
-## Output Structure
-
-Creates for each task:
-- `.worktrees/[task-name]/` - Independent worktree directory
-- `.worktrees/tasks/[task-name].md` - Detailed task instructions
-- Environment files copied and symlinks created
-- Branch `feature/[task-name]` ready for work
-
-## Success Indicators
-
-- All worktrees created successfully
-- Environment files properly copied
-- Task instructions generated
-- No branch conflicts
-- Clear launch commands provided
-
-## Error Handling
-
-Common issues and solutions:
-- **Branch exists**: Check and clean existing branches
-- **PLAN.md missing**: Create template or use `/worktree:plan`
-- **Permission denied**: Check script execution permissions
-- **Disk space**: Verify sufficient space before distribution
-
-## Integration Points
-
-- Use after `/worktree:plan` for automatic planning
-- Monitor with `/worktree:status`
-- Synchronize with `/worktree:sync`
-- Clean up with `git worktree remove`
-
-## Example Workflow
-
-```bash
-# Generate plan (if not exists)
-/worktree:plan "implement auth, payment, and search"
-
-# Distribute tasks (manual mode)
-/worktree:distribute
-
-# Or: auto-launch with tmux (creates background session)
-/worktree:distribute --launch=tmux
-# Then in another terminal: tmux attach -t {project}-wt
-
-# Or: auto-launch with iTerm tabs (macOS)
-/worktree:distribute --launch=iterm
+## Dependencies
+- [Note any task dependencies or merge order]
 ```
 
-## Launch Options
+## Dynamic File Detection
 
-### tmux (Recommended)
-Creates a detached tmux session with one window per worktree:
-- Session name: `{project-name}-wt`
-- Each window runs `claude` automatically
-- Attach from another terminal: `tmux attach -t {session}`
-- Preserves current claude code session
+Instead of a fixed list, analyze the project to copy:
 
-### iTerm (macOS only)
-Opens new iTerm tabs for each worktree:
-- Each tab `cd`s to worktree and runs `claude`
-- Uses current iTerm window
-- Good for visual tab-based workflow
+**Node.js projects:**
+- package.json, package-lock.json, yarn.lock, pnpm-lock.yaml
+- tsconfig*.json, .eslintrc*, .prettierrc*
+- vite.config.*, next.config.*, webpack.config.*
+- Symlink: node_modules/
 
-Execute worktree distribution now using `scripts/worktree-manager.sh distribute [--launch=tmux|iterm]`.
+**Python projects:**
+- pyproject.toml, setup.py, requirements*.txt
+- Pipfile, Pipfile.lock, poetry.lock
+- .python-version, .flake8, mypy.ini
+- Symlink: venv/, .venv/
+
+**Rust projects:**
+- Cargo.toml, Cargo.lock
+- rust-toolchain.toml, .cargo/config.toml
+- Symlink: target/
+
+**Common:**
+- .env, .env.local, .env.development, .env.production
+- docker-compose.yml, Dockerfile
+- .nvmrc, .node-version, .tool-versions
+
+## Success Criteria
+
+- All worktrees created with correct branches
+- Environment properly configured for each worktree
+- Task instructions generated with relevant context
+- Clear guidance for launching parallel sessions
+
+## Integration
+
+- **Before**: Use `/wt-plan` to generate PLAN.md
+- **After**: Use `/wt-launch tmux` or `/wt-launch iterm` to start sessions
+- **Monitor**: Use `/wt-status` to check progress
+- **Sync**: Use `/wt-sync` to synchronize env files
