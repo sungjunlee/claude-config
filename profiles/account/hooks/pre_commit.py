@@ -42,8 +42,8 @@ def run_command(cmd: Union[str, List[str]], timeout: int = 30) -> Tuple[bool, st
         return False, "", "Command timed out"
     except FileNotFoundError:
         return False, "", f"Command not found: {cmd_list[0] if cmd_list else 'unknown'}"
-    except Exception as e:
-        return False, "", str(e)
+    except OSError as e:
+        return False, "", f"OS error: {e}"
 
 
 def check_tool(tool: str) -> bool:
@@ -195,8 +195,9 @@ def main() -> int:
         try:
             if not check_func():
                 failed.append(name)
-        except Exception as e:
+        except (OSError, subprocess.SubprocessError) as e:
             print(f"⚠️  {name} error: {e}")
+            failed.append(name)
 
     print("\n" + "=" * 40)
 

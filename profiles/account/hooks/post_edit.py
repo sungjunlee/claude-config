@@ -8,8 +8,8 @@ Unified post-edit hook for all languages.
 Automatically formats and checks files based on extension.
 
 Supported:
-  - Python (.py): ruff format + check
-  - TypeScript/JavaScript (.ts, .tsx, .js, .jsx): prettier + eslint
+  - Python (.py, .pyi): ruff format + check
+  - TypeScript/JavaScript (.ts, .tsx, .js, .jsx, .mjs, .mts): prettier + eslint
   - Rust (.rs): cargo fmt + clippy
   - Go (.go): gofmt + golangci-lint
 
@@ -20,12 +20,16 @@ Environment variables (from Claude Code):
 """
 
 import os
-import sys
 import subprocess
 import shutil
 import shlex
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Callable
+
+# Timeout constants (seconds)
+TIMEOUT_FAST = 15
+TIMEOUT_DEFAULT = 30
+TIMEOUT_SLOW = 60
 
 
 # =============================================================================
@@ -34,32 +38,23 @@ from typing import Tuple, List, Union, Optional, Callable
 
 def run_command(
     cmd: Union[str, List[str]],
-    timeout: int = 30,
-    cwd: Optional[str] = None
+    timeout: int = TIMEOUT_DEFAULT,
+    cwd: Optional[str] = None,
 ) -> Tuple[bool, str, str]:
-    """Run a command securely without shell=True."""
+    """Run a command securely. Returns (success, stdout, stderr)."""
+    cmd_list = shlex.split(cmd) if isinstance(cmd, str) else cmd
     try:
-        if isinstance(cmd, str):
-            cmd_list = shlex.split(cmd)
-        else:
-            cmd_list = cmd
-
         result = subprocess.run(
-            cmd_list,
-            shell=False,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            cwd=cwd,
-            check=False,
+            cmd_list, shell=False, capture_output=True, text=True,
+            timeout=timeout, cwd=cwd, check=False,
         )
         return result.returncode == 0, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
-        return False, "", f"Timeout after {timeout}s"
+        return False, "", f"Timeout ({timeout}s)"
     except FileNotFoundError:
-        return False, "", f"Not found: {cmd_list[0] if cmd_list else 'unknown'}"
-    except Exception as e:
-        return False, "", str(e)
+        return False, "", f"Not found: {cmd_list[0]}"
+    except OSError as e:
+        return False, "", f"OS error: {e}"
 
 
 def has_tool(tool: str) -> bool:
@@ -76,56 +71,60 @@ def resolve_tool(tool: str, fallback_uvx: bool = True) -> List[str]:
     return [tool]
 
 
+def resolve_npm_tool(tool: str) -> Optional[List[str]]:
+    """Resolve npm tool, falling back to npx."""
+    if has_tool(tool):
+        return [tool]
+    if has_tool("npx"):
+        return ["npx", tool]
+    return None
+
+
 def find_project_root(start: str) -> Optional[str]:
     """Find project root by looking for common markers."""
     markers = [".git", "pyproject.toml", "package.json", "Cargo.toml", "go.mod"]
     path = Path(start).resolve()
-
     for parent in [path] + list(path.parents):
         if any((parent / marker).exists() for marker in markers):
             return str(parent)
     return None
 
 
+def read_file_safe(filepath: str) -> Optional[str]:
+    """Read file content safely, returning None on failure."""
+    try:
+        return Path(filepath).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return None
+    except (PermissionError, UnicodeDecodeError, OSError) as e:
+        print(f"  ⚠️  read error: {e}")
+        return None
+
+
 # =============================================================================
-# Language handlers
+# Python handler
 # =============================================================================
 
-def handle_python(filepath: str) -> None:
-    """Handle Python files with ruff."""
-    ruff = resolve_tool("ruff")
-
-    if ruff == ["ruff"] and not has_tool("ruff"):
-        print("  ⚠️  ruff not found")
-        return
-
-    # Format
+def _run_ruff_format(ruff: List[str], filepath: str) -> None:
     success, _, stderr = run_command([*ruff, "format", filepath])
     if success:
         print("  ✓ formatted")
-    else:
+    elif stderr:
         print(f"  ⚠️  format: {stderr[:50]}")
 
-    # Fix
-    success, stdout, stderr = run_command([*ruff, "check", "--fix", "--quiet", filepath])
+
+def _run_ruff_check(ruff: List[str], filepath: str) -> None:
+    success, _, stderr = run_command([*ruff, "check", "--fix", "--quiet", filepath])
     if not success and stderr:
-        # Show first issue only
         lines = stderr.strip().split("\n")
         if lines and "error" in lines[0].lower():
             print(f"  ⚠️  {lines[0][:60]}")
 
-    # Async pattern check for FastAPI
-    _check_python_async(filepath)
-
 
 def _check_python_async(filepath: str) -> None:
     """Check for blocking calls in async code."""
-    try:
-        content = Path(filepath).read_text()
-    except Exception:
-        return
-
-    if "async def" not in content:
+    content = read_file_safe(filepath)
+    if not content or "async def" not in content:
         return
 
     issues = []
@@ -138,26 +137,79 @@ def _check_python_async(filepath: str) -> None:
         print(f"  ⚠️  async: {', '.join(issues)}")
 
 
+def handle_python(filepath: str) -> None:
+    """Handle Python files with ruff."""
+    ruff = resolve_tool("ruff")
+    if ruff == ["ruff"] and not has_tool("ruff"):
+        print("  ⚠️  ruff not found")
+        return
+
+    _run_ruff_format(ruff, filepath)
+    _run_ruff_check(ruff, filepath)
+    _check_python_async(filepath)
+
+
+# =============================================================================
+# TypeScript/JavaScript handler
+# =============================================================================
+
+def _run_prettier(filepath: str) -> None:
+    prettier = resolve_npm_tool("prettier")
+    if not prettier:
+        return
+
+    success, _, stderr = run_command([*prettier, "--write", filepath], timeout=TIMEOUT_FAST)
+    if success:
+        print("  ✓ prettier")
+    elif "No parser" not in stderr:
+        print("  ⚠️  prettier failed")
+
+
+def _run_eslint(filepath: str) -> None:
+    eslint = resolve_npm_tool("eslint")
+    if not eslint:
+        return
+
+    success, stdout, stderr = run_command([*eslint, "--fix", filepath])
+    if success:
+        print("  ✓ eslint")
+    else:
+        output = stdout or stderr
+        if output and "error" in output.lower():
+            lines = output.strip().split("\n")
+            print(f"  ⚠️  eslint: {lines[0][:50]}")
+
+
 def handle_typescript(filepath: str) -> None:
     """Handle TypeScript/JavaScript with prettier + eslint."""
-    # Prettier
-    if has_tool("prettier") or has_tool("npx"):
-        prettier = ["prettier"] if has_tool("prettier") else ["npx", "prettier"]
-        success, _, stderr = run_command([*prettier, "--write", filepath], timeout=15)
-        if success:
-            print("  ✓ prettier")
-        elif "No parser" not in stderr:
-            print(f"  ⚠️  prettier failed")
+    _run_prettier(filepath)
+    _run_eslint(filepath)
 
-    # ESLint fix
-    if has_tool("eslint") or has_tool("npx"):
-        eslint = ["eslint"] if has_tool("eslint") else ["npx", "eslint"]
-        success, _, stderr = run_command([*eslint, "--fix", filepath], timeout=30)
-        if success:
-            print("  ✓ eslint")
-        elif stderr and "error" in stderr.lower():
-            lines = stderr.strip().split("\n")
-            print(f"  ⚠️  eslint: {lines[0][:50]}")
+
+# =============================================================================
+# Rust handler
+# =============================================================================
+
+def _run_cargo_fmt(filepath: str, project_root: str) -> None:
+    success, _, stderr = run_command(
+        ["cargo", "fmt", "--", filepath], cwd=project_root
+    )
+    if success:
+        print("  ✓ cargo fmt")
+    elif stderr:
+        print(f"  ⚠️  fmt: {stderr[:50]}")
+
+
+def _run_clippy(filepath: str, project_root: str) -> None:
+    success, stdout, stderr = run_command(
+        ["cargo", "clippy", "--message-format=short", "-q"],
+        cwd=project_root, timeout=TIMEOUT_SLOW,
+    )
+    output = stdout or stderr
+    if output:
+        lines = [l for l in output.strip().split("\n") if filepath in l]
+        if lines:
+            print(f"  ⚠️  clippy: {lines[0][:60]}")
 
 
 def handle_rust(filepath: str) -> None:
@@ -167,56 +219,59 @@ def handle_rust(filepath: str) -> None:
         print("  ⚠️  No Cargo.toml found")
         return
 
-    # cargo fmt
-    if has_tool("cargo"):
-        success, _, stderr = run_command(
-            ["cargo", "fmt", "--", filepath],
-            cwd=project_root,
-            timeout=30
-        )
-        if success:
-            print("  ✓ cargo fmt")
-        else:
-            print(f"  ⚠️  fmt: {stderr[:50]}")
+    if not has_tool("cargo"):
+        print("  ⚠️  cargo not found")
+        return
 
-        # clippy (just warnings, no fix)
-        success, stdout, _ = run_command(
-            ["cargo", "clippy", "--message-format=short", "-q"],
-            cwd=project_root,
-            timeout=60
-        )
-        if stdout:
-            lines = [l for l in stdout.strip().split("\n") if filepath in l]
-            if lines:
-                print(f"  ⚠️  clippy: {lines[0][:60]}")
+    _run_cargo_fmt(filepath, project_root)
+    _run_clippy(filepath, project_root)
 
 
-def handle_go(filepath: str) -> None:
-    """Handle Go files with gofmt + golangci-lint."""
-    # gofmt
+# =============================================================================
+# Go handler
+# =============================================================================
+
+def _run_gofmt(filepath: str) -> bool:
     if has_tool("gofmt"):
         success, _, stderr = run_command(["gofmt", "-w", filepath])
         if success:
             print("  ✓ gofmt")
-        else:
+        elif stderr:
             print(f"  ⚠️  gofmt: {stderr[:50]}")
+        return success
     elif has_tool("go"):
-        success, _, _ = run_command(["go", "fmt", filepath])
+        success, _, stderr = run_command(["go", "fmt", filepath])
         if success:
             print("  ✓ go fmt")
+        elif stderr:
+            print(f"  ⚠️  go fmt: {stderr[:50]}")
+        return success
+    return False
 
-    # golangci-lint (if available)
-    if has_tool("golangci-lint"):
-        project_root = find_project_root(filepath)
-        if project_root:
-            success, stdout, _ = run_command(
-                ["golangci-lint", "run", "--fast", filepath],
-                cwd=project_root,
-                timeout=30
-            )
-            if not success and stdout:
-                lines = stdout.strip().split("\n")
-                print(f"  ⚠️  lint: {lines[0][:60]}")
+
+def _run_golangci_lint(filepath: str) -> None:
+    if not has_tool("golangci-lint"):
+        return
+
+    project_root = find_project_root(filepath)
+    if not project_root:
+        return
+
+    success, stdout, stderr = run_command(
+        ["golangci-lint", "run", "--fast", filepath],
+        cwd=project_root,
+    )
+    if not success:
+        output = stdout or stderr
+        if output:
+            lines = output.strip().split("\n")
+            print(f"  ⚠️  lint: {lines[0][:60]}")
+
+
+def handle_go(filepath: str) -> None:
+    """Handle Go files with gofmt + golangci-lint."""
+    _run_gofmt(filepath)
+    _run_golangci_lint(filepath)
 
 
 # =============================================================================
@@ -224,22 +279,11 @@ def handle_go(filepath: str) -> None:
 # =============================================================================
 
 HANDLERS: dict[str, Callable[[str], None]] = {
-    # Python
-    ".py": handle_python,
-    ".pyi": handle_python,
-
-    # TypeScript / JavaScript
-    ".ts": handle_typescript,
-    ".tsx": handle_typescript,
-    ".js": handle_typescript,
-    ".jsx": handle_typescript,
-    ".mjs": handle_typescript,
-    ".mts": handle_typescript,
-
-    # Rust
+    ".py": handle_python, ".pyi": handle_python,
+    ".ts": handle_typescript, ".tsx": handle_typescript,
+    ".js": handle_typescript, ".jsx": handle_typescript,
+    ".mjs": handle_typescript, ".mts": handle_typescript,
     ".rs": handle_rust,
-
-    # Go
     ".go": handle_go,
 }
 
@@ -253,30 +297,21 @@ def main() -> None:
     tool_use = os.environ.get("TOOL_USE", "")
     file_path = os.environ.get("FILE_PATH", "")
 
-    # Only process Edit/Write tools
     if tool_use not in ("Edit", "Write", "MultiEdit"):
         return
-
-    # Check file exists
     if not file_path or not os.path.exists(file_path):
         return
 
-    # Get extension
     ext = Path(file_path).suffix.lower()
     handler = HANDLERS.get(ext)
-
     if not handler:
-        return  # Unsupported file type, silently skip
+        return
 
-    # Run handler
-    filename = Path(file_path).name
-    print(f"\n🔧 {filename}")
-
+    print(f"\n🔧 {Path(file_path).name}")
     try:
         handler(file_path)
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         print(f"  ⚠️  error: {e}")
-
     print()
 
 

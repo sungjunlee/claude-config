@@ -7,7 +7,7 @@
 # This script:
 #   1. Creates .claude/hooks/ in the project
 #   2. Copies unified hooks (post_edit.py, pre_commit.py)
-#   3. Merges hook config into .claude/settings.json or settings.local.json
+#   3. Adds hook config to .claude/settings.json (overwrites existing hooks config)
 
 set -e
 
