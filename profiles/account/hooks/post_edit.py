@@ -106,19 +106,21 @@ def read_file_safe(filepath: str) -> Optional[str]:
 # =============================================================================
 
 def _run_ruff_format(ruff: List[str], filepath: str) -> None:
-    success, _, stderr = run_command([*ruff, "format", filepath])
+    success, stdout, stderr = run_command([*ruff, "format", filepath])
     if success:
         print("  ✓ formatted")
-    elif stderr:
-        print(f"  ⚠️  format: {stderr[:50]}")
+    else:
+        msg = stderr or stdout or "unknown error"
+        print(f"  ⚠️  format: {msg[:60]}")
 
 
 def _run_ruff_check(ruff: List[str], filepath: str) -> None:
-    success, _, stderr = run_command([*ruff, "check", "--fix", "--quiet", filepath])
-    if not success and stderr:
-        lines = stderr.strip().split("\n")
-        if lines and "error" in lines[0].lower():
-            print(f"  ⚠️  {lines[0][:60]}")
+    success, stdout, stderr = run_command([*ruff, "check", "--fix", "--quiet", filepath])
+    if not success:
+        output = stderr or stdout
+        if output:
+            lines = output.strip().split("\n")
+            print(f"  ⚠️  check: {lines[0][:60]}")
 
 
 def _check_python_async(filepath: str) -> None:
@@ -159,11 +161,12 @@ def _run_prettier(filepath: str) -> None:
         print("  ⚠️  prettier not found")
         return
 
-    success, _, stderr = run_command([*prettier, "--write", filepath], timeout=TIMEOUT_FAST)
+    success, stdout, stderr = run_command([*prettier, "--write", filepath], timeout=TIMEOUT_FAST)
     if success:
         print("  ✓ prettier")
-    elif "No parser" not in stderr:
-        print("  ⚠️  prettier failed")
+    elif "No parser" not in (stderr or ""):
+        msg = stderr or stdout or "unknown error"
+        print(f"  ⚠️  prettier: {msg[:60]}")
 
 
 def _run_eslint(filepath: str) -> None:
@@ -176,10 +179,9 @@ def _run_eslint(filepath: str) -> None:
     if success:
         print("  ✓ eslint")
     else:
-        output = stdout or stderr
-        if output and "error" in output.lower():
-            lines = output.strip().split("\n")
-            print(f"  ⚠️  eslint: {lines[0][:50]}")
+        output = stdout or stderr or "unknown error"
+        lines = output.strip().split("\n")
+        print(f"  ⚠️  eslint: {lines[0][:60]}")
 
 
 def handle_typescript(filepath: str) -> None:
@@ -258,6 +260,7 @@ def _run_golangci_lint(filepath: str) -> None:
 
     project_root = find_project_root(filepath)
     if not project_root:
+        print("  ⚠️  golangci-lint: no go.mod found")
         return
 
     success, stdout, stderr = run_command(

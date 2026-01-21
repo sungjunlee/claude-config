@@ -32,4 +32,5 @@ api_keys.json
 # Temporary files
 tmp/
 temp/
-*.tmp__pycache__/
+*.tmp
+__pycache__/
