@@ -12,13 +12,14 @@ NC='\033[0m' # No Color
 
 # Configuration
 WORKTREES_DIR=".worktrees"
+LAUNCH_MODE=""
 
 # Help function
 show_help() {
     cat <<EOF
 Worktree Manager - Git Worktree task distribution tool
 
-Usage: $0 {init|distribute|status|sync|help}
+Usage: $0 {init|distribute|status|sync|help} [options]
 
 Commands:
   init       - Create PLAN.md template
@@ -27,12 +28,16 @@ Commands:
   sync       - Synchronize environment files between worktrees
   help       - Show this help message
 
+Options for 'distribute':
+  --launch=tmux   - Auto-launch claude in tmux session (background)
+  --launch=iterm  - Auto-launch claude in iTerm tabs (macOS only)
+
 Example:
-  $0 init                    # Initial setup
-  vim .worktrees/PLAN.md     # Edit task plan
-  $0 distribute              # Distribute tasks
-  cd .worktrees/auth         # Move to worktree
-  claude                     # Run Claude
+  $0 init                           # Initial setup
+  vim .worktrees/PLAN.md            # Edit task plan
+  $0 distribute                     # Distribute tasks (manual)
+  $0 distribute --launch=tmux       # Distribute + tmux sessions
+  $0 distribute --launch=iterm      # Distribute + iTerm tabs
 
 EOF
 }
@@ -144,6 +149,158 @@ copy_env_files() {
     if [[ $copied_count -eq 0 ]]; then
         echo "    ℹ No environment files found to copy"
     fi
+}
+
+# Check if tmux is available
+check_tmux() {
+    if ! command -v tmux &> /dev/null; then
+        echo -e "${RED}✗ tmux is not installed${NC}"
+        echo "Install with: brew install tmux (macOS) or apt install tmux (Linux)"
+        return 1
+    fi
+    return 0
+}
+
+# Launch tmux sessions for all worktrees
+launch_tmux_sessions() {
+    if ! check_tmux; then
+        return 1
+    fi
+
+    local project_name
+    project_name="$(basename "$(pwd)")"
+    local session_name="${project_name}-wt"
+
+    # Check if session already exists
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        echo -e "${YELLOW}⚠ tmux session '$session_name' already exists${NC}"
+        echo ""
+        echo "To attach:  tmux attach -t $session_name"
+        echo "To kill:    tmux kill-session -t $session_name"
+        return 0
+    fi
+
+    echo -e "${BLUE}🚀 Creating tmux session: $session_name${NC}"
+
+    local first=true
+    local window_count=0
+
+    for dir in "$WORKTREES_DIR"/*/; do
+        if [[ -d "$dir" && -f "$dir/.git" ]]; then
+            local task_name
+            task_name="$(basename "$dir")"
+            local abs_path
+            abs_path="$(cd "$dir" && pwd)"
+
+            if [[ "$first" == true ]]; then
+                # Create new session with first window
+                tmux new-session -d -s "$session_name" -n "$task_name" -c "$abs_path"
+                first=false
+            else
+                # Add new window to existing session
+                tmux new-window -t "$session_name" -n "$task_name" -c "$abs_path"
+            fi
+
+            # Send claude command to the window
+            tmux send-keys -t "$session_name:$task_name" "claude" Enter
+
+            echo "    ✓ Window: $task_name"
+            ((window_count++))
+        fi
+    done
+
+    if [[ $window_count -eq 0 ]]; then
+        echo -e "${YELLOW}⚠ No worktrees found to launch${NC}"
+        return 1
+    fi
+
+    echo ""
+    echo -e "${GREEN}✅ tmux session '$session_name' created with $window_count windows${NC}"
+    echo ""
+    echo -e "${BLUE}To attach (from another terminal):${NC}"
+    echo "  tmux attach -t $session_name"
+    echo ""
+    echo -e "${BLUE}To list windows:${NC}"
+    echo "  tmux list-windows -t $session_name"
+    echo ""
+    echo -e "${YELLOW}Note: Not auto-attaching to preserve current claude session${NC}"
+}
+
+# Check if iTerm2 is available (macOS only)
+check_iterm() {
+    if [[ "$(uname)" != "Darwin" ]]; then
+        echo -e "${RED}✗ iTerm launch is only available on macOS${NC}"
+        return 1
+    fi
+
+    if ! osascript -e 'tell application "System Events" to (name of processes) contains "iTerm2"' &>/dev/null; then
+        # Check if iTerm2 is installed
+        if [[ ! -d "/Applications/iTerm.app" ]]; then
+            echo -e "${RED}✗ iTerm2 is not installed${NC}"
+            echo "Download from: https://iterm2.com/"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# Launch iTerm tabs for all worktrees
+launch_iterm_tabs() {
+    if ! check_iterm; then
+        return 1
+    fi
+
+    echo -e "${BLUE}🚀 Opening iTerm tabs...${NC}"
+
+    local tab_count=0
+    local first=true
+
+    for dir in "$WORKTREES_DIR"/*/; do
+        if [[ -d "$dir" && -f "$dir/.git" ]]; then
+            local task_name
+            task_name="$(basename "$dir")"
+            local abs_path
+            abs_path="$(cd "$dir" && pwd)"
+
+            if [[ "$first" == true ]]; then
+                # Use current tab for the first worktree (or create new window)
+                osascript <<EOF
+tell application "iTerm2"
+    activate
+    tell current window
+        tell current session
+            write text "cd '$abs_path' && claude"
+        end tell
+    end tell
+end tell
+EOF
+                first=false
+            else
+                # Create new tab for subsequent worktrees
+                osascript <<EOF
+tell application "iTerm2"
+    tell current window
+        create tab with default profile
+        tell current session
+            write text "cd '$abs_path' && claude"
+        end tell
+    end tell
+end tell
+EOF
+            fi
+
+            echo "    ✓ Tab: $task_name"
+            ((tab_count++))
+        fi
+    done
+
+    if [[ $tab_count -eq 0 ]]; then
+        echo -e "${YELLOW}⚠ No worktrees found to launch${NC}"
+        return 1
+    fi
+
+    echo ""
+    echo -e "${GREEN}✅ Opened $tab_count iTerm tabs${NC}"
 }
 
 # Distribute tasks
@@ -268,21 +425,40 @@ EOF
     
     # Completion message
     echo -e "${GREEN}✅ Task distribution complete! ($task_count tasks)${NC}\n"
-    echo -e "${BLUE}Next steps:${NC}"
-    echo "Run Claude in each worktree:"
-    echo ""
-    
-    # Display list of created worktrees
-    for dir in "$WORKTREES_DIR"/*/; do
-        if [[ -d "$dir" && -f "$dir/.git" ]]; then
-            local task_name
-            task_name="$(basename "$dir")"
-            echo "  cd .worktrees/$task_name && claude"
-        fi
-    done
-    
-    echo ""
-    echo -e "${YELLOW}Tip:${NC} Run separately in each terminal/tab for parallel work"
+
+    # Handle auto-launch if requested
+    if [[ -n "$LAUNCH_MODE" ]]; then
+        echo ""
+        case "$LAUNCH_MODE" in
+            tmux)
+                launch_tmux_sessions
+                ;;
+            iterm)
+                launch_iterm_tabs
+                ;;
+            *)
+                echo -e "${RED}✗ Unknown launch mode: $LAUNCH_MODE${NC}"
+                echo "Supported: tmux, iterm"
+                ;;
+        esac
+    else
+        # Show manual instructions
+        echo -e "${BLUE}Next steps:${NC}"
+        echo "Run Claude in each worktree:"
+        echo ""
+
+        # Display list of created worktrees
+        for dir in "$WORKTREES_DIR"/*/; do
+            if [[ -d "$dir" && -f "$dir/.git" ]]; then
+                local task_name
+                task_name="$(basename "$dir")"
+                echo "  cd .worktrees/$task_name && claude"
+            fi
+        done
+
+        echo ""
+        echo -e "${YELLOW}Tip:${NC} Use --launch=tmux or --launch=iterm for auto-launch"
+    fi
 }
 
 # Check status
@@ -393,6 +569,30 @@ sync_env_files() {
     fi
 }
 
+# Parse arguments
+parse_args() {
+    local cmd=""
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --launch=*)
+                LAUNCH_MODE="${1#*=}"
+                shift
+                ;;
+            --launch)
+                LAUNCH_MODE="$2"
+                shift 2
+                ;;
+            *)
+                if [[ -z "$cmd" ]]; then
+                    cmd="$1"
+                fi
+                shift
+                ;;
+        esac
+    done
+    echo "$cmd"
+}
+
 # Main function
 main() {
     # Check Git repository
@@ -401,8 +601,13 @@ main() {
         echo "Please run this script in a git repository"
         exit 1
     fi
-    
-    case "${1:-help}" in
+
+    # Parse arguments
+    local command
+    command=$(parse_args "$@")
+    command="${command:-help}"
+
+    case "$command" in
         init)
             create_plan_template
             ;;

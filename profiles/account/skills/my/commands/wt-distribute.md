@@ -38,10 +38,10 @@ Parse `.worktrees/PLAN.md` and create isolated worktrees for parallel developmen
    - Document Claude invocation commands
    - Add troubleshooting guidance
 
-6. **Provide Launch Instructions**:
-   - Display commands for each worktree
-   - Suggest terminal/tab organization
-   - Indicate parallel execution capability
+6. **Launch Options**:
+   - Default: Display manual commands for each worktree
+   - `--launch=tmux`: Auto-create tmux session with windows per worktree
+   - `--launch=iterm`: Auto-open iTerm tabs per worktree (macOS only)
 
 ## PLAN.md Structure
 
@@ -105,13 +105,30 @@ Common issues and solutions:
 # Generate plan (if not exists)
 /worktree:plan "implement auth, payment, and search"
 
-# Distribute tasks
+# Distribute tasks (manual mode)
 /worktree:distribute
 
-# Work in parallel (different terminals)
-cd .worktrees/auth && claude
-cd .worktrees/payment && claude
-cd .worktrees/search && claude
+# Or: auto-launch with tmux (creates background session)
+/worktree:distribute --launch=tmux
+# Then in another terminal: tmux attach -t {project}-wt
+
+# Or: auto-launch with iTerm tabs (macOS)
+/worktree:distribute --launch=iterm
 ```
 
-Execute worktree distribution now using `scripts/worktree-manager.sh distribute`.
+## Launch Options
+
+### tmux (Recommended)
+Creates a detached tmux session with one window per worktree:
+- Session name: `{project-name}-wt`
+- Each window runs `claude` automatically
+- Attach from another terminal: `tmux attach -t {session}`
+- Preserves current claude code session
+
+### iTerm (macOS only)
+Opens new iTerm tabs for each worktree:
+- Each tab `cd`s to worktree and runs `claude`
+- Uses current iTerm window
+- Good for visual tab-based workflow
+
+Execute worktree distribution now using `scripts/worktree-manager.sh distribute [--launch=tmux|iterm]`.
