@@ -19,6 +19,14 @@ PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
 
 echo "🔧 Installing hooks to: $PROJECT_DIR"
 
+# Verify source files exist
+for hook in post_edit.py pre_commit.py; do
+    if [[ ! -f "$SCRIPT_DIR/$hook" ]]; then
+        echo "❌ Source file not found: $SCRIPT_DIR/$hook"
+        exit 1
+    fi
+done
+
 # Create directories
 mkdir -p "$PROJECT_DIR/.claude/hooks"
 
@@ -58,7 +66,7 @@ if ! command -v jq &> /dev/null; then
   }
 }
 EOF
-    exit 0
+    exit 1
 fi
 
 # Merge hooks config

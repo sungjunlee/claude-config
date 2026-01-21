@@ -22,13 +22,9 @@ from typing import Tuple, List, Union
 
 
 def run_command(cmd: Union[str, List[str]], timeout: int = 30) -> Tuple[bool, str, str]:
-    """Run a command and return output."""
+    """Run a command and return (success, stdout, stderr)."""
+    cmd_list = shlex.split(cmd) if isinstance(cmd, str) else cmd
     try:
-        if isinstance(cmd, str):
-            cmd_list = shlex.split(cmd)
-        else:
-            cmd_list = cmd
-
         result = subprocess.run(
             cmd_list,
             shell=False,
@@ -41,7 +37,7 @@ def run_command(cmd: Union[str, List[str]], timeout: int = 30) -> Tuple[bool, st
     except subprocess.TimeoutExpired:
         return False, "", "Command timed out"
     except FileNotFoundError:
-        return False, "", f"Command not found: {cmd_list[0] if cmd_list else 'unknown'}"
+        return False, "", f"Command not found: {cmd_list[0]}"
     except OSError as e:
         return False, "", f"OS error: {e}"
 

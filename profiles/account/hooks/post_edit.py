@@ -156,6 +156,7 @@ def handle_python(filepath: str) -> None:
 def _run_prettier(filepath: str) -> None:
     prettier = resolve_npm_tool("prettier")
     if not prettier:
+        print("  ⚠️  prettier not found")
         return
 
     success, _, stderr = run_command([*prettier, "--write", filepath], timeout=TIMEOUT_FAST)
@@ -168,6 +169,7 @@ def _run_prettier(filepath: str) -> None:
 def _run_eslint(filepath: str) -> None:
     eslint = resolve_npm_tool("eslint")
     if not eslint:
+        print("  ⚠️  eslint not found")
         return
 
     success, stdout, stderr = run_command([*eslint, "--fix", filepath])
@@ -246,6 +248,7 @@ def _run_gofmt(filepath: str) -> bool:
         elif stderr:
             print(f"  ⚠️  go fmt: {stderr[:50]}")
         return success
+    print("  ⚠️  gofmt/go not found")
     return False
 
 
@@ -297,10 +300,16 @@ def main() -> None:
     tool_use = os.environ.get("TOOL_USE", "")
     file_path = os.environ.get("FILE_PATH", "")
 
+    # Skip non-edit tools (expected, no logging needed)
     if tool_use not in ("Edit", "Write", "MultiEdit"):
         return
-    if not file_path or not os.path.exists(file_path):
+
+    # Log missing file path (helps debugging misconfiguration)
+    if not file_path:
+        print("⚠️  post_edit: FILE_PATH not set")
         return
+    if not os.path.exists(file_path):
+        return  # File deleted after edit - acceptable
 
     ext = Path(file_path).suffix.lower()
     handler = HANDLERS.get(ext)
