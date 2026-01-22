@@ -81,7 +81,7 @@ tmux kill-session -t {project}-wt
 
 ## Execution
 
-Run the `worktree-launcher.sh` script from the account profile's scripts directory:
+Run the `worktree-launcher.sh` script from `${CLAUDE_PLUGIN_ROOT}/scripts/`:
 ```bash
 worktree-launcher.sh {tmux|iterm|list}
 ```

@@ -75,5 +75,5 @@ Git Worktree Summary:
 - During work to monitor progress
 - With `/my:wt-sync` to identify sync needs
 
-Execute status check now by running the `worktree-status.sh` script from the account profile's scripts directory.
+Execute status check now by running the `worktree-status.sh` script from `${CLAUDE_PLUGIN_ROOT}/scripts/`.
 

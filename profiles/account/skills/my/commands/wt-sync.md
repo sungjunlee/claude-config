@@ -73,5 +73,5 @@ Note: run 'npm install' in auth
 - After pulling updates from remote
 - Part of regular maintenance workflow
 
-Execute synchronization now by running the `worktree-sync.sh` script from the account profile's scripts directory.
+Execute synchronization now by running the `worktree-sync.sh` script from `${CLAUDE_PLUGIN_ROOT}/scripts/`.
 
