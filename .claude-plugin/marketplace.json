@@ -1,0 +1,21 @@
+{
+  "$schema": "https://claude.ai/schemas/marketplace.json",
+  "name": "sungjunlee-claude-config",
+  "description": "Personal Claude Code plugins and configurations by sungjunlee",
+  "owner": {
+    "name": "sungjunlee",
+    "url": "https://github.com/sungjunlee"
+  },
+  "plugins": [
+    {
+      "name": "my",
+      "description": "Personal dev toolkit - AI integration, session management, git worktree parallel development",
+      "author": {
+        "name": "sungjunlee"
+      },
+      "category": "productivity",
+      "source": "./profiles/account/skills/my",
+      "homepage": "https://github.com/sungjunlee/claude-config"
+    }
+  ]
+}
