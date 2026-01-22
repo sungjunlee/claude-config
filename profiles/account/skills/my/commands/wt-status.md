@@ -31,48 +31,49 @@ Monitor progress across all parallel development worktrees, providing visibility
 ## Output Format
 
 ```text
-═══════════════════════════════
-     Worktree Status
-═══════════════════════════════
+================================
+ Worktree Status
+================================
 
-✅ auth
-   Branch: feature/auth
-   Changes: 0 file(s)
-   Commits: 5
-   Last: Implement JWT validation
-   Task: ../tasks/auth.md
+[OK] auth
+  Branch:  feature/auth
+  Changes: 0 file(s)
+  Commits: 5
+  Last:    Implement JWT validation
+  Task:    .worktrees/tasks/auth.md
 
-📝 payment
-   Branch: feature/payment
-   Changes: 3 file(s)
-   Commits: 2
-   Last: Add Stripe webhook handler
-   Task: ../tasks/payment.md
+[WIP] payment
+  Branch:  feature/payment
+  Changes: 3 file(s)
+  Commits: 2
+  Last:    Add Stripe webhook handler
+  Task:    .worktrees/tasks/payment.md
 
-🔄 search
-   Branch: feature/search
-   Changes: 7 file(s)
-   Commits: 0
-   Last: No commits yet
-   Task: ../tasks/search.md
+[NEW] search
+  Branch:  feature/search
+  Changes: 0 file(s)
+  Commits: 0
+  Last:    No commits yet
+  Task:    .worktrees/tasks/search.md
 
-───────────────────────────────
+--------------------------------
 Git Worktree Summary:
-3 active worktrees
+3 active worktree(s)
 ```
 
 ## Status Indicators
 
-- ✅ **Complete**: No changes, has commits (ready to merge)
-- 📝 **In Progress**: Has uncommitted changes
-- 🔄 **Starting**: No commits yet
-- ⚠️ **Conflict**: Merge conflicts detected
+- **[OK]**: No changes, has commits (ready to merge)
+- **[WIP]**: Has uncommitted changes (work in progress)
+- **[NEW]**: No commits yet (just started)
+- **[CONFLICT]**: Merge conflicts detected
 
 ## Integration Points
 
-- After `/worktree:distribute` to verify setup
+- After `/wt-distribute` to verify setup
 - Before merging to check completion
 - During work to monitor progress
-- With `/worktree:sync` to identify sync needs
+- With `/wt-sync` to identify sync needs
 
-Execute status check now using `scripts/worktree-manager.sh status`.
+Execute status check now by running the `worktree-status.sh` script from the account profile's scripts directory.
+
