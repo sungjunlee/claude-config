@@ -73,5 +73,5 @@ Note: run 'npm install' in auth
 - After pulling updates from remote
 - Part of regular maintenance workflow
 
-Execute synchronization now using `scripts/worktree-sync.sh`.
+Execute synchronization now by running the `worktree-sync.sh` script from the account profile's scripts directory.
 
