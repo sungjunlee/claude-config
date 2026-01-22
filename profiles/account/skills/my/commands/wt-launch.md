@@ -44,16 +44,16 @@ Shows existing worktrees and their branches.
 
 ## Prerequisites
 
-- Worktrees must exist (use `/wt-distribute` first)
+- Worktrees must exist (use `/my:wt-distribute` first)
 - For tmux: `tmux` installed (`brew install tmux`)
 - For iTerm: iTerm2 app installed, macOS only
 
 ## Workflow
 
 ```
-/wt-distribute          # Claude Code creates worktrees
+/my:wt-distribute          # Claude Code creates worktrees
          ↓
-/wt-launch tmux         # Script launches terminals
+/my:wt-launch tmux         # Script launches terminals
          ↓
 tmux attach -t {project}-wt       # User attaches to session
 ```

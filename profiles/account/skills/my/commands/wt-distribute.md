@@ -49,7 +49,7 @@ Parse `.worktrees/PLAN.md` and create isolated worktrees for parallel developmen
 
 7. **Provide Next Steps**:
    - Show created worktrees
-   - Suggest using `/wt-launch tmux` or `/wt-launch iterm` for auto-launch
+   - Suggest using `/my:wt-launch tmux` or `/my:wt-launch iterm` for auto-launch
    - Or show manual commands for each worktree
 
 ## PLAN.md Template
@@ -111,7 +111,7 @@ Instead of a fixed list, analyze the project to copy:
 
 ## Integration
 
-- **Before**: Use `/wt-plan` to generate PLAN.md
-- **After**: Use `/wt-launch tmux` or `/wt-launch iterm` to start sessions
-- **Monitor**: Use `/wt-status` to check progress
-- **Sync**: Use `/wt-sync` to synchronize env files
+- **Before**: Use `/my:wt-plan` to generate PLAN.md
+- **After**: Use `/my:wt-launch tmux` or `/my:wt-launch iterm` to start sessions
+- **Monitor**: Use `/my:wt-status` to check progress
+- **Sync**: Use `/my:wt-sync` to synchronize env files
