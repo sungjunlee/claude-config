@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Worktree Status - Show status summary for git worktrees
+#
+# Exit codes:
+#   0 - Success
+#   1 - Error (not a git repo, no worktrees)
 
 set -euo pipefail
 
@@ -135,7 +139,7 @@ show_status() {
             echo "  Task:    $task_file"
         fi
         echo ""
-        ((count++))
+        count=$((count + 1))
     done < <(collect_worktrees "$worktrees_dir")
 
     if [[ $count -eq 0 ]]; then

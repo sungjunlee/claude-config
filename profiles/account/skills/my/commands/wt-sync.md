@@ -47,30 +47,24 @@ Currently syncs the following core files:
 ## Example Output
 
 ```text
-🔄 Syncing environment files...
+Syncing environment files...
 
 Checking: auth
-  ✓ Updated .env
-  ✓ Updated package.json
+  UPD .env updated
+  UPD package.json updated
 
 Checking: payment
-  ✓ Updated .env
-  ⚠ package.json differs - skipping (has local changes)
+  UPD .env updated
+  SKIP package.json differs (local changes)
 
 Checking: search
-  ✓ All files up to date
+  OK  .env is up to date
+  OK  package.json is up to date
 
-✅ Synced 3 file(s)
-⚠ Note: Run 'npm install' in auth worktree (package.json updated)
+Done. Synced 3 file(s).
+Skipped 1 file(s) with local changes.
+Note: run 'npm install' in auth
 ```
-
-## Conflict Resolution
-
-When conflicts detected:
-1. Show diff between versions
-2. Ask user to choose action
-3. Option to backup before overwrite
-4. Log all sync operations
 
 ## Integration Points
 

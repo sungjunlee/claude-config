@@ -1,5 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Worktree Launcher - Launch claude in existing worktrees via tmux/iTerm
+#
+# Exit codes:
+#   0 - Success
+#   1 - Error (missing dependencies, no worktrees, partial failures)
 
 set -euo pipefail
 
@@ -45,14 +49,16 @@ list_worktrees() {
     fi
 
     local count=0
+    shopt -s nullglob
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
             local name=$(basename "$dir")
             local branch=$(cd "$dir" && git branch --show-current 2>/dev/null || echo "unknown")
             echo "  • $name ($branch)"
-            ((count++))
+            count=$((count + 1))
         fi
     done
+    shopt -u nullglob
 
     if [[ $count -eq 0 ]]; then
         echo -e "${YELLOW}No worktrees found${NC}"
@@ -83,6 +89,8 @@ launch_tmux() {
     fi
 
     local project_name=$(basename "$(pwd)")
+    # Sanitize session name: only allow alphanumeric, underscore, hyphen
+    project_name="${project_name//[^a-zA-Z0-9_-]/_}"
     local session_name="${project_name}-wt"
 
     # Check existing session
@@ -100,36 +108,40 @@ launch_tmux() {
     local count=0
     local failures=0
 
+    shopt -s nullglob
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
             local name=$(basename "$dir")
             local path
             if ! path=$(cd "$dir" && pwd); then
                 echo -e "  ${RED}✗ $name (directory inaccessible)${NC}" >&2
-                ((failures++))
+                failures=$((failures + 1))
                 continue
             fi
 
             if [[ "$first" == true ]]; then
                 if ! tmux new-session -d -s "$session_name" -n "$name" -c "$path"; then
                     echo -e "  ${RED}✗ $name (failed to create session)${NC}" >&2
-                    ((failures++))
+                    failures=$((failures + 1))
                     continue
                 fi
                 first=false
             else
                 if ! tmux new-window -t "$session_name" -n "$name" -c "$path"; then
                     echo -e "  ${RED}✗ $name (failed to create window)${NC}" >&2
-                    ((failures++))
+                    failures=$((failures + 1))
                     continue
                 fi
             fi
 
-            tmux send-keys -t "$session_name:$name" "claude" Enter
+            if ! tmux send-keys -t "$session_name:$name" "claude" Enter; then
+                echo -e "  ${YELLOW}! $name (window created but failed to launch claude)${NC}" >&2
+            fi
             echo "  ✓ $name"
-            ((count++))
+            count=$((count + 1))
         fi
     done
+    shopt -u nullglob
 
     if [[ $count -eq 0 && $failures -eq 0 ]]; then
         echo -e "${YELLOW}No worktrees to launch${NC}"
@@ -204,13 +216,14 @@ launch_iterm() {
     local failures=0
     local error_output
 
+    shopt -s nullglob
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
             local name=$(basename "$dir")
             local path
             if ! path=$(cd "$dir" && pwd); then
                 echo -e "  ${RED}✗ $name (directory inaccessible)${NC}" >&2
-                ((failures++))
+                failures=$((failures + 1))
                 continue
             fi
 
@@ -235,7 +248,7 @@ end tell
 EOF
                 ); then
                     echo -e "  ${RED}✗ $name (failed: ${error_output:-unknown error})${NC}" >&2
-                    ((failures++))
+                    failures=$((failures + 1))
                     continue
                 fi
                 first=false
@@ -253,15 +266,16 @@ end tell
 EOF
                 ); then
                     echo -e "  ${RED}✗ $name (failed: ${error_output:-unknown error})${NC}" >&2
-                    ((failures++))
+                    failures=$((failures + 1))
                     continue
                 fi
             fi
 
             echo "  ✓ $name"
-            ((count++))
+            count=$((count + 1))
         fi
     done
+    shopt -u nullglob
 
     if [[ $count -eq 0 && $failures -eq 0 ]]; then
         echo -e "${YELLOW}No worktrees to launch${NC}"

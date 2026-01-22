@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Worktree Sync - Sync environment files across git worktrees
+#
+# Exit codes:
+#   0 - Success
+#   1 - Error (not a git repo, no worktrees, sync failures)
 
 set -euo pipefail
 
@@ -55,6 +59,7 @@ sync_worktrees() {
     local count=0
     local synced=0
     local skipped=0
+    local failures=0
     local -a npm_notice=()
 
     local dir
@@ -73,31 +78,39 @@ sync_worktrees() {
                 continue
             fi
 
-            if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then
-                echo "  OK  $file is up to date"
-                continue
+            # Check if files are identical (handle cmp errors gracefully)
+            if [[ -f "$dest" ]]; then
+                if cmp -s "$src" "$dest" 2>/dev/null; then
+                    echo "  OK  $file is up to date"
+                    continue
+                fi
+                # If cmp fails (not just different), treat as needing update
             fi
 
             if [[ -e "$dest" ]]; then
-                if git -C "$dir" status --porcelain -- "$file" | grep -q .; then
+                if git -C "$dir" status --porcelain -- "$file" 2>/dev/null | grep -q .; then
                     echo "  SKIP $file differs (local changes)"
-                    ((skipped++))
+                    skipped=$((skipped + 1))
                     continue
                 fi
             fi
 
             mkdir -p "$(dirname "$dest")"
-            cp "$src" "$dest"
-            echo "  UPD $file updated"
-            ((synced++))
+            if cp "$src" "$dest"; then
+                echo "  UPD $file updated"
+                synced=$((synced + 1))
 
-            if [[ "$file" == "package.json" ]]; then
-                npm_notice+=("$name")
+                if [[ "$file" == "package.json" ]]; then
+                    npm_notice+=("$name")
+                fi
+            else
+                echo "  ERR $file: copy failed" >&2
+                failures=$((failures + 1))
             fi
         done
 
         echo ""
-        ((count++))
+        count=$((count + 1))
     done < <(collect_worktrees "$worktrees_dir")
 
     if [[ $count -eq 0 ]]; then
@@ -110,9 +123,15 @@ sync_worktrees() {
     if [[ $skipped -gt 0 ]]; then
         echo "Skipped $skipped file(s) with local changes."
     fi
+    if [[ $failures -gt 0 ]]; then
+        echo "Failed to sync $failures file(s)." >&2
+    fi
     if [[ ${#npm_notice[@]} -gt 0 ]]; then
         echo "Note: run 'npm install' in ${npm_notice[*]}"
     fi
+
+    [[ $failures -gt 0 ]] && return 1
+    return 0
 }
 
 main() {
