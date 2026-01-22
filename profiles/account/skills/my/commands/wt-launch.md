@@ -26,10 +26,10 @@ scripts/worktree-launcher.sh list
 
 ### tmux
 Creates a detached tmux session with one window per worktree:
-- Session name: `{project-name}-wt`
+- Session name: `{project}-wt` (where `{project}` = current directory name)
 - Each window named after worktree (e.g., `auth`, `payment`)
 - `claude` auto-started in each window
-- Attach from another terminal: `tmux attach -t {session}`
+- Attach from another terminal: `tmux attach -t {project}-wt`
 
 **Why detached?** Preserves your current Claude Code session. Attach from a different terminal.
 
@@ -55,7 +55,7 @@ Shows existing worktrees and their branches.
          ↓
 /wt-launch tmux         # Script launches terminals
          ↓
-tmux attach -t wt       # User attaches to session
+tmux attach -t {project}-wt       # User attaches to session
 ```
 
 ## Tmux Quick Reference

@@ -190,7 +190,7 @@ git worktree prune
 
 ```bash
 # 스크립트 실행 권한
-chmod +x scripts/worktree-manager.sh
+chmod +x scripts/worktree-launcher.sh scripts/worktree-status.sh scripts/worktree-sync.sh
 ```
 
 ## Integration with CI/CD

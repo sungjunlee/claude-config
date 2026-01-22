@@ -75,4 +75,5 @@ Git Worktree Summary:
 - During work to monitor progress
 - With `/worktree:sync` to identify sync needs
 
-Execute status check now using `scripts/worktree-manager.sh status`.
+Execute status check now using `scripts/worktree-status.sh`.
+

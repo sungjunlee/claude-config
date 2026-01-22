@@ -79,4 +79,5 @@ When conflicts detected:
 - After pulling updates from remote
 - Part of regular maintenance workflow
 
-Execute synchronization now using `scripts/worktree-manager.sh sync`.
+Execute synchronization now using `scripts/worktree-sync.sh`.
+

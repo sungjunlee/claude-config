@@ -27,7 +27,7 @@ Commands:
 
 Examples:
   $0 tmux              # Create tmux session with all worktrees
-  tmux attach -t wt    # Then attach from another terminal
+  tmux attach -t {project}-wt    # Then attach from another terminal
 
   $0 iterm             # Open iTerm tabs for all worktrees
 
@@ -98,17 +98,31 @@ launch_tmux() {
 
     local first=true
     local count=0
+    local failures=0
 
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
             local name=$(basename "$dir")
-            local path=$(cd "$dir" && pwd)
+            local path
+            if ! path=$(cd "$dir" && pwd); then
+                echo -e "  ${RED}✗ $name (directory inaccessible)${NC}" >&2
+                ((failures++))
+                continue
+            fi
 
             if [[ "$first" == true ]]; then
-                tmux new-session -d -s "$session_name" -n "$name" -c "$path"
+                if ! tmux new-session -d -s "$session_name" -n "$name" -c "$path"; then
+                    echo -e "  ${RED}✗ $name (failed to create session)${NC}" >&2
+                    ((failures++))
+                    continue
+                fi
                 first=false
             else
-                tmux new-window -t "$session_name" -n "$name" -c "$path"
+                if ! tmux new-window -t "$session_name" -n "$name" -c "$path"; then
+                    echo -e "  ${RED}✗ $name (failed to create window)${NC}" >&2
+                    ((failures++))
+                    continue
+                fi
             fi
 
             tmux send-keys -t "$session_name:$name" "claude" Enter
@@ -117,16 +131,24 @@ launch_tmux() {
         fi
     done
 
-    if [[ $count -eq 0 ]]; then
+    if [[ $count -eq 0 && $failures -eq 0 ]]; then
         echo -e "${YELLOW}No worktrees to launch${NC}"
         return 1
     fi
 
     echo ""
-    echo -e "${GREEN}✅ Created session '$session_name' with $count windows${NC}"
-    echo ""
-    echo -e "${BLUE}Attach from another terminal:${NC}"
-    echo "  tmux attach -t $session_name"
+    if [[ $failures -gt 0 ]]; then
+        echo -e "${YELLOW}⚠ $failures worktree(s) failed${NC}"
+    fi
+    if [[ $count -gt 0 ]]; then
+        echo -e "${GREEN}✅ Created session '$session_name' with $count window(s)${NC}"
+        echo ""
+        echo -e "${BLUE}Attach from another terminal:${NC}"
+        echo "  tmux attach -t $session_name"
+    fi
+
+    [[ $failures -gt 0 ]] && return 1
+    return 0
 }
 
 # Check iTerm availability
@@ -136,11 +158,34 @@ check_iterm() {
         return 1
     fi
 
-    if [[ ! -d "/Applications/iTerm.app" ]]; then
-        echo -e "${RED}✗ iTerm2 not installed${NC}"
-        echo "Download: https://iterm2.com/"
-        return 1
+    if pgrep -x "iTerm2" >/dev/null 2>&1 || pgrep -x "iTerm" >/dev/null 2>&1; then
+        return 0
     fi
+
+    if command -v mdfind >/dev/null 2>&1; then
+        if mdfind 'kMDItemCFBundleIdentifier == "com.googlecode.iterm2"' | head -n 1 | grep -q .; then
+            return 0
+        fi
+    fi
+
+    if [[ -d "/Applications/iTerm.app" || -d "$HOME/Applications/iTerm.app" ]]; then
+        return 0
+    fi
+
+    if osascript -e 'id of application id "com.googlecode.iterm2"' >/dev/null 2>&1; then
+        return 0
+    fi
+
+    echo -e "${RED}✗ iTerm2 not installed${NC}"
+    echo "Download: https://iterm2.com/"
+    return 1
+}
+
+# Escape single quotes for AppleScript
+escape_applescript_path() {
+    local path="$1"
+    # Replace ' with '\'' (end quote, escaped quote, start quote)
+    echo "${path//\'/\'\\\'\'}"
 }
 
 # Launch iTerm tabs
@@ -156,35 +201,61 @@ launch_iterm() {
 
     local first=true
     local count=0
+    local failures=0
+    local error_output
 
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
             local name=$(basename "$dir")
-            local path=$(cd "$dir" && pwd)
+            local path
+            if ! path=$(cd "$dir" && pwd); then
+                echo -e "  ${RED}✗ $name (directory inaccessible)${NC}" >&2
+                ((failures++))
+                continue
+            fi
+
+            # Escape single quotes in path for AppleScript
+            local escaped_path
+            escaped_path=$(escape_applescript_path "$path")
 
             if [[ "$first" == true ]]; then
-                osascript <<EOF
-tell application "iTerm2"
+                # First tab: activate iTerm and ensure window exists
+                if ! error_output=$(osascript <<EOF 2>&1
+tell application id "com.googlecode.iterm2"
     activate
+    if (count of windows) = 0 then
+        create window with default profile
+    end if
     tell current window
         tell current session
-            write text "cd '$path' && claude"
+            write text "cd '${escaped_path}' && claude"
         end tell
     end tell
 end tell
 EOF
+                ); then
+                    echo -e "  ${RED}✗ $name (failed: ${error_output:-unknown error})${NC}" >&2
+                    ((failures++))
+                    continue
+                fi
                 first=false
             else
-                osascript <<EOF
-tell application "iTerm2"
+                # Subsequent tabs
+                if ! error_output=$(osascript <<EOF 2>&1
+tell application id "com.googlecode.iterm2"
     tell current window
         create tab with default profile
         tell current session
-            write text "cd '$path' && claude"
+            write text "cd '${escaped_path}' && claude"
         end tell
     end tell
 end tell
 EOF
+                ); then
+                    echo -e "  ${RED}✗ $name (failed: ${error_output:-unknown error})${NC}" >&2
+                    ((failures++))
+                    continue
+                fi
             fi
 
             echo "  ✓ $name"
@@ -192,13 +263,21 @@ EOF
         fi
     done
 
-    if [[ $count -eq 0 ]]; then
+    if [[ $count -eq 0 && $failures -eq 0 ]]; then
         echo -e "${YELLOW}No worktrees to launch${NC}"
         return 1
     fi
 
     echo ""
-    echo -e "${GREEN}✅ Opened $count iTerm tabs${NC}"
+    if [[ $failures -gt 0 ]]; then
+        echo -e "${YELLOW}⚠ $failures worktree(s) failed to open${NC}"
+    fi
+    if [[ $count -gt 0 ]]; then
+        echo -e "${GREEN}✅ Opened $count iTerm tab(s)${NC}"
+    fi
+
+    [[ $failures -gt 0 ]] && return 1
+    return 0
 }
 
 # Main
