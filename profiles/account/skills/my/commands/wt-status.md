@@ -70,9 +70,9 @@ Git Worktree Summary:
 
 ## Integration Points
 
-- After `/worktree:distribute` to verify setup
+- After `/my:wt-distribute` to verify setup
 - Before merging to check completion
 - During work to monitor progress
-- With `/worktree:sync` to identify sync needs
+- With `/my:wt-sync` to identify sync needs
 
-Execute status check now using `scripts/worktree-manager.sh status`.
+Execute status check now using `~/.claude/scripts/worktree-manager.sh status`.

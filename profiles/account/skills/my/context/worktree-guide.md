@@ -93,14 +93,14 @@ ln -s ../../target .worktrees/feature-name/target
 
 ```bash
 # PLAN.md 생성
-/worktree:plan "implement auth, payment, search features"
+/my:wt-plan "implement auth, payment, search features"
 ```
 
 ### 2. Distribution Phase
 
 ```bash
 # Worktrees 생성 및 환경 설정
-/worktree:distribute
+/my:wt-distribute
 ```
 
 ### 3. Parallel Work
@@ -120,14 +120,14 @@ cd .worktrees/search && claude
 
 ```bash
 # 진행 상황 확인
-/worktree:status
+/my:wt-status
 ```
 
 ### 5. Synchronization
 
 ```bash
 # 환경 파일 동기화
-/worktree:sync
+/my:wt-sync
 ```
 
 ### 6. Merge
@@ -158,7 +158,7 @@ git merge feature/search
 
 - 병합 순서 미리 계획
 - 공통 유틸리티 변경은 먼저 병합
-- 자주 `/worktree:status` 확인
+- 자주 `/my:wt-status` 확인
 
 ## Troubleshooting
 
@@ -190,7 +190,7 @@ git worktree prune
 
 ```bash
 # 스크립트 실행 권한
-chmod +x scripts/worktree-manager.sh
+chmod +x ~/.claude/scripts/worktree-manager.sh
 ```
 
 ## Integration with CI/CD

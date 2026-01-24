@@ -32,19 +32,19 @@ Leverage plan-agent to analyze complex requirements, identify parallelizable wor
 4. **Prepare for Distribution**:
    - Validate branch name availability
    - Check for existing worktrees
-   - Ready for `/worktree:distribute`
+   - Ready for `/my:wt-distribute`
 
 ## Examples
 
 ```bash
 # Example 1: E-commerce site core features
-/worktree:plan "Add authentication, payment, and search features to e-commerce site"
+/my:wt-plan "Add authentication, payment, and search features to e-commerce site"
 
 # Example 2: Large-scale refactoring
-/worktree:plan "Migrate from React 16 to 18 while introducing TypeScript"
+/my:wt-plan "Migrate from React 16 to 18 while introducing TypeScript"
 
 # Example 3: Bug fixes
-/worktree:plan "Fix bugs found in login, payment, and search"
+/my:wt-plan "Fix bugs found in login, payment, and search"
 ```
 
 ## Integration with plan-agent
@@ -87,7 +87,7 @@ search: Elasticsearch search feature (estimated: 2h)
 ## Workflow Sequence
 
 ```text
-/worktree:plan → plan-agent analysis → PLAN.md generation → /worktree:distribute → Parallel execution
+/my:wt-plan → plan-agent analysis → PLAN.md generation → /my:wt-distribute → Parallel execution
 ```
 
 ## Success Indicators
@@ -115,8 +115,8 @@ search: Elasticsearch search feature (estimated: 2h)
 ## Related Commands
 
 - `/plan` - General strategic planning
-- `/worktree:distribute` - Execute task distribution
-- `/worktree:status` - Monitor progress
-- `/worktree:sync` - Synchronize environments
+- `/my:wt-distribute` - Execute task distribution
+- `/my:wt-status` - Monitor progress
+- `/my:wt-sync` - Synchronize environments
 
 Execute plan-agent now to analyze and generate parallel task plan.

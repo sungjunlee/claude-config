@@ -88,25 +88,25 @@ Creates for each task:
 
 Common issues and solutions:
 - **Branch exists**: Check and clean existing branches
-- **PLAN.md missing**: Create template or use `/worktree:plan`
+- **PLAN.md missing**: Create template or use `/my:wt-plan`
 - **Permission denied**: Check script execution permissions
 - **Disk space**: Verify sufficient space before distribution
 
 ## Integration Points
 
-- Use after `/worktree:plan` for automatic planning
-- Monitor with `/worktree:status`
-- Synchronize with `/worktree:sync`
+- Use after `/my:wt-plan` for automatic planning
+- Monitor with `/my:wt-status`
+- Synchronize with `/my:wt-sync`
 - Clean up with `git worktree remove`
 
 ## Example Workflow
 
 ```bash
 # Generate plan (if not exists)
-/worktree:plan "implement auth, payment, and search"
+/my:wt-plan "implement auth, payment, and search"
 
 # Distribute tasks
-/worktree:distribute
+/my:wt-distribute
 
 # Work in parallel (different terminals)
 cd .worktrees/auth && claude
@@ -114,4 +114,4 @@ cd .worktrees/payment && claude
 cd .worktrees/search && claude
 ```
 
-Execute worktree distribution now using `scripts/worktree-manager.sh distribute`.
+Execute worktree distribution now using `~/.claude/scripts/worktree-manager.sh distribute`.
