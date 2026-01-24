@@ -1,0 +1,7 @@
+# Global Codex guidance
+
+## Working agreements
+- Ask before running destructive commands or modifying large sets of files.
+- Prefer project-specific instructions when a repo provides its own AGENTS.md or CLAUDE.md.
+- Run relevant tests after behavior changes and summarize results.
+- Keep outputs concise and call out assumptions.
