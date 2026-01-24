@@ -47,24 +47,30 @@ Currently syncs the following core files:
 ## Example Output
 
 ```text
-Syncing environment files...
+🔄 Syncing environment files...
 
 Checking: auth
-  UPD .env updated
-  UPD package.json updated
+  ✓ Updated .env
+  ✓ Updated package.json
 
 Checking: payment
-  UPD .env updated
-  SKIP package.json differs (local changes)
+  ✓ Updated .env
+  ⚠ package.json differs - skipping (has local changes)
 
 Checking: search
-  OK  .env is up to date
-  OK  package.json is up to date
+  ✓ All files up to date
 
-Done. Synced 3 file(s).
-Skipped 1 file(s) with local changes.
-Note: run 'npm install' in auth
+✅ Synced 3 file(s)
+⚠ Note: Run 'npm install' in auth worktree (package.json updated)
 ```
+
+## Conflict Resolution
+
+When conflicts detected:
+1. Show diff between versions
+2. Ask user to choose action
+3. Option to backup before overwrite
+4. Log all sync operations
 
 ## Integration Points
 
@@ -73,5 +79,4 @@ Note: run 'npm install' in auth
 - After pulling updates from remote
 - Part of regular maintenance workflow
 
-Execute synchronization now by running the `worktree-sync.sh` script from `${CLAUDE_PLUGIN_ROOT}/scripts/`.
-
+Execute synchronization now using `scripts/worktree-manager.sh sync`.
