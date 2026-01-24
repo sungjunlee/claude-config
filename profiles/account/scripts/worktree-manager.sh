@@ -18,19 +18,22 @@ show_help() {
     cat <<EOF
 Worktree Manager - Git Worktree task distribution tool
 
-Usage: $0 {init|distribute|status|sync|help}
+Usage: $0 {init|distribute|status|sync|launch|list|help}
 
 Commands:
   init       - Create PLAN.md template
   distribute - Distribute tasks based on PLAN.md
   status     - Check all worktree status
   sync       - Synchronize environment files between worktrees
+  launch     - Launch claude in worktrees (tmux|iterm|list)
+  list       - List existing worktrees (alias for launch list)
   help       - Show this help message
 
 Example:
   $0 init                    # Initial setup
   vim .worktrees/PLAN.md     # Edit task plan
   $0 distribute              # Distribute tasks
+  $0 launch tmux             # Launch claude in tmux session
   cd .worktrees/auth         # Move to worktree
   claude                     # Run Claude
 
@@ -393,6 +396,283 @@ sync_env_files() {
     fi
 }
 
+# List existing worktrees
+list_worktrees() {
+    echo -e "${BLUE}📂 Worktrees in $WORKTREES_DIR:${NC}"
+    echo ""
+
+    if [[ ! -d "$WORKTREES_DIR" ]]; then
+        echo -e "${YELLOW}No worktrees directory found${NC}"
+        return 1
+    fi
+
+    local count=0
+    shopt -s nullglob
+    for dir in "$WORKTREES_DIR"/*/; do
+        if [[ -d "$dir" && -f "$dir/.git" ]]; then
+            local name
+            name=$(basename "$dir")
+            local branch
+            branch=$(cd "$dir" && git branch --show-current 2>/dev/null || echo "unknown")
+            echo "  • $name ($branch)"
+            count=$((count + 1))
+        fi
+    done
+    shopt -u nullglob
+
+    if [[ $count -eq 0 ]]; then
+        echo -e "${YELLOW}No worktrees found${NC}"
+        echo "Use '$0 distribute' to create worktrees first"
+        return 1
+    fi
+
+    echo ""
+    echo -e "${GREEN}Total: $count worktree(s)${NC}"
+}
+
+# Check tmux availability
+check_tmux() {
+    if ! command -v tmux &> /dev/null; then
+        echo -e "${RED}✗ tmux not installed${NC}"
+        echo "Install: brew install tmux (macOS) or apt install tmux (Linux)"
+        return 1
+    fi
+}
+
+# Launch tmux session
+launch_tmux() {
+    check_tmux || return 1
+
+    if [[ ! -d "$WORKTREES_DIR" ]]; then
+        echo -e "${RED}✗ No worktrees directory${NC}"
+        return 1
+    fi
+
+    local project_name
+    project_name=$(basename "$(pwd)")
+    # Sanitize session name: only allow alphanumeric, underscore, hyphen
+    project_name="${project_name//[^a-zA-Z0-9_-]/_}"
+    local session_name="${project_name}-wt"
+
+    # Check existing session
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        echo -e "${YELLOW}⚠ Session '$session_name' already exists${NC}"
+        echo ""
+        echo "  Attach:  tmux attach -t $session_name"
+        echo "  Kill:    tmux kill-session -t $session_name"
+        return 0
+    fi
+
+    echo -e "${BLUE}🚀 Creating tmux session: $session_name${NC}"
+
+    local first=true
+    local count=0
+    local failures=0
+
+    shopt -s nullglob
+    for dir in "$WORKTREES_DIR"/*/; do
+        if [[ -d "$dir" && -f "$dir/.git" ]]; then
+            local name
+            name=$(basename "$dir")
+            local path
+            if ! path=$(cd "$dir" && pwd); then
+                echo -e "  ${RED}✗ $name (directory inaccessible)${NC}" >&2
+                failures=$((failures + 1))
+                continue
+            fi
+
+            if [[ "$first" == true ]]; then
+                if ! tmux new-session -d -s "$session_name" -n "$name" -c "$path"; then
+                    echo -e "  ${RED}✗ $name (failed to create session)${NC}" >&2
+                    failures=$((failures + 1))
+                    continue
+                fi
+                first=false
+            else
+                if ! tmux new-window -t "$session_name" -n "$name" -c "$path"; then
+                    echo -e "  ${RED}✗ $name (failed to create window)${NC}" >&2
+                    failures=$((failures + 1))
+                    continue
+                fi
+            fi
+
+            if ! tmux send-keys -t "$session_name:$name" "claude" C-m; then
+                echo -e "  ${YELLOW}⚠ $name (failed to start claude)${NC}" >&2
+                failures=$((failures + 1))
+                continue
+            fi
+
+            echo "  ✓ $name"
+            count=$((count + 1))
+        fi
+    done
+    shopt -u nullglob
+
+    if [[ $count -eq 0 && $failures -eq 0 ]]; then
+        echo -e "${YELLOW}No worktrees to launch${NC}"
+        return 1
+    fi
+
+    echo ""
+    if [[ $failures -gt 0 ]]; then
+        echo -e "${YELLOW}⚠ $failures worktree(s) failed to launch${NC}"
+    fi
+    if [[ $count -gt 0 ]]; then
+        echo -e "${GREEN}✅ Launched $count worktree(s) in tmux${NC}"
+        echo "Attach: tmux attach -t $session_name"
+    fi
+
+    [[ $failures -gt 0 ]] && return 1
+    return 0
+}
+
+# Check iTerm availability (macOS only)
+check_iterm() {
+    if [[ "$(uname)" != "Darwin" ]]; then
+        echo -e "${RED}✗ iTerm only available on macOS${NC}"
+        return 1
+    fi
+
+    if pgrep -x "iTerm2" >/dev/null 2>&1 || pgrep -x "iTerm" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    if command -v mdfind >/dev/null 2>&1; then
+        if mdfind 'kMDItemCFBundleIdentifier == "com.googlecode.iterm2"' | head -n 1 | grep -q .; then
+            return 0
+        fi
+    fi
+
+    if [[ -d "/Applications/iTerm.app" || -d "$HOME/Applications/iTerm.app" ]]; then
+        return 0
+    fi
+
+    if osascript -e 'id of application id "com.googlecode.iterm2"' >/dev/null 2>&1; then
+        return 0
+    fi
+
+    echo -e "${RED}✗ iTerm2 not installed${NC}"
+    echo "Download: https://iterm2.com/"
+    return 1
+}
+
+# Escape single quotes for AppleScript
+escape_applescript_path() {
+    local path="$1"
+    # Replace ' with '\'' (end quote, escaped quote, start quote)
+    echo "${path//\'/\'\\\'\'}"
+}
+
+# Launch iTerm tabs
+launch_iterm() {
+    check_iterm || return 1
+
+    if [[ ! -d "$WORKTREES_DIR" ]]; then
+        echo -e "${RED}✗ No worktrees directory${NC}"
+        return 1
+    fi
+
+    echo -e "${BLUE}🚀 Opening iTerm tabs...${NC}"
+
+    local first=true
+    local count=0
+    local failures=0
+    local error_output
+
+    shopt -s nullglob
+    for dir in "$WORKTREES_DIR"/*/; do
+        if [[ -d "$dir" && -f "$dir/.git" ]]; then
+            local name
+            name=$(basename "$dir")
+            local path
+            if ! path=$(cd "$dir" && pwd); then
+                echo -e "  ${RED}✗ $name (directory inaccessible)${NC}" >&2
+                failures=$((failures + 1))
+                continue
+            fi
+
+            local escaped_path
+            escaped_path=$(escape_applescript_path "$path")
+
+            if [[ "$first" == true ]]; then
+                if ! error_output=$(osascript <<EOF 2>&1
+tell application id "com.googlecode.iterm2"
+    activate
+    if (count of windows) = 0 then
+        create window with default profile
+    end if
+    tell current window
+        tell current session
+            write text "cd '${escaped_path}' && claude"
+        end tell
+    end tell
+end tell
+EOF
+                ); then
+                    echo -e "  ${RED}✗ $name (failed: ${error_output:-unknown error})${NC}" >&2
+                    failures=$((failures + 1))
+                    continue
+                fi
+                first=false
+            else
+                if ! error_output=$(osascript <<EOF 2>&1
+tell application id "com.googlecode.iterm2"
+    tell current window
+        create tab with default profile
+        tell current session
+            write text "cd '${escaped_path}' && claude"
+        end tell
+    end tell
+end tell
+EOF
+                ); then
+                    echo -e "  ${RED}✗ $name (failed: ${error_output:-unknown error})${NC}" >&2
+                    failures=$((failures + 1))
+                    continue
+                fi
+            fi
+
+            echo "  ✓ $name"
+            count=$((count + 1))
+        fi
+    done
+    shopt -u nullglob
+
+    if [[ $count -eq 0 && $failures -eq 0 ]]; then
+        echo -e "${YELLOW}No worktrees to launch${NC}"
+        return 1
+    fi
+
+    echo ""
+    if [[ $failures -gt 0 ]]; then
+        echo -e "${YELLOW}⚠ $failures worktree(s) failed to open${NC}"
+    fi
+    if [[ $count -gt 0 ]]; then
+        echo -e "${GREEN}✅ Opened $count iTerm tab(s)${NC}"
+    fi
+
+    [[ $failures -gt 0 ]] && return 1
+    return 0
+}
+
+launch_worktrees() {
+    case "${1:-list}" in
+        tmux)
+            launch_tmux
+            ;;
+        iterm)
+            launch_iterm
+            ;;
+        list|"")
+            list_worktrees
+            ;;
+        *)
+            echo -e "${YELLOW}Usage:${NC} $0 launch {tmux|iterm|list}"
+            return 1
+            ;;
+    esac
+}
+
 # Main function
 main() {
     # Check Git repository
@@ -414,6 +694,12 @@ main() {
             ;;
         sync)
             sync_env_files
+            ;;
+        launch)
+            launch_worktrees "${2:-}"
+            ;;
+        tmux|iterm|list)
+            launch_worktrees "$1"
             ;;
         help|*)
             show_help

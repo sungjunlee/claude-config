@@ -116,6 +116,7 @@ search: Elasticsearch search feature (estimated: 2h)
 
 - `/plan` - General strategic planning
 - `/my:wt-distribute` - Execute task distribution
+- `/my:wt-launch` - Launch claude sessions in worktrees
 - `/my:wt-status` - Monitor progress
 - `/my:wt-sync` - Synchronize environments
 

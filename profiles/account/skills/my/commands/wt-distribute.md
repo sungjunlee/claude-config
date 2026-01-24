@@ -97,6 +97,7 @@ Common issues and solutions:
 - Use after `/my:wt-plan` for automatic planning
 - Monitor with `/my:wt-status`
 - Synchronize with `/my:wt-sync`
+- Launch sessions with `/my:wt-launch tmux` or `/my:wt-launch iterm`
 - Clean up with `git worktree remove`
 
 ## Example Workflow
@@ -107,6 +108,9 @@ Common issues and solutions:
 
 # Distribute tasks
 /my:wt-distribute
+
+# Optional: Launch sessions automatically
+/my:wt-launch tmux
 
 # Work in parallel (different terminals)
 cd .worktrees/auth && claude

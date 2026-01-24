@@ -50,6 +50,7 @@ Git worktree를 활용한 병렬 개발:
 |---------|---------|
 | `/my:wt-plan` | Generate parallel task plan |
 | `/my:wt-distribute` | Distribute tasks to worktrees |
+| `/my:wt-launch` | Launch claude sessions in worktrees |
 | `/my:wt-status` | Check all worktree status |
 | `/my:wt-sync` | Sync environment across worktrees |
 
@@ -77,5 +78,6 @@ Git worktree를 활용한 병렬 개발:
 # Worktree: Parallel feature development
 /my:wt-plan
 /my:wt-distribute
+/my:wt-launch tmux
 /my:wt-status
 ```
