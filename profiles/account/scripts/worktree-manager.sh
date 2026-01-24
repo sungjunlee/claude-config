@@ -61,7 +61,10 @@ create_plan_template() {
         fi
     fi
     
-    cat > "$WORKTREES_DIR/PLAN.md" <<'EOF'
+    if ! cat > "$WORKTREES_DIR/PLAN.md" <<'EOF'; then
+        echo -e "${RED}✗ Failed to write $WORKTREES_DIR/PLAN.md${NC}"
+        return 1
+    fi
 # Task Plan
 
 ## Task List
@@ -240,7 +243,11 @@ distribute_tasks() {
             copy_env_files "$worktree_path" "."
             
             # Generate task instructions
-            cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF
+            if ! cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF; then
+                echo -e "    ${RED}✗ Failed to write task file for $task_name${NC}"
+                echo ""
+                continue
+            fi
 # Task: $task_name
 
 ## 📋 Task Description
@@ -474,7 +481,9 @@ list_worktrees() {
             local name
             name=$(basename "$dir")
             local branch
-            branch=$(cd "$dir" && git branch --show-current 2>/dev/null || echo "unknown")
+            branch=$(git -C "$dir" symbolic-ref -q --short HEAD 2>/dev/null \
+                || git -C "$dir" rev-parse --short HEAD 2>/dev/null \
+                || echo "detached")
             echo "  • $name ($branch)"
             count=$((count + 1))
         fi
