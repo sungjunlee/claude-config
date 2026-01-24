@@ -1,0 +1,30 @@
+{
+  "name": "my",
+  "version": "1.0.0",
+  "description": "Personal development toolkit - AI integration, session management, and parallel git worktree development",
+  "author": {
+    "name": "sungjunlee"
+  },
+  "homepage": "https://github.com/sungjunlee/claude-config",
+  "repository": "https://github.com/sungjunlee/claude-config",
+  "license": "MIT",
+  "keywords": [
+    "ai-integration",
+    "gemini",
+    "codex",
+    "session-management",
+    "handoff",
+    "git-worktree",
+    "parallel-development"
+  ],
+  "category": "productivity",
+  "tags": [
+    "multi-model",
+    "worktree",
+    "session",
+    "development-workflow"
+  ],
+  "commands": [
+    "./commands/"
+  ]
+}
