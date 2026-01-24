@@ -13,13 +13,13 @@ Automatically open terminal sessions (tmux windows or iTerm tabs) for each workt
 
 ```bash
 # Launch with tmux (recommended - works everywhere)
-scripts/worktree-launcher.sh tmux
+~/.claude/scripts/worktree-manager.sh launch tmux
 
 # Launch with iTerm (macOS only)
-scripts/worktree-launcher.sh iterm
+~/.claude/scripts/worktree-manager.sh launch iterm
 
 # List existing worktrees
-scripts/worktree-launcher.sh list
+~/.claude/scripts/worktree-manager.sh launch list
 ```
 
 ## Commands
@@ -51,11 +51,11 @@ Shows existing worktrees and their branches.
 ## Workflow
 
 ```
-/my:wt-distribute          # Claude Code creates worktrees
+/my:wt-distribute          # Create worktrees
          ↓
-/my:wt-launch tmux         # Script launches terminals
+/my:wt-launch tmux         # Launch terminals
          ↓
-tmux attach -t {project}-wt       # User attaches to session
+tmux attach -t {project}-wt
 ```
 
 ## Tmux Quick Reference
@@ -81,7 +81,12 @@ tmux kill-session -t {project}-wt
 
 ## Execution
 
-Run the `worktree-launcher.sh` script from `${CLAUDE_PLUGIN_ROOT}/scripts/`:
+Run the worktree manager from `~/.claude/scripts`:
 ```bash
-worktree-launcher.sh {tmux|iterm|list}
+~/.claude/scripts/worktree-manager.sh launch {tmux|iterm|list}
+```
+
+Optional shortcut:
+```bash
+~/.claude/scripts/worktree-manager.sh {tmux|iterm|list}
 ```

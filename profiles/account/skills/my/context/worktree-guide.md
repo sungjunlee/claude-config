@@ -103,7 +103,17 @@ ln -s ../../target .worktrees/feature-name/target
 /my:wt-distribute
 ```
 
-### 3. Parallel Work
+### 3. Launch Sessions (Optional)
+
+```bash
+# tmux (recommended)
+/my:wt-launch tmux
+
+# iTerm (macOS)
+/my:wt-launch iterm
+```
+
+### 4. Parallel Work
 
 ```bash
 # 터미널 1
@@ -116,21 +126,21 @@ cd .worktrees/payment && claude
 cd .worktrees/search && claude
 ```
 
-### 4. Monitoring
+### 5. Monitoring
 
 ```bash
 # 진행 상황 확인
 /my:wt-status
 ```
 
-### 5. Synchronization
+### 6. Synchronization
 
 ```bash
 # 환경 파일 동기화
 /my:wt-sync
 ```
 
-### 6. Merge
+### 7. Merge
 
 ```bash
 # 각 브랜치 병합 (권장 순서 따르기)
@@ -190,7 +200,7 @@ git worktree prune
 
 ```bash
 # 스크립트 실행 권한
-chmod +x scripts/worktree-launcher.sh scripts/worktree-status.sh scripts/worktree-sync.sh
+chmod +x ~/.claude/scripts/worktree-manager.sh
 ```
 
 ## Integration with CI/CD
