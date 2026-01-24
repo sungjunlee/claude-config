@@ -42,14 +42,22 @@ EOF
 
 # Create PLAN.md template
 create_plan_template() {
-    mkdir -p "$WORKTREES_DIR"
+    if ! mkdir -p "$WORKTREES_DIR"; then
+        echo -e "${RED}✗ Failed to create $WORKTREES_DIR${NC}"
+        return 1
+    fi
     
     if [[ -f "$WORKTREES_DIR/PLAN.md" ]]; then
         echo -e "${YELLOW}⚠ PLAN.md already exists${NC}"
-        read -p "Overwrite? (y/n) " -n 1 -r
-        echo
+        if [[ -t 0 ]]; then
+            read -p "Overwrite? (y/n) " -n 1 -r
+            echo
+        else
+            echo -e "${YELLOW}⚠ Non-interactive shell; aborting overwrite${NC}"
+            return 1
+        fi
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            return
+            return 1
         fi
     fi
     
@@ -138,16 +146,22 @@ copy_env_files() {
     if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
         local abs_node_modules
         abs_node_modules="$(cd "$root_path" && pwd)"/node_modules
-        ln -s "$abs_node_modules" "$worktree_path/node_modules"
-        echo "    ✓ Linked node_modules"
+        if ln -s "$abs_node_modules" "$worktree_path/node_modules"; then
+            echo "    ✓ Linked node_modules"
+        else
+            echo "    ⚠ Failed to link node_modules"
+        fi
     fi
     
     # Symlink Python venv
     if [[ -d "$root_path/venv" && ! -e "$worktree_path/venv" ]]; then
         local abs_venv
         abs_venv="$(cd "$root_path" && pwd)"/venv
-        ln -s "$abs_venv" "$worktree_path/venv"
-        echo "    ✓ Linked venv"
+        if ln -s "$abs_venv" "$worktree_path/venv"; then
+            echo "    ✓ Linked venv"
+        else
+            echo "    ⚠ Failed to link venv"
+        fi
     fi
     
     if [[ $copied_count -eq 0 ]]; then
@@ -315,16 +329,25 @@ show_status() {
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
             worktree_found=true
-            local task_name=$(basename "$dir")
-            
-            # Change to working directory
-            pushd "$dir" > /dev/null
-            
-            local branch=$(git branch --show-current)
-            local changes=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-            local commits=$(git rev-list --count HEAD 2>/dev/null || echo "0")
-            local last_commit=$(git log -1 --pretty=format:"%s" 2>/dev/null || echo "No commits yet")
-            
+            local task_name
+            task_name=$(basename "$dir")
+
+            if ! git -C "$dir" rev-parse --git-dir > /dev/null 2>&1; then
+                echo -e "${YELLOW}⚠ Skipping $task_name (invalid git worktree)${NC}"
+                continue
+            fi
+
+            local branch
+            branch=$(git -C "$dir" symbolic-ref -q --short HEAD 2>/dev/null \
+                || git -C "$dir" rev-parse --short HEAD 2>/dev/null \
+                || echo "detached")
+            local changes
+            changes=$(git -C "$dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+            local commits
+            commits=$(git -C "$dir" rev-list --count HEAD 2>/dev/null || echo "0")
+            local last_commit
+            last_commit=$(git -C "$dir" log -1 --pretty=format:"%s" 2>/dev/null || echo "No commits yet")
+
             # Determine status icon
             local status_icon="🔄"
             if [[ $changes -eq 0 && $commits -gt 0 ]]; then
@@ -332,21 +355,19 @@ show_status() {
             elif [[ $changes -gt 0 ]]; then
                 status_icon="📝"
             fi
-            
+
             echo -e "${GREEN}$status_icon $task_name${NC}"
             echo "   Branch: $branch"
             echo "   Changes: $changes file(s)"
             echo "   Commits: $commits"
             echo "   Last: $last_commit"
-            
+
             # Check task file
-            if [[ -f "../tasks/$task_name.md" ]]; then
+            if [[ -f "$WORKTREES_DIR/tasks/$task_name.md" ]]; then
                 echo "   Task: ../tasks/$task_name.md"
             fi
-            
+
             echo ""
-            
-            popd > /dev/null
         fi
     done
     
@@ -381,18 +402,48 @@ sync_env_files() {
     
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
-            local task_name=$(basename "$dir")
+            local task_name
+            task_name=$(basename "$dir")
+
+            if ! git -C "$dir" rev-parse --git-dir > /dev/null 2>&1; then
+                echo -e "${YELLOW}⚠ Skipping $task_name (invalid git worktree)${NC}"
+                continue
+            fi
+
             echo -e "${BLUE}Checking: $task_name${NC}"
+            local updated=0
+            local skipped=0
+            local checked=0
             
             for file in "${sync_files[@]}"; do
                 if [[ -f "$file" ]]; then
-                    if [[ ! -f "$dir/$file" ]] || [[ "$file" -nt "$dir/$file" ]]; then
-                        cp "$file" "$dir/"
+                    checked=$((checked + 1))
+                    local dest="$dir/$file"
+
+                    if [[ -f "$dest" ]]; then
+                        if git -C "$dir" status --porcelain -- "$file" 2>/dev/null | grep -q .; then
+                            echo "  ⚠ $file differs - skipping (has local changes)"
+                            skipped=$((skipped + 1))
+                            continue
+                        fi
+                        if cmp -s "$file" "$dest"; then
+                            continue
+                        fi
+                    fi
+
+                    if cp "$file" "$dest"; then
                         echo "  ✓ Updated $file"
-                        ((sync_count++))
+                        updated=$((updated + 1))
+                        sync_count=$((sync_count + 1))
+                    else
+                        echo "  ⚠ Failed to update $file"
                     fi
                 fi
             done
+
+            if [[ $checked -gt 0 && $updated -eq 0 && $skipped -eq 0 ]]; then
+                echo "  ✓ All files up to date"
+            fi
             
             echo ""
         fi
@@ -478,6 +529,7 @@ launch_tmux() {
     local first=true
     local count=0
     local failures=0
+    local warnings=0
 
     shopt -s nullglob
     for dir in "$WORKTREES_DIR"/*/; do
@@ -506,14 +558,13 @@ launch_tmux() {
                 fi
             fi
 
-            if ! tmux send-keys -t "$session_name:$name" "claude" C-m; then
-                echo -e "  ${YELLOW}⚠ $name (failed to start claude)${NC}" >&2
-                failures=$((failures + 1))
-                continue
-            fi
-
-            echo "  ✓ $name"
             count=$((count + 1))
+            if ! tmux send-keys -t "$session_name:$name" "claude" C-m; then
+                echo -e "  ${YELLOW}⚠ $name (window created, failed to start claude)${NC}" >&2
+                warnings=$((warnings + 1))
+            else
+                echo "  ✓ $name"
+            fi
         fi
     done
     shopt -u nullglob
@@ -526,6 +577,9 @@ launch_tmux() {
     echo ""
     if [[ $failures -gt 0 ]]; then
         echo -e "${YELLOW}⚠ $failures worktree(s) failed to launch${NC}"
+    fi
+    if [[ $warnings -gt 0 ]]; then
+        echo -e "${YELLOW}⚠ $warnings worktree(s) created without starting claude${NC}"
     fi
     if [[ $count -gt 0 ]]; then
         echo -e "${GREEN}✅ Launched $count worktree(s) in tmux${NC}"
