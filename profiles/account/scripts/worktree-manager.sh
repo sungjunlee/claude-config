@@ -122,12 +122,18 @@ copy_env_files() {
     local copied_count=0
     for file in "${env_files[@]}"; do
         if [[ -f "$root_path/$file" ]]; then
-            cp "$root_path/$file" "$worktree_path/" 2>/dev/null || true
-            echo "    ✓ Copied $file"
-            ((copied_count++))
+            if [[ -f "$worktree_path/$file" ]]; then
+                echo "    ℹ Skipped $file (already exists)"
+                continue
+            fi
+            if cp "$root_path/$file" "$worktree_path/"; then
+                echo "    ✓ Copied $file"
+                ((copied_count++))
+            else
+                echo "    ⚠ Failed to copy $file"
+            fi
         fi
     done
-    
     # Symlink node_modules (if exists)
     if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
         local abs_node_modules
@@ -197,20 +203,24 @@ distribute_tasks() {
             else
                 # Check if branch already exists
                 if git show-ref --verify --quiet "refs/heads/$branch_name"; then
-                    if ! git worktree add "$worktree_path" "$branch_name" 2>&1 | grep -q .; then
+                    local worktree_output=""
+                    if worktree_output=$(git worktree add "$worktree_path" "$branch_name" 2>&1); then
                         echo "    ✓ Added worktree (existing branch)"
                     else
                         echo -e "    ${YELLOW}⚠ Could not add worktree for $branch_name (branch may be checked out elsewhere)${NC}"
+                        [[ -n "$worktree_output" ]] && echo "      ${worktree_output%%$'\n'*}"
                     fi
                 else
-                    if ! git worktree add "$worktree_path" -b "$branch_name" 2>&1 | grep -q "fatal"; then
+                    local worktree_output=""
+                    if worktree_output=$(git worktree add "$worktree_path" -b "$branch_name" 2>&1); then
                         echo "    ✓ Created worktree (new branch)"
                     else
                         echo -e "    ${RED}✗ Failed to create worktree/branch $branch_name${NC}"
+                        [[ -n "$worktree_output" ]] && echo "      ${worktree_output%%$'\n'*}"
                     fi
                 fi
-            fi
             
+            fi
             # Copy environment files
             echo "    📄 Copying environment files..."
             copy_env_files "$worktree_path" "."
