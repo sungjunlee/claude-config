@@ -10,6 +10,7 @@ Platform-independent alternative to symbolic links.
 """
 
 import os
+import sys
 import json
 import yaml
 import shutil
@@ -182,10 +183,12 @@ class HandoffManager:
         conflicts = self._check_git_conflicts()
         if conflicts is None:
             results["valid"] = False
-            results["warnings"].append("Unable to check git conflicts (git unavailable)")
+            results["warnings"].append(
+                "Unable to check git conflicts (git unavailable)"
+            )
         elif conflicts:
             results["conflicts"] = conflicts
-        
+
         return results
 
     def _write_metadata(self, metadata: Dict):
@@ -232,8 +235,15 @@ class HandoffManager:
             # Use cl100k_base encoding (GPT-4, Claude compatible estimate)
             encoding = tiktoken.get_encoding("cl100k_base")
             return len(encoding.encode(content))
-        except Exception:
-            # Fallback to simple estimation (1 token ≈ 4 chars)
+        except ImportError:
+            # Fallback if tiktoken is not installed
+            return len(content) // 4
+        except Exception as e:
+            # Log unexpected errors but don't crash
+            print(
+                f"Warning: Token estimation failed ({e}), using fallback",
+                file=sys.stderr,
+            )
             return len(content) // 4
 
     def _get_current_model(self) -> str:
@@ -309,7 +319,7 @@ class HandoffManager:
                 conflicts = result.stdout.strip().split("\n")
         except (subprocess.SubprocessError, FileNotFoundError, OSError):
             return None  # Git not available or not a git repo
-        
+
         return conflicts
 
 

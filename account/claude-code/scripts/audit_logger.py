@@ -20,10 +20,20 @@ def run_command(cmd, cwd=None, timeout=5):
     cmd_list = shlex.split(cmd) if isinstance(cmd, str) else cmd
     try:
         result = subprocess.run(
-            cmd_list, shell=False, capture_output=True, text=True, timeout=timeout, cwd=cwd
+            cmd_list,
+            shell=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=cwd,
         )
         return result.stdout.strip() if result.returncode == 0 else None
-    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError, OSError) as e:
+    except (
+        subprocess.TimeoutExpired,
+        subprocess.SubprocessError,
+        FileNotFoundError,
+        OSError,
+    ) as e:
         print(f"audit_logger: command failed: {cmd_list[0]} ({e})", file=sys.stderr)
         return None
 
@@ -50,11 +60,11 @@ def get_git_info(cwd):
     if not branch:
         branch = run_command(["git", "describe", "--tags", "--exact-match"], cwd)
     git_info["branch"] = branch or "unknown"
-    
+
     # Commit hash (short)
     commit = run_command(["git", "rev-parse", "--short", "HEAD"], cwd)
     git_info["commit"] = commit or "unknown"
-    
+
     # Check if repo is dirty (opt-in to avoid slowdowns)
     if os.environ.get("CLAUDE_AUDIT_GIT_STATUS") == "1":
         dirty = run_command(["git", "status", "--porcelain"], cwd)
@@ -69,12 +79,14 @@ def get_system_info():
     """Get system information"""
     try:
         hostname = socket.gethostname()
-    except Exception:
+    except Exception as e:
+        print(f"audit_logger: failed to get hostname: {e}", file=sys.stderr)
         hostname = "unknown"
 
     try:
         username = getpass.getuser()
-    except Exception:
+    except Exception as e:
+        print(f"audit_logger: failed to get username: {e}", file=sys.stderr)
         username = "unknown"
 
     return {"hostname": hostname, "username": username}

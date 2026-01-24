@@ -80,7 +80,13 @@ fi
 # Recent commits
 echo ""
 echo "📜 Recent Commits:"
-git log --oneline --graph -5 2>/dev/null | sed 's/^/   /' || echo "   No commits yet"
+if ! git log --oneline --graph -5 2>/dev/null | sed 's/^/   /'; then
+    if ! git rev-parse HEAD >/dev/null 2>&1; then
+         echo "   (No commits yet)"
+    else
+         echo "   ⚠️  Error listing commits"
+    fi
+fi
 
 echo ""
 echo "────────────────────────────────────────────────────────────────────"

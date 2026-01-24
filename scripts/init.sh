@@ -13,8 +13,19 @@ LIB_DIR="$ROOT_DIR/lib"
 PROFILES_DIR="$ROOT_DIR/profiles"
 
 # Load common functions
-source "$LIB_DIR/common.sh"
-source "$LIB_DIR/profile.sh"
+if [[ -f "$LIB_DIR/common.sh" ]]; then
+    source "$LIB_DIR/common.sh"
+else
+    echo "Error: Library file not found: $LIB_DIR/common.sh" >&2
+    exit 1
+fi
+
+if [[ -f "$LIB_DIR/profile.sh" ]]; then
+    source "$LIB_DIR/profile.sh"
+else
+    echo "Error: Library file not found: $LIB_DIR/profile.sh" >&2
+    exit 1
+fi
 
 # Show usage
 show_usage() {
