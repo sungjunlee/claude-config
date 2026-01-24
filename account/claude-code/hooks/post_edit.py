@@ -26,7 +26,7 @@ import shlex
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Callable
 
-TIMEOUT = 30
+TIMEOUT = int(os.environ.get("CLAUDE_HOOK_TIMEOUT", "60"))
 
 
 def run_command(

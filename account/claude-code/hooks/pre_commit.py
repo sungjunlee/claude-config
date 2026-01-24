@@ -125,10 +125,10 @@ def check_security() -> bool:
 
     # Patterns to search for
     patterns = [
-        (re.compile(r"api_key.*=.*['\"]", re.IGNORECASE), "API key"),
-        (re.compile(r"password.*=.*['\"]", re.IGNORECASE), "Password"),
-        (re.compile(r"secret.*=.*['\"]", re.IGNORECASE), "Secret"),
-        (re.compile(r"token.*=.*['\"]", re.IGNORECASE), "Token"),
+        (re.compile(r"\b(api_key|apikey)\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "API key"),
+        (re.compile(r"\bpassword\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Password"),
+        (re.compile(r"\bsecret\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Secret"),
+        (re.compile(r"\btoken\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Token"),
     ]
     ignore_dirs = {".git", ".venv", "venv", "node_modules", "dist", "build"}
     safe_markers = {

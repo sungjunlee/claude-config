@@ -131,6 +131,7 @@ copy_env_files() {
     )
     
     local copied_count=0
+    local has_error=0
     for file in "${env_files[@]}"; do
         if [[ -f "$root_path/$file" ]]; then
             if [[ -f "$worktree_path/$file" ]]; then
@@ -142,9 +143,11 @@ copy_env_files() {
                 ((copied_count++))
             else
                 echo "    ⚠ Failed to copy $file"
+                has_error=1
             fi
         fi
     done
+    return "$has_error"
     # Symlink node_modules (DISABLED: Too risky for shared state)
     # if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
     #     local abs_node_modules
@@ -240,7 +243,9 @@ distribute_tasks() {
             fi
             # Copy environment files
             echo "    📄 Copying environment files..."
-            copy_env_files "$worktree_path" "."
+            if ! copy_env_files "$worktree_path" "."; then
+                echo "    ⚠ Environment file copy had failures"
+            fi
             
             # Generate task instructions
             if ! cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF; then

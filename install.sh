@@ -316,7 +316,7 @@ install_config() {
             log "Installing agents..."
             cp -r "$ACCOUNT_DIR/agents" "$CLAUDE_CONFIG_DIR/"
         else
-            warn "Agents directory not found in profile"
+            info "Agents not installed (optional)"
         fi
         
         if [ -n "$REPO_DIR" ] && [ -d "$REPO_DIR/commands" ]; then

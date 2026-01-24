@@ -23,7 +23,8 @@ def run_command(cmd, cwd=None, timeout=5):
             cmd_list, shell=False, capture_output=True, text=True, timeout=timeout, cwd=cwd
         )
         return result.stdout.strip() if result.returncode == 0 else None
-    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError, OSError):
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError, OSError) as e:
+        print(f"audit_logger: command failed: {cmd_list[0]} ({e})", file=sys.stderr)
         return None
 
 
@@ -54,9 +55,12 @@ def get_git_info(cwd):
     commit = run_command(["git", "rev-parse", "--short", "HEAD"], cwd)
     git_info["commit"] = commit or "unknown"
     
-    # Check if repo is dirty
-    dirty = run_command(["git", "status", "--porcelain"], cwd)
-    git_info["dirty"] = bool(dirty)
+    # Check if repo is dirty (opt-in to avoid slowdowns)
+    if os.environ.get("CLAUDE_AUDIT_GIT_STATUS") == "1":
+        dirty = run_command(["git", "status", "--porcelain"], cwd)
+        git_info["dirty"] = bool(dirty)
+    else:
+        git_info["dirty"] = False
 
     return git_info
 
