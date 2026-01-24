@@ -10,6 +10,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $CLAUDE_CONFIG_DIR = "$env:USERPROFILE\.claude"
+$CODEX_CONFIG_DIR = "$env:USERPROFILE\.codex"
 $REPO_URL = "https://github.com/sungjunlee/claude-config.git"
 $BACKUP_DIR = "$env:USERPROFILE\.claude-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 
@@ -129,36 +130,74 @@ function Install-Configuration {
         }
         
         # Copy files from temp directory
-        Write-Success "Installing agents..."
-        Copy-Item -Path "$tempDir\profiles\account\agents" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        $accountDir = "$tempDir\account\claude-code"
         
-        Write-Success "Installing commands..."
-        Copy-Item -Path "$tempDir\profiles\account\commands" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        if (Test-Path "$accountDir\agents") {
+            Write-Success "Installing agents..."
+            Copy-Item -Path "$accountDir\agents" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        }
         
-        Write-Success "Installing scripts..."
-        Copy-Item -Path "$tempDir\profiles\account\scripts" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        if (Test-Path "$tempDir\commands") {
+            Write-Success "Installing commands..."
+            Copy-Item -Path "$tempDir\commands" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        }
+        
+        if (Test-Path "$tempDir\skills") {
+            Write-Success "Installing skills..."
+            Copy-Item -Path "$tempDir\skills" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        }
+        
+        if (Test-Path "$accountDir\scripts") {
+            Write-Success "Installing scripts..."
+            Copy-Item -Path "$accountDir\scripts" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        }
+
+        if (Test-Path "$accountDir\hooks") {
+            Write-Success "Installing hooks..."
+            Copy-Item -Path "$accountDir\hooks" -Destination "$CLAUDE_CONFIG_DIR\" -Recurse -Force
+        }
         
         Write-Success "Installing CLAUDE.md..."
-        Copy-Item -Path "$tempDir\profiles\account\CLAUDE.md" -Destination "$CLAUDE_CONFIG_DIR\" -Force
+        Copy-Item -Path "$accountDir\CLAUDE.md" -Destination "$CLAUDE_CONFIG_DIR\" -Force
         
         Write-Success "Installing llm-models-latest.md..."
-        Copy-Item -Path "$tempDir\profiles\account\llm-models-latest.md" -Destination "$CLAUDE_CONFIG_DIR\" -Force
+        Copy-Item -Path "$accountDir\llm-models-latest.md" -Destination "$CLAUDE_CONFIG_DIR\" -Force
         
         # Handle settings.json with merge logic
         if (Test-Path "$CLAUDE_CONFIG_DIR\settings.json") {
             Write-Warning "settings.json already exists, creating settings.json.new"
-            Copy-Item -Path "$tempDir\profiles\account\settings.json" -Destination "$CLAUDE_CONFIG_DIR\settings.json.new" -Force
+            Copy-Item -Path "$accountDir\settings.json" -Destination "$CLAUDE_CONFIG_DIR\settings.json.new" -Force
             Write-Info "Please manually merge settings.json.new with your existing settings.json"
         } else {
             Write-Success "Installing settings.json..."
-            Copy-Item -Path "$tempDir\profiles\account\settings.json" -Destination "$CLAUDE_CONFIG_DIR\" -Force
+            Copy-Item -Path "$accountDir\settings.json" -Destination "$CLAUDE_CONFIG_DIR\" -Force
         }
         
         # Create settings.local.json from example
         if (-not (Test-Path "$CLAUDE_CONFIG_DIR\settings.local.json")) {
             Write-Success "Creating settings.local.json from example..."
-            Copy-Item -Path "$tempDir\profiles\account\settings.local.json.example" -Destination "$CLAUDE_CONFIG_DIR\settings.local.json" -Force
+            Copy-Item -Path "$accountDir\settings.local.json.example" -Destination "$CLAUDE_CONFIG_DIR\settings.local.json" -Force
             Write-Warning "Please edit $CLAUDE_CONFIG_DIR\settings.local.json with your personal settings"
+        }
+
+        # Install Codex templates (optional)
+        $codexSource = "$tempDir\account\codex"
+        if (Test-Path $codexSource) {
+            $response = Read-Host "Install Codex templates to $CODEX_CONFIG_DIR? (y/N)"
+            if ($response -match '^[Yy]$') {
+                if (-not (Test-Path $CODEX_CONFIG_DIR)) {
+                    New-Item -ItemType Directory -Path $CODEX_CONFIG_DIR -Force | Out-Null
+                }
+                if ((Test-Path "$codexSource\config.toml.example") -and -not (Test-Path "$CODEX_CONFIG_DIR\config.toml")) {
+                    Copy-Item -Path "$codexSource\config.toml.example" -Destination "$CODEX_CONFIG_DIR\config.toml" -Force
+                }
+                if ((Test-Path "$codexSource\AGENTS.md.example") -and -not (Test-Path "$CODEX_CONFIG_DIR\AGENTS.md")) {
+                    Copy-Item -Path "$codexSource\AGENTS.md.example" -Destination "$CODEX_CONFIG_DIR\AGENTS.md" -Force
+                }
+                Write-Success "Codex templates installed"
+            } else {
+                Write-Info "Skipping Codex templates"
+            }
         }
         
         # Copy docs directory if it exists
@@ -186,8 +225,7 @@ function Test-Installation {
         $agentCount = (Get-ChildItem "$CLAUDE_CONFIG_DIR\agents" -Filter "*.md").Count
         Write-Info "✓ Agents installed ($agentCount files)"
     } else {
-        Write-Warning "✗ Agents not found"
-        $success = $false
+        Write-Info "Agents not installed (optional)"
     }
     
     if (Test-Path "$CLAUDE_CONFIG_DIR\commands") {
@@ -211,6 +249,16 @@ function Test-Installation {
     } else {
         Write-Warning "✗ CLAUDE.md not found"
         $success = $false
+    }
+
+    if (Test-Path "$CODEX_CONFIG_DIR") {
+        if ((Test-Path "$CODEX_CONFIG_DIR\config.toml") -or (Test-Path "$CODEX_CONFIG_DIR\AGENTS.md")) {
+            Write-Info "✓ Codex templates installed"
+        } else {
+            Write-Info "Codex templates not installed (optional)"
+        }
+    } else {
+        Write-Info "Codex templates not installed (optional)"
     }
     
     if (-not $success) {
