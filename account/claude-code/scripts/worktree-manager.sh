@@ -421,6 +421,7 @@ sync_env_files() {
             local updated=0
             local skipped=0
             local checked=0
+            local status_ok=true
             
             for file in "${sync_files[@]}"; do
                 if [[ -f "$file" ]]; then
@@ -428,7 +429,14 @@ sync_env_files() {
                     local dest="$dir/$file"
 
                     if [[ -f "$dest" ]]; then
-                        if git -C "$dir" status --porcelain -- "$file" 2>/dev/null | grep -q .; then
+                        local status_output
+                        if ! status_output=$(git -C "$dir" status --porcelain -- "$file" 2>&1); then
+                            echo "  ⚠ Unable to check git status for $file; skipping worktree"
+                            skipped=$((skipped + 1))
+                            status_ok=false
+                            break
+                        fi
+                        if [[ -n "$status_output" ]]; then
                             echo "  ⚠ $file differs - skipping (has local changes)"
                             skipped=$((skipped + 1))
                             continue
@@ -447,6 +455,12 @@ sync_env_files() {
                     fi
                 fi
             done
+
+            if [[ "$status_ok" == false ]]; then
+                echo "  ⚠ Skipped remaining files due to git status error"
+                echo ""
+                continue
+            fi
 
             if [[ $checked -gt 0 && $updated -eq 0 && $skipped -eq 0 ]]; then
                 echo "  ✓ All files up to date"

@@ -44,32 +44,36 @@ fi
 # Working directory status
 echo ""
 echo "📊 Working Directory:"
+status_ok=true
 if ! STATUS_OUTPUT=$(git status --porcelain 2>&1); then
-    echo "   ⚠️  Unable to check git status"
-    CHANGES=0
+    status_ok=false
+    first_line=$(echo "$STATUS_OUTPUT" | head -n 1)
+    echo "   ⚠️  Unable to check git status: ${first_line:-unknown error}"
 else
     CHANGES=$(echo -n "$STATUS_OUTPUT" | grep -c '^' || true)
 fi
 
-if [ "$CHANGES" -eq 0 ]; then
-    echo "   ✨ Clean (no changes)"
-else
-    # Count different types of changes
-    MODIFIED=$(git status --porcelain | grep -c "^ M" || true)
-    ADDED=$(git status --porcelain | grep -c "^A" || true)
-    DELETED=$(git status --porcelain | grep -c "^ D" || true)
-    UNTRACKED=$(git status --porcelain | grep -c "^??" || true)
-    
-    if [ "$MODIFIED" -gt 0 ]; then echo "   📝 Modified: $MODIFIED file(s)"; fi
-    if [ "$ADDED" -gt 0 ]; then echo "   ➕ Added: $ADDED file(s)"; fi
-    if [ "$DELETED" -gt 0 ]; then echo "   ➖ Deleted: $DELETED file(s)"; fi
-    if [ "$UNTRACKED" -gt 0 ]; then echo "   🆕 Untracked: $UNTRACKED file(s)"; fi
-    
-    # Show file names if not too many
-    if [ "$CHANGES" -le 10 ]; then
-        echo ""
-        echo "   Files:"
-        git status -s | sed 's/^/      /'
+if [ "$status_ok" = true ]; then
+    if [ "$CHANGES" -eq 0 ]; then
+        echo "   ✨ Clean (no changes)"
+    else
+        # Count different types of changes
+        MODIFIED=$(echo "$STATUS_OUTPUT" | grep -c "^ M" || true)
+        ADDED=$(echo "$STATUS_OUTPUT" | grep -c "^A" || true)
+        DELETED=$(echo "$STATUS_OUTPUT" | grep -c "^ D" || true)
+        UNTRACKED=$(echo "$STATUS_OUTPUT" | grep -c "^??" || true)
+        
+        if [ "$MODIFIED" -gt 0 ]; then echo "   📝 Modified: $MODIFIED file(s)"; fi
+        if [ "$ADDED" -gt 0 ]; then echo "   ➕ Added: $ADDED file(s)"; fi
+        if [ "$DELETED" -gt 0 ]; then echo "   ➖ Deleted: $DELETED file(s)"; fi
+        if [ "$UNTRACKED" -gt 0 ]; then echo "   🆕 Untracked: $UNTRACKED file(s)"; fi
+        
+        # Show file names if not too many
+        if [ "$CHANGES" -le 10 ]; then
+            echo ""
+            echo "   Files:"
+            echo "$STATUS_OUTPUT" | sed 's/^/      /'
+        fi
     fi
 fi
 

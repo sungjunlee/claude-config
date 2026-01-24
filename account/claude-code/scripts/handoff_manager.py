@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["pyyaml", "tiktoken"]
+# ///
 """
 Handoff Manager for Claude Code
 Manages handoff document creation, retrieval, and archiving.
@@ -176,9 +180,12 @@ class HandoffManager:
 
         # Check for git conflicts
         conflicts = self._check_git_conflicts()
-        if conflicts:
+        if conflicts is None:
+            results["valid"] = False
+            results["warnings"].append("Unable to check git conflicts (git unavailable)")
+        elif conflicts:
             results["conflicts"] = conflicts
-
+        
         return results
 
     def _write_metadata(self, metadata: Dict):
@@ -288,7 +295,7 @@ class HandoffManager:
         mtime = datetime.fromtimestamp(filepath.stat().st_mtime)
         return mtime > since
 
-    def _check_git_conflicts(self) -> List[str]:
+    def _check_git_conflicts(self) -> Optional[List[str]]:
         """Check for git merge conflicts."""
         conflicts = []
         try:
@@ -301,8 +308,8 @@ class HandoffManager:
             if result.returncode == 0 and result.stdout:
                 conflicts = result.stdout.strip().split("\n")
         except (subprocess.SubprocessError, FileNotFoundError, OSError):
-            pass  # Git not available or not a git repo
-
+            return None  # Git not available or not a git repo
+        
         return conflicts
 
 

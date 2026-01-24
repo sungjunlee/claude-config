@@ -119,6 +119,11 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 설치 스크립트가 `~/.codex/config.toml`, `~/.codex/AGENTS.md` 템플릿을
 선택적으로 설치할 수 있습니다.
 
+## 참고
+
+- [MIGRATION.md](MIGRATION.md) - 마이그레이션 가이드
+- [docs/SKILLS_MIGRATION_PROPOSAL.md](docs/SKILLS_MIGRATION_PROPOSAL.md) - 레거시 제안서 (현재 구조와 다를 수 있음)
+
 ## License
 
 MIT

@@ -41,10 +41,8 @@ codex auth status 2>/dev/null || {
 - 🎯 Precise code generation from specs
 - 🔍 Advanced refactoring patterns
 
-**Available Models:**
-- `gpt-5.2`: High intelligence (Complex tasks)
-- `gpt-5.1`: Balanced (General tasks)
-- `gpt-5.2-chat-latest`: Latest version
+**Model Selection:**
+- Run `codex /model` to list and select available models
 
 ## Execute Codex Analysis
 

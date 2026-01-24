@@ -2,7 +2,7 @@
 
 ## Unified My Skill Architecture (v4.1)
 
-2025년 12월, 모든 커스텀 기능을 단일 `my` skill로 통합했습니다.
+2026년 1월, 모든 커스텀 기능을 단일 `my` skill로 통합했습니다.
 
 ### 현재 구조
 

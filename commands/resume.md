@@ -149,7 +149,7 @@ Automatically check:
 ### Missing Handoff
 ```markdown
 No handoff found. Options:
-1. /flow:plan [requirements]
+1. /feature-dev:code-architect [requirements]
 2. /flow:handoff (create initial)
 ```
 

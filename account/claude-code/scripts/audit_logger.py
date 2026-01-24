@@ -6,6 +6,7 @@ Logs detailed command execution information with context
 
 import json
 import sys
+import shlex
 import subprocess
 import os
 import socket
@@ -15,13 +16,14 @@ from pathlib import Path
 
 
 def run_command(cmd, cwd=None, timeout=5):
-    """Run a command safely with timeout"""
+    """Run a command safely with timeout."""
+    cmd_list = shlex.split(cmd) if isinstance(cmd, str) else cmd
     try:
         result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, timeout=timeout, cwd=cwd
+            cmd_list, shell=False, capture_output=True, text=True, timeout=timeout, cwd=cwd
         )
         return result.stdout.strip() if result.returncode == 0 else None
-    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError, OSError):
         return None
 
 
@@ -39,21 +41,21 @@ def get_git_info(cwd):
         }
 
     # Repository name
-    repo_name = run_command("basename `git rev-parse --show-toplevel`", cwd)
-    git_info["repo"] = repo_name or "unknown"
+    repo_root = run_command(["git", "rev-parse", "--show-toplevel"], cwd)
+    git_info["repo"] = os.path.basename(repo_root) if repo_root else "unknown"
 
     # Current branch
-    branch = run_command("git branch --show-current", cwd)
+    branch = run_command(["git", "branch", "--show-current"], cwd)
     if not branch:
-        branch = run_command("git describe --tags --exact-match", cwd)
+        branch = run_command(["git", "describe", "--tags", "--exact-match"], cwd)
     git_info["branch"] = branch or "unknown"
-
+    
     # Commit hash (short)
-    commit = run_command("git rev-parse --short HEAD", cwd)
+    commit = run_command(["git", "rev-parse", "--short", "HEAD"], cwd)
     git_info["commit"] = commit or "unknown"
-
+    
     # Check if repo is dirty
-    dirty = run_command("git status --porcelain", cwd)
+    dirty = run_command(["git", "status", "--porcelain"], cwd)
     git_info["dirty"] = bool(dirty)
 
     return git_info
