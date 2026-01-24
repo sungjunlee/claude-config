@@ -6,6 +6,9 @@
 > **목적**: 현재 commands/agents 구조를 Claude Code Skills 체계로 전환하기 위한 분석 및 제안
 >
 > **완료 요약**: 모든 Phase 완료 (PR #31-#36), Legacy 구조 정리 완료
+>
+> **참고**: 이 문서는 legacy `profiles/` 구조를 기준으로 작성되었습니다. 현재 레이아웃은
+> `account/claude-code/` (계정 설정) + 루트 `commands/`/`skills/` 를 사용합니다.
 
 ---
 

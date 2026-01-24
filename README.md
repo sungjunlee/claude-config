@@ -12,13 +12,13 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 
 ```
 ~/.claude/
+├── commands/           # /my:* 슬래시 커맨드
 ├── skills/
-│   └── my/               # 개인 도구 모음 (공식 대안 없음)
-│       ├── commands/     # AI, 세션, 워크트리 명령어
-│       └── context/      # 참조 문서
-│
-├── CLAUDE.md             # 글로벌 설정
-└── llm-models-latest.md  # LLM 모델 참조
+│   └── my/             # 개인 도구 모음 (컨텍스트/자동 호출)
+├── hooks/              # (선택) 이벤트 훅
+├── scripts/            # (선택) 지원 스크립트
+├── CLAUDE.md           # 글로벌 설정
+└── llm-models-latest.md # LLM 모델 참조
 ```
 
 ## My Skill - 개인 도구 모음
@@ -113,6 +113,11 @@ Git 워크플로우 자동화:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
 ```
+
+## Codex 템플릿 (선택)
+
+설치 스크립트가 `~/.codex/config.toml`, `~/.codex/AGENTS.md` 템플릿을
+선택적으로 설치할 수 있습니다.
 
 ## License
 
