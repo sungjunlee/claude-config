@@ -287,16 +287,6 @@ install_config() {
         else
             info "Skills directory not found (optional)"
         fi
-
-        if [ -d "$PROFILE_DIR/hooks" ]; then
-            log "Installing hooks..."
-            cp -r "$PROFILE_DIR/hooks" "$CLAUDE_CONFIG_DIR/"
-            # Set execution permissions for hook scripts
-            find "$CLAUDE_CONFIG_DIR/hooks" -type f -name "*.sh" -exec chmod +x {} \;
-            find "$CLAUDE_CONFIG_DIR/hooks" -type f -name "*.py" -exec chmod +x {} \;
-        else
-            debug "Hooks directory not found (optional)"
-        fi
         
         if [ -f "$PROFILE_DIR/CLAUDE.md" ]; then
             log "Installing CLAUDE.md..."
@@ -360,13 +350,6 @@ install_config() {
             cp -r "$source_dir/skills" "$CLAUDE_CONFIG_DIR/"
         fi
 
-        if [ -d "$source_dir/hooks" ]; then
-            log "Installing hooks..."
-            cp -r "$source_dir/hooks" "$CLAUDE_CONFIG_DIR/"
-            find "$CLAUDE_CONFIG_DIR/hooks" -type f -name "*.sh" -exec chmod +x {} \;
-            find "$CLAUDE_CONFIG_DIR/hooks" -type f -name "*.py" -exec chmod +x {} \;
-        fi
-
         log "Installing CLAUDE.md..."
         cp "$source_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
         
@@ -423,12 +406,6 @@ verify_installation() {
         info "✓ Skills installed ($(find "$CLAUDE_CONFIG_DIR/skills" -name "SKILL.md" | wc -l) skills)"
     else
         info "Skills not installed (optional)"
-    fi
-
-    if [ -d "$CLAUDE_CONFIG_DIR/hooks" ]; then
-        info "✓ Hooks installed ($(find "$CLAUDE_CONFIG_DIR/hooks" -name "*.py" -o -name "*.sh" | wc -l) files)"
-    else
-        info "Hooks not installed (optional)"
     fi
 
     if [ -f "$CLAUDE_CONFIG_DIR/CLAUDE.md" ]; then
