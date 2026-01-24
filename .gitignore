@@ -1,6 +1,7 @@
 # Personal settings
 settings.local.json
 *.local.md
+.serena/
 
 # Worktree 관련
 .worktrees/
