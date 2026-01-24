@@ -77,6 +77,12 @@ main() {
         show_usage
         exit 1
     fi
+
+    if [[ ! -d "$PROFILES_DIR/projects" ]]; then
+        error "Project profiles are not available in this repository layout."
+        info "Use skills/ and account/claude-code for configuration instead."
+        exit 1
+    fi
     
     # Auto-detect if requested
     if [[ "$language" == "auto" ]]; then

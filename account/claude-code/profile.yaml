@@ -5,9 +5,10 @@ type: account
 
 # Account-level configurations applied globally
 features:
-  - agents          # Specialized AI agents
-  - commands        # Workflow commands
+  - skills          # Agent Skills
+  - commands        # Slash commands
   - scripts         # Supporting scripts
+  - hooks           # Claude Code hooks
   - context-management  # Handoff/Resume system
 
 # Installation configuration
