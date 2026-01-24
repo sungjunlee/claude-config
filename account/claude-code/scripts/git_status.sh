@@ -44,7 +44,13 @@ fi
 # Working directory status
 echo ""
 echo "📊 Working Directory:"
-CHANGES=$(git status --porcelain 2>/dev/null | wc -l | xargs)
+if ! STATUS_OUTPUT=$(git status --porcelain 2>&1); then
+    echo "   ⚠️  Unable to check git status"
+    CHANGES=0
+else
+    CHANGES=$(echo -n "$STATUS_OUTPUT" | grep -c '^' || true)
+fi
+
 if [ "$CHANGES" -eq 0 ]; then
     echo "   ✨ Clean (no changes)"
 else

@@ -40,7 +40,7 @@ Install: `/plugin install {name}`
 
 ## Time Awareness
 - Hook automatically injects current timestamp on every prompt
-- Use current year in web searches (2025, not 2024)
+- Use current year in web searches (2026, not 2025)
 - Prioritize latest information for docs/version searches
 
 ## LLM Model Selection

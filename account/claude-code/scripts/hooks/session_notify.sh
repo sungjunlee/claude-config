@@ -15,12 +15,12 @@ MESSAGE="${2:-Claude Code session event: $EVENT}"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS - use osascript
     if command -v osascript >/dev/null 2>&1; then
-        osascript -e "display notification \"$MESSAGE\" with title \"Claude Code\""
+        osascript -e "display notification \"$MESSAGE\" with title \"Claude Code\"" || true
     fi
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux - check for various notification tools
     if command -v notify-send >/dev/null 2>&1; then
-        notify-send "Claude Code" "$MESSAGE"
+        notify-send "Claude Code" "$MESSAGE" || true
     elif [ -n "${WSL_DISTRO_NAME:-}" ] && command -v powershell.exe >/dev/null 2>&1; then
         # WSL - use Windows PowerShell (escape single quotes)
         ESCAPED_MESSAGE="${MESSAGE//\'/\'\'}"

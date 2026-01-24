@@ -5,7 +5,7 @@ description: |
   Use when: multi-model AI, session handoff, git worktree operations.
   Triggers: "gemini", "codex", "handoff", "resume", "worktree"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
+model: claude-sonnet-4-5
 ---
 
 # My Skill

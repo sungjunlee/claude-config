@@ -38,13 +38,22 @@ def run_command(
     cmd_list = shlex.split(cmd) if isinstance(cmd, str) else cmd
     try:
         result = subprocess.run(
-            cmd_list, shell=False, capture_output=True, text=True,
-            timeout=timeout, cwd=cwd, check=False,
+            cmd_list,
+            shell=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=cwd,
+            check=False,
         )
         output = result.stdout or result.stderr or ""
         return result.returncode == 0, output.strip()
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
-        return False, ""
+    except subprocess.TimeoutExpired:
+        return False, "Command timed out"
+    except FileNotFoundError:
+        return False, f"Command not found: {cmd_list[0]}"
+    except OSError as e:
+        return False, f"OS error: {e}"
 
 
 def has_tool(tool: str) -> bool:
@@ -83,6 +92,7 @@ def find_project_root(start: str) -> Optional[str]:
 # Language handlers
 # =============================================================================
 
+
 def handle_python(filepath: str) -> None:
     """Handle Python files with ruff."""
     ruff = resolve_tool("ruff")
@@ -94,8 +104,9 @@ def handle_python(filepath: str) -> None:
     print("  ✓ formatted" if ok else "  ⚠️  format failed")
 
     ok, out = run_command([*ruff, "check", "--fix", "--quiet", filepath])
-    if not ok and out:
-        print(f"  ⚠️  {out.split(chr(10))[0][:60]}")
+    if not ok:
+        msg = out.split(chr(10))[0][:60] if out else "Linting failed"
+        print(f"  ⚠️  {msg}")
 
 
 def handle_typescript(filepath: str) -> None:
@@ -112,8 +123,9 @@ def handle_typescript(filepath: str) -> None:
         ok, out = run_command([*eslint, "--fix", filepath])
         if ok:
             print("  ✓ eslint")
-        elif out:
-            print(f"  ⚠️  {out.split(chr(10))[0][:60]}")
+        else:
+            msg = out.split(chr(10))[0][:60] if out else "eslint failed"
+            print(f"  ⚠️  {msg}")
     else:
         print("  ⚠️  eslint not found")
 
@@ -133,13 +145,15 @@ def handle_rust(filepath: str) -> None:
 
     ok, out = run_command(
         ["cargo", "clippy", "--message-format=short", "-q"],
-        cwd=project_root, timeout=60,
+        cwd=project_root,
+        timeout=60,
     )
     relevant = [l for l in out.split("\n") if filepath in l] if out else []
     if relevant:
         print(f"  ⚠️  {relevant[0][:60]}")
     elif not ok:
-        print("  ⚠️  clippy failed")
+        msg = out.split(chr(10))[0][:60] if out else "clippy failed"
+        print(f"  ⚠️  {msg}")
 
 
 def handle_go(filepath: str) -> None:
@@ -159,8 +173,9 @@ def handle_go(filepath: str) -> None:
             ok, out = run_command(
                 ["golangci-lint", "run", "--fast", filepath], cwd=project_root
             )
-            if not ok and out:
-                print(f"  ⚠️  {out.split(chr(10))[0][:60]}")
+            if not ok:
+                msg = out.split(chr(10))[0][:60] if out else "golangci-lint failed"
+                print(f"  ⚠️  {msg}")
 
 
 # =============================================================================
@@ -168,10 +183,14 @@ def handle_go(filepath: str) -> None:
 # =============================================================================
 
 HANDLERS: dict[str, Callable[[str], None]] = {
-    ".py": handle_python, ".pyi": handle_python,
-    ".ts": handle_typescript, ".tsx": handle_typescript,
-    ".js": handle_typescript, ".jsx": handle_typescript,
-    ".mjs": handle_typescript, ".mts": handle_typescript,
+    ".py": handle_python,
+    ".pyi": handle_python,
+    ".ts": handle_typescript,
+    ".tsx": handle_typescript,
+    ".js": handle_typescript,
+    ".jsx": handle_typescript,
+    ".mjs": handle_typescript,
+    ".mts": handle_typescript,
     ".rs": handle_rust,
     ".go": handle_go,
 }

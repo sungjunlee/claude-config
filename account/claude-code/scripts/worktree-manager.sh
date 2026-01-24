@@ -145,16 +145,16 @@ copy_env_files() {
             fi
         fi
     done
-    # Symlink node_modules (if exists)
-    if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
-        local abs_node_modules
-        abs_node_modules="$(cd "$root_path" && pwd)"/node_modules
-        if ln -s "$abs_node_modules" "$worktree_path/node_modules"; then
-            echo "    ✓ Linked node_modules"
-        else
-            echo "    ⚠ Failed to link node_modules"
-        fi
-    fi
+    # Symlink node_modules (DISABLED: Too risky for shared state)
+    # if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
+    #     local abs_node_modules
+    #     abs_node_modules="$(cd "$root_path" && pwd)"/node_modules
+    #     if ln -s "$abs_node_modules" "$worktree_path/node_modules"; then
+    #         echo "    ✓ Linked node_modules"
+    #     else
+    #         echo "    ⚠ Failed to link node_modules"
+    #     fi
+    # fi
     
     # Symlink Python venv
     if [[ -d "$root_path/venv" && ! -e "$worktree_path/venv" ]]; then

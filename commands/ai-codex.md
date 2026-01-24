@@ -42,9 +42,9 @@ codex auth status 2>/dev/null || {
 - 🔍 Advanced refactoring patterns
 
 **Available Models:**
-- `gpt-5-minimal`: Fastest responses
-- `gpt-5-medium`: Balanced (default)
-- `gpt-5-high`: Deep reasoning for complex problems
+- `gpt-5.2`: High intelligence (Complex tasks)
+- `gpt-5.1`: Balanced (General tasks)
+- `gpt-5.2-chat-latest`: Latest version
 
 ## Execute Codex Analysis
 
