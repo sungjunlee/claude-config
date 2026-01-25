@@ -1,4 +1,4 @@
-# Global Antigravity Rules
+# Global Gemini/Antigravity Instructions
 
 ## Working Agreements
 - Ask before running destructive commands or modifying large sets of files.
@@ -10,3 +10,7 @@
 - Follow existing project conventions.
 - Functions under 20 lines when possible.
 - Clear, descriptive variable naming.
+
+## Language
+- Respond in user's language (Korean/English)
+- Technical terms in English

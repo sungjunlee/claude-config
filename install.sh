@@ -35,7 +35,16 @@ get_config_dir() {
     case "$tool" in
         claude) echo "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" ;;
         codex) echo "${CODEX_CONFIG_DIR:-$HOME/.codex}" ;;
-        antigravity) echo "${ANTIGRAVITY_CONFIG_DIR:-$HOME/.config/antigravity}" ;;
+        antigravity) echo "${ANTIGRAVITY_CONFIG_DIR:-$HOME/.gemini/antigravity}" ;;
+    esac
+}
+
+# Get additional config directories for a tool (if any)
+get_extra_config_dir() {
+    local tool="$1"
+    case "$tool" in
+        antigravity) echo "$HOME/.gemini" ;;  # For GEMINI.md
+        *) echo "" ;;
     esac
 }
 
@@ -406,7 +415,9 @@ install_antigravity() {
     local account_dir="$2"
     local force_install="$3"
     local config_dir
+    local gemini_dir
     config_dir=$(get_config_dir "antigravity")
+    gemini_dir=$(get_extra_config_dir "antigravity")
 
     if [ ! -d "$account_dir" ]; then
         info "Antigravity templates not found"
@@ -415,11 +426,15 @@ install_antigravity() {
 
     log "Installing Antigravity configuration..."
     mkdir -p "$config_dir"
+    mkdir -p "$gemini_dir"
 
     # Install example files (only if not exists)
+    # Settings go to ~/.gemini/antigravity/
     install_example_file "$account_dir/settings.json.example" "$config_dir/settings.json" "Antigravity settings.json"
-    install_example_file "$account_dir/mcp.json.example" "$config_dir/mcp.json" "Antigravity mcp.json"
-    install_example_file "$account_dir/rules.md.example" "$config_dir/rules.md" "Antigravity rules.md"
+    install_example_file "$account_dir/mcp_config.json.example" "$config_dir/mcp_config.json" "Antigravity mcp_config.json"
+
+    # GEMINI.md goes to ~/.gemini/ (shared with Gemini CLI)
+    install_example_file "$account_dir/GEMINI.md.example" "$gemini_dir/GEMINI.md" "GEMINI.md (global instructions)"
 }
 
 #############################################
@@ -460,14 +475,16 @@ verify_codex() {
 
 verify_antigravity() {
     local config_dir
+    local gemini_dir
     config_dir=$(get_config_dir "antigravity")
+    gemini_dir=$(get_extra_config_dir "antigravity")
 
     info "Verifying Antigravity installation..."
 
-    if [ -d "$config_dir" ]; then
-        [ -f "$config_dir/settings.json" ] && info "  ✓ settings.json" || info "  - settings.json (optional)"
-        [ -f "$config_dir/mcp.json" ] && info "  ✓ mcp.json" || info "  - mcp.json (optional)"
-        [ -f "$config_dir/rules.md" ] && info "  ✓ rules.md" || info "  - rules.md (optional)"
+    if [ -d "$config_dir" ] || [ -d "$gemini_dir" ]; then
+        [ -f "$config_dir/settings.json" ] && info "  ✓ settings.json (~/.gemini/antigravity/)" || info "  - settings.json (optional)"
+        [ -f "$config_dir/mcp_config.json" ] && info "  ✓ mcp_config.json (~/.gemini/antigravity/)" || info "  - mcp_config.json (optional)"
+        [ -f "$gemini_dir/GEMINI.md" ] && info "  ✓ GEMINI.md (~/.gemini/)" || info "  - GEMINI.md (optional)"
         return 0
     else
         info "  - Not installed"
