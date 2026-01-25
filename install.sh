@@ -222,6 +222,7 @@ install_tool() {
         log "$tool installed successfully!"
     else
         warn "$tool installation may have failed - command '$cmd' not found"
+        return 1
     fi
 }
 
