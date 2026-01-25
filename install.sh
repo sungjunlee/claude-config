@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 #
-# Claude Code Configuration Installer
+# Dev Environment Configuration Installer
 # https://github.com/sungjunlee/claude-config
 #
-# This script installs Claude Code account-level configuration
-# for consistent development environment across machines.
+# Installs account-level configuration for AI coding assistants:
+# - Claude Code (~/.claude)
+# - Codex (~/.codex)
+# - Antigravity (~/.config/antigravity)
 
 set -euo pipefail
 
@@ -17,20 +19,45 @@ fi
 
 # Check if running from repo or standalone
 if [[ -d "$SCRIPT_DIR/account/claude-code" ]]; then
-    # Running from repo
     REPO_DIR="$SCRIPT_DIR"
-    ACCOUNT_DIR="$SCRIPT_DIR/account/claude-code"
 else
-    # Running standalone (downloaded via curl)
     REPO_DIR=""
-    ACCOUNT_DIR=""
 fi
 
-# Configuration
-CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-CODEX_CONFIG_DIR="${CODEX_CONFIG_DIR:-$HOME/.codex}"
-BACKUP_DIR="$HOME/.claude-backup-$(date +%Y%m%d-%H%M%S)"
+# Tool configurations (compatible with bash 3.2)
+ALL_TOOLS="claude codex antigravity"
+DEFAULT_TOOLS="claude"
 REPO_URL="https://github.com/sungjunlee/claude-config.git"
+
+# Get config directory for a tool
+get_config_dir() {
+    local tool="$1"
+    case "$tool" in
+        claude) echo "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" ;;
+        codex) echo "${CODEX_CONFIG_DIR:-$HOME/.codex}" ;;
+        antigravity) echo "${ANTIGRAVITY_CONFIG_DIR:-$HOME/.config/antigravity}" ;;
+    esac
+}
+
+# Get account directory for a tool
+get_account_dir() {
+    local tool="$1"
+    case "$tool" in
+        claude) echo "account/claude-code" ;;
+        codex) echo "account/codex" ;;
+        antigravity) echo "account/antigravity" ;;
+    esac
+}
+
+# Get command name for a tool
+get_tool_command() {
+    local tool="$1"
+    case "$tool" in
+        claude) echo "claude" ;;
+        codex) echo "codex" ;;
+        antigravity) echo "antigravity" ;;
+    esac
+}
 
 # Colors for output (disabled if not TTY)
 if [ -t 1 ]; then
@@ -39,14 +66,9 @@ if [ -t 1 ]; then
     YELLOW='\033[1;33m'
     BLUE='\033[0;34m'
     CYAN='\033[0;36m'
-    NC='\033[0m' # No Color
+    NC='\033[0m'
 else
-    RED=''
-    GREEN=''
-    YELLOW=''
-    BLUE=''
-    CYAN=''
-    NC=''
+    RED='' GREEN='' YELLOW='' BLUE='' CYAN='' NC=''
 fi
 
 # Logging functions
@@ -54,11 +76,7 @@ log() { echo -e "${GREEN}[+]${NC} $1"; }
 warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 error() { echo -e "${RED}[✗]${NC} $1" >&2; }
 info() { echo -e "${BLUE}[i]${NC} $1"; }
-debug() { 
-    if [[ "${DEBUG:-0}" == "1" ]]; then
-        echo -e "${CYAN}[D]${NC} $1" >&2
-    fi
-}
+debug() { [[ "${DEBUG:-0}" == "1" ]] && echo -e "${CYAN}[D]${NC} $1" >&2 || true; }
 
 # Detect OS
 detect_os() {
@@ -79,18 +97,17 @@ detect_os() {
 # Check prerequisites
 check_prerequisites() {
     local missing_tools=()
-    
-    # Check for required tools
+
     for tool in git curl; do
         if ! command -v "$tool" &> /dev/null; then
             missing_tools+=("$tool")
         fi
     done
-    
+
     if [ ${#missing_tools[@]} -ne 0 ]; then
         error "Missing required tools: ${missing_tools[*]}"
         info "Please install them first:"
-        
+
         OS_INFO=$(detect_os)
         if [[ "$OS_INFO" == linux:* ]]; then
             info "  sudo apt-get install ${missing_tools[*]}  # Debian/Ubuntu"
@@ -101,6 +118,7 @@ check_prerequisites() {
         exit 1
     fi
 
+    # Check optional Python deps for handoff_manager
     if command -v python3 &> /dev/null; then
         if ! python3 - <<'PY' 2>/dev/null; then
 import importlib.util
@@ -117,282 +135,349 @@ PY
     fi
 }
 
-# Check if Claude Code is installed
-check_claude_installation() {
-    local force="${1:-false}"
-    
-    if command -v claude &> /dev/null; then
-        log "Claude Code is already installed ($(claude --version 2>/dev/null || echo 'version unknown'))"
+# Check if a tool is installed
+check_tool_installation() {
+    local tool="$1"
+    local force="${2:-false}"
+    local cmd
+    cmd=$(get_tool_command "$tool")
+
+    if command -v "$cmd" &> /dev/null; then
+        log "$tool is installed ($($cmd --version 2>/dev/null || echo 'version unknown'))"
         return 0
     else
-        warn "Claude Code is not installed"
-        
-        # If force flag is set, install without prompting
+        warn "$tool is not installed"
+
         if [[ "$force" == "true" ]]; then
-            install_claude_code
+            install_tool "$tool"
             return
         fi
-        
-        info "Would you like to install it now? (y/N)"
+
+        info "Would you like to install $tool now? (y/N)"
+        local response
         if [ -t 0 ]; then
             read -r response
         else
             response="${CI_RESPONSE:-n}"
         fi
         if [[ "$response" =~ ^[Yy]$ ]]; then
-            install_claude_code
+            install_tool "$tool"
         else
-            warn "Continuing without Claude Code installation..."
+            warn "Continuing without $tool installation..."
         fi
     fi
 }
 
-# Install Claude Code
-install_claude_code() {
-    log "Installing Claude Code..."
-    
-    # Check for Node.js/npm first
-    if command -v npm &> /dev/null; then
-        log "Installing via npm..."
-        npm install -g @anthropic-ai/claude-code
+# Install a tool
+install_tool() {
+    local tool="$1"
+    log "Installing $tool..."
+
+    case "$tool" in
+        claude)
+            if command -v npm &> /dev/null; then
+                npm install -g @anthropic-ai/claude-code
+            else
+                curl -fsSL https://claude.ai/install.sh | bash
+            fi
+            ;;
+        codex)
+            if command -v npm &> /dev/null; then
+                npm install -g @openai/codex
+            else
+                warn "npm required to install Codex"
+                return 1
+            fi
+            ;;
+        antigravity)
+            info "Antigravity is installed via Google Cloud. Visit: https://antigravity.dev"
+            return 0
+            ;;
+    esac
+
+    local cmd
+    cmd=$(get_tool_command "$tool")
+    if command -v "$cmd" &> /dev/null; then
+        log "$tool installed successfully!"
     else
-        log "Installing via official script..."
-        curl -fsSL https://claude.ai/install.sh | bash
-    fi
-    
-    if command -v claude &> /dev/null; then
-        log "Claude Code installed successfully!"
-    else
-        error "Claude Code installation failed"
-        exit 1
+        warn "$tool installation may have failed"
     fi
 }
 
-# Backup existing configuration
-backup_existing_config() {
-    if [ -d "$CLAUDE_CONFIG_DIR" ]; then
-        log "Backing up existing configuration to $BACKUP_DIR"
-        cp -r "$CLAUDE_CONFIG_DIR" "$BACKUP_DIR"
-        info "Backup created at: $BACKUP_DIR"
+# Backup existing configuration for a tool
+backup_tool_config() {
+    local tool="$1"
+    local config_dir
+    config_dir=$(get_config_dir "$tool")
+
+    if [ -d "$config_dir" ]; then
+        local backup_dir="$HOME/.${tool}-backup-$(date +%Y%m%d-%H%M%S)"
+        log "Backing up $tool config to $backup_dir"
+        cp -r "$config_dir" "$backup_dir"
+        info "Backup created at: $backup_dir"
     fi
 }
 
-# Handle settings.json merge interactively
-handle_settings_merge() {
+# Handle config file merge interactively
+handle_config_merge() {
     local source_file="$1"
     local target_file="$2"
     local force_mode="${3:-false}"
-    
+    local file_label="${4:-config file}"
+
     if [ ! -f "$target_file" ]; then
-        # No existing file, just copy
-        log "Installing settings.json..."
+        log "Installing $file_label..."
+        mkdir -p "$(dirname "$target_file")"
         cp "$source_file" "$target_file"
         return 0
     fi
-    
-    # Existing file found
-    warn "Existing settings.json detected at $target_file"
-    
-    # If force mode, default to backup
+
+    warn "Existing $file_label detected at $target_file"
+
     if [ "$force_mode" = "true" ]; then
         warn "Force mode: backing up existing and installing new"
         cp "$target_file" "${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
         cp "$source_file" "$target_file"
         return 0
     fi
-    
-    # Show options
+
     echo ""
     info "Configuration file conflict detected. What would you like to do?"
-    echo "  [K]eep existing settings (default)"
-    echo "  [R]eplace with new settings"
+    echo "  [K]eep existing (default)"
+    echo "  [R]eplace with new"
     echo "  [B]ackup existing and install new"
     echo "  [D]iff - show differences"
-    echo "  [N]ew - save as settings.json.new for manual merge"
+    echo "  [N]ew - save as .new for manual merge"
     echo -n "Choice [K/r/b/d/n]: "
-    
+
     local response
     if [ -t 0 ]; then
         read -r response
     else
         response="${CI_RESPONSE:-k}"
     fi
-    
-    # Convert to lowercase for compatibility (macOS bash 3.2)
+
     response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
     case "$response" in
         r|replace)
-            warn "Replacing existing settings.json"
+            warn "Replacing $file_label"
             cp "$source_file" "$target_file"
             ;;
         b|backup)
-            local backup_name
-            backup_name="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
+            local backup_name="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
             log "Backing up to $backup_name"
             cp "$target_file" "$backup_name"
             cp "$source_file" "$target_file"
-            info "Previous settings backed up to: $backup_name"
             ;;
         d|diff)
             info "Showing differences (existing < > new):"
             echo "----------------------------------------"
-            if command -v diff &> /dev/null; then
-                diff -u "$target_file" "$source_file" || true
-            else
-                warn "diff command not available"
-            fi
+            diff -u "$target_file" "$source_file" || true
             echo "----------------------------------------"
-            # Recursive call to ask again after showing diff
-            handle_settings_merge "$source_file" "$target_file" "$force_mode"
+            handle_config_merge "$source_file" "$target_file" "$force_mode" "$file_label"
             ;;
         n|new)
-            warn "Saving new settings as settings.json.new"
+            warn "Saving as ${target_file}.new"
             cp "$source_file" "${target_file}.new"
-            info "Please manually merge ${target_file}.new with your existing settings.json"
+            info "Please manually merge ${target_file}.new"
             ;;
         k|keep|"")
-            log "Keeping existing settings.json"
-            info "New settings available at: $source_file (temporary)"
+            log "Keeping existing $file_label"
             ;;
         *)
-            warn "Invalid choice. Keeping existing settings."
+            warn "Invalid choice. Keeping existing."
             ;;
     esac
 }
 
-install_codex_templates() {
-    local source_dir="$1"
-    local force_install="${2:-false}"
-    local response
-    local install_codex=false
+# Install example file (only if target doesn't exist)
+install_example_file() {
+    local src="$1"
+    local dest="$2"
+    local label="$3"
 
-    if [ ! -d "$source_dir" ]; then
-        info "Codex templates not found (optional)"
-        return 0
-    fi
-
-    if [ "$force_install" = true ]; then
-        install_codex=true
-    else
-        echo ""
-        info "Install Codex templates to $CODEX_CONFIG_DIR? (config.toml, AGENTS.md)"
-        echo -n "Continue? (y/N) "
-        if [ -t 0 ]; then
-            read -r response
+    if [ -f "$src" ]; then
+        if [ ! -f "$dest" ]; then
+            mkdir -p "$(dirname "$dest")"
+            cp "$src" "$dest"
+            log "Installed $label"
         else
-            response="${CI_RESPONSE:-n}"
-        fi
-        if [[ "$response" =~ ^[Yy]$ ]]; then
-            install_codex=true
-        fi
-    fi
-
-    if [ "$install_codex" != true ]; then
-        info "Skipping Codex templates"
-        return 0
-    fi
-
-    mkdir -p "$CODEX_CONFIG_DIR"
-
-    if [ -f "$source_dir/config.toml.example" ]; then
-        if [ ! -f "$CODEX_CONFIG_DIR/config.toml" ]; then
-            cp "$source_dir/config.toml.example" "$CODEX_CONFIG_DIR/config.toml"
-            log "Installed Codex config.toml"
-        else
-            warn "Codex config.toml already exists; leaving as-is"
-        fi
-    fi
-
-    if [ -f "$source_dir/AGENTS.md.example" ]; then
-        if [ ! -f "$CODEX_CONFIG_DIR/AGENTS.md" ]; then
-            cp "$source_dir/AGENTS.md.example" "$CODEX_CONFIG_DIR/AGENTS.md"
-            log "Installed Codex AGENTS.md"
-        else
-            warn "Codex AGENTS.md already exists; leaving as-is"
+            info "$label already exists; leaving as-is"
         fi
     fi
 }
 
+# Install directory
 install_dir() {
     local label="$1"
     local src="$2"
     local dest="$3"
     local exec_flag="${4:-false}"
+
     if [ -d "$src" ]; then
         log "Installing $label..."
+        mkdir -p "$dest"
         cp -r "$src" "$dest"
         if [ "$exec_flag" = "true" ]; then
             local target="$dest/$(basename "$src")"
             find "$target" -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod +x {} \;
         fi
     else
-        info "$label not found (optional)"
+        debug "$label not found at $src"
     fi
 }
 
+# Install file
 install_file() {
     local label="$1"
     local src="$2"
     local dest="$3"
+
     if [ -f "$src" ]; then
         log "Installing $label..."
+        mkdir -p "$(dirname "$dest")"
         cp "$src" "$dest"
     else
-        warn "$label not found"
+        debug "$label not found at $src"
     fi
 }
 
-install_account_dirs() {
-    local dir="$1"
-    install_dir "agents" "$dir/agents" "$CLAUDE_CONFIG_DIR/" "false"
-    install_dir "scripts" "$dir/scripts" "$CLAUDE_CONFIG_DIR/" "true"
-    install_dir "hooks" "$dir/hooks" "$CLAUDE_CONFIG_DIR/" "true"
-}
+#############################################
+# Tool-specific installation functions
+#############################################
 
-install_repo_dirs() {
-    local repo="$1"
-    install_dir "commands" "$repo/commands" "$CLAUDE_CONFIG_DIR/" "false"
-    install_dir "skills" "$repo/skills" "$CLAUDE_CONFIG_DIR/" "false"
-}
-
-install_account_files() {
-    local dir="$1"
-    install_file "CLAUDE.md" "$dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
-    install_file "llm-models-latest.md" "$dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
-}
-
-install_settings_files() {
-    local dir="$1"
-    local force_install="$2"
-    if [ -f "$dir/settings.json" ]; then
-        handle_settings_merge "$dir/settings.json" "$CLAUDE_CONFIG_DIR/settings.json" "$force_install"
-    fi
-    if [ -f "$dir/settings.local.json.example" ] && [ ! -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]; then
-        cp "$dir/settings.local.json.example" "$CLAUDE_CONFIG_DIR/settings.local.json"
-        warn "Please edit $CLAUDE_CONFIG_DIR/settings.local.json with your personal settings"
-    fi
-}
-
-install_codex_dir() {
-    local repo="$1"
-    local force_install="$2"
-    if [ -d "$repo/account/codex" ]; then
-        install_codex_templates "$repo/account/codex" "$force_install"
-    else
-        info "Codex templates not found (optional)"
-    fi
-}
-
-install_from_dirs() {
-    local repo="$1"
-    local account="$2"
+install_claude() {
+    local repo_dir="$1"
+    local account_dir="$2"
     local force_install="$3"
-    install_account_dirs "$account"
-    install_repo_dirs "$repo"
-    install_account_files "$account"
-    install_settings_files "$account" "$force_install"
-    install_codex_dir "$repo" "$force_install"
+    local config_dir
+    config_dir=$(get_config_dir "claude")
+
+    log "Installing Claude Code configuration..."
+    mkdir -p "$config_dir"
+
+    # Account-level directories
+    install_dir "agents" "$account_dir/agents" "$config_dir/" "false"
+    install_dir "scripts" "$account_dir/scripts" "$config_dir/" "true"
+    install_dir "hooks" "$account_dir/hooks" "$config_dir/" "true"
+
+    # Repo-level directories
+    install_dir "commands" "$repo_dir/commands" "$config_dir/" "false"
+    install_dir "skills" "$repo_dir/skills" "$config_dir/" "false"
+
+    # Files
+    install_file "CLAUDE.md" "$account_dir/CLAUDE.md" "$config_dir/CLAUDE.md"
+    install_file "llm-models-latest.md" "$account_dir/llm-models-latest.md" "$config_dir/llm-models-latest.md"
+
+    # Settings with merge handling
+    if [ -f "$account_dir/settings.json" ]; then
+        handle_config_merge "$account_dir/settings.json" "$config_dir/settings.json" "$force_install" "settings.json"
+    fi
+
+    # Local settings example
+    if [ -f "$account_dir/settings.local.json.example" ] && [ ! -f "$config_dir/settings.local.json" ]; then
+        cp "$account_dir/settings.local.json.example" "$config_dir/settings.local.json"
+        warn "Please edit $config_dir/settings.local.json with your personal settings"
+    fi
 }
+
+install_codex() {
+    local repo_dir="$1"
+    local account_dir="$2"
+    local force_install="$3"
+    local config_dir
+    config_dir=$(get_config_dir "codex")
+
+    if [ ! -d "$account_dir" ]; then
+        info "Codex templates not found"
+        return 0
+    fi
+
+    log "Installing Codex configuration..."
+    mkdir -p "$config_dir"
+
+    # Install example files (only if not exists)
+    install_example_file "$account_dir/config.toml.example" "$config_dir/config.toml" "Codex config.toml"
+    install_example_file "$account_dir/AGENTS.md.example" "$config_dir/AGENTS.md" "Codex AGENTS.md"
+}
+
+install_antigravity() {
+    local repo_dir="$1"
+    local account_dir="$2"
+    local force_install="$3"
+    local config_dir
+    config_dir=$(get_config_dir "antigravity")
+
+    if [ ! -d "$account_dir" ]; then
+        info "Antigravity templates not found"
+        return 0
+    fi
+
+    log "Installing Antigravity configuration..."
+    mkdir -p "$config_dir"
+
+    # Install example files (only if not exists)
+    install_example_file "$account_dir/settings.json.example" "$config_dir/settings.json" "Antigravity settings.json"
+    install_example_file "$account_dir/mcp.json.example" "$config_dir/mcp.json" "Antigravity mcp.json"
+    install_example_file "$account_dir/rules.md.example" "$config_dir/rules.md" "Antigravity rules.md"
+}
+
+#############################################
+# Verification functions
+#############################################
+
+verify_claude() {
+    local config_dir
+    config_dir=$(get_config_dir "claude")
+    local success=true
+
+    info "Verifying Claude Code installation..."
+
+    [ -d "$config_dir/commands" ] && info "  ✓ Commands" || { warn "  ✗ Commands"; success=false; }
+    [ -d "$config_dir/scripts" ] && info "  ✓ Scripts" || { warn "  ✗ Scripts"; success=false; }
+    [ -f "$config_dir/CLAUDE.md" ] && info "  ✓ CLAUDE.md" || { warn "  ✗ CLAUDE.md"; success=false; }
+    [ -d "$config_dir/skills" ] && info "  ✓ Skills" || info "  - Skills (optional)"
+    [ -d "$config_dir/hooks" ] && info "  ✓ Hooks" || info "  - Hooks (optional)"
+
+    [ "$success" = true ]
+}
+
+verify_codex() {
+    local config_dir
+    config_dir=$(get_config_dir "codex")
+
+    info "Verifying Codex installation..."
+
+    if [ -d "$config_dir" ]; then
+        [ -f "$config_dir/config.toml" ] && info "  ✓ config.toml" || info "  - config.toml (optional)"
+        [ -f "$config_dir/AGENTS.md" ] && info "  ✓ AGENTS.md" || info "  - AGENTS.md (optional)"
+        return 0
+    else
+        info "  - Not installed"
+        return 0
+    fi
+}
+
+verify_antigravity() {
+    local config_dir
+    config_dir=$(get_config_dir "antigravity")
+
+    info "Verifying Antigravity installation..."
+
+    if [ -d "$config_dir" ]; then
+        [ -f "$config_dir/settings.json" ] && info "  ✓ settings.json" || info "  - settings.json (optional)"
+        [ -f "$config_dir/mcp.json" ] && info "  ✓ mcp.json" || info "  - mcp.json (optional)"
+        [ -f "$config_dir/rules.md" ] && info "  ✓ rules.md" || info "  - rules.md (optional)"
+        return 0
+    else
+        info "  - Not installed"
+        return 0
+    fi
+}
+
+#############################################
+# Main installation logic
+#############################################
 
 clone_repo() {
     local temp_dir
@@ -404,111 +489,111 @@ clone_repo() {
     echo "$temp_dir"
 }
 
-# Install configuration files
-install_config() {
-    local force_install="${1:-false}"
-    log "Installing Claude Code configuration..."
-    
-    # Create config directory if it doesn't exist
-    mkdir -p "$CLAUDE_CONFIG_DIR"
-    
-    if [ -n "$ACCOUNT_DIR" ] && [ -d "$ACCOUNT_DIR" ]; then
-        log "Installing from local repository..."
-        install_from_dirs "$REPO_DIR" "$ACCOUNT_DIR" "$force_install"
-    else
+install_tools() {
+    local tools="$1"
+    local force_install="$2"
+    local skip_backup="$3"
+    local repo_dir="$REPO_DIR"
+    local cleanup_repo=false
+
+    # Clone repo if running standalone
+    if [ -z "$repo_dir" ]; then
         log "Downloading configuration from GitHub..."
-        local temp_dir
-        if ! temp_dir=$(clone_repo); then
-            error "Failed to download configuration files from GitHub"
-            error "Please ensure git is installed and you have internet connection"
+        if ! repo_dir=$(clone_repo); then
+            error "Failed to download configuration from GitHub"
             exit 1
         fi
-        trap "rm -rf $temp_dir" EXIT
-        install_from_dirs "$temp_dir" "$temp_dir/account/claude-code" "$force_install"
-        if [ -d "$temp_dir/docs" ]; then
-            log "Installing documentation..."
-            cp -r "$temp_dir/docs" "$CLAUDE_CONFIG_DIR/"
-        fi
+        cleanup_repo=true
+        trap "rm -rf $repo_dir" EXIT
     fi
+
+    # Install each tool
+    for tool in $tools; do
+        local account_dir="$repo_dir/$(get_account_dir "$tool")"
+
+        echo ""
+        log "=== Installing $tool ==="
+
+        # Backup if needed
+        if [ "$skip_backup" = "false" ]; then
+            backup_tool_config "$tool"
+        fi
+
+        # Check tool installation
+        check_tool_installation "$tool" "$force_install"
+
+        # Install configuration
+        case "$tool" in
+            claude)
+                install_claude "$repo_dir" "$account_dir" "$force_install"
+                ;;
+            codex)
+                install_codex "$repo_dir" "$account_dir" "$force_install"
+                ;;
+            antigravity)
+                install_antigravity "$repo_dir" "$account_dir" "$force_install"
+                ;;
+        esac
+    done
+
+    # Verify installations
+    echo ""
+    log "=== Verification ==="
+    for tool in $tools; do
+        case "$tool" in
+            claude) verify_claude ;;
+            codex) verify_codex ;;
+            antigravity) verify_antigravity ;;
+        esac
+    done
 }
 
-# Verify installation
-verify_installation() {
-    log "Verifying installation..."
-    
-    local success=true
-    
-    # Check if files were copied
-    if [ -d "$CLAUDE_CONFIG_DIR/agents" ]; then
-        info "✓ Agents installed ($(ls -1 "$CLAUDE_CONFIG_DIR/agents" | wc -l) files)"
-    else
-        info "Agents not installed (optional)"
-    fi
-    
-    if [ -d "$CLAUDE_CONFIG_DIR/commands" ]; then
-        info "✓ Commands installed ($(find "$CLAUDE_CONFIG_DIR/commands" -name "*.md" | wc -l) files)"
-    else
-        warn "✗ Commands not found"
-        success=false
-    fi
-    
-    if [ -d "$CLAUDE_CONFIG_DIR/scripts" ]; then
-        info "✓ Scripts installed ($(ls -1 "$CLAUDE_CONFIG_DIR/scripts" | wc -l) files)"
-    else
-        warn "✗ Scripts not found"
-        success=false
-    fi
+show_help() {
+    cat << EOF
+Dev Environment Configuration Installer
 
-    if [ -d "$CLAUDE_CONFIG_DIR/skills" ]; then
-        info "✓ Skills installed ($(find "$CLAUDE_CONFIG_DIR/skills" -name "SKILL.md" | wc -l) skills)"
-    else
-        info "Skills not installed (optional)"
-    fi
+Usage: $0 [OPTIONS]
 
-    if [ -d "$CLAUDE_CONFIG_DIR/hooks" ]; then
-        info "✓ Hooks installed ($(find "$CLAUDE_CONFIG_DIR/hooks" -name "*.py" -o -name "*.sh" | wc -l) files)"
-    else
-        info "Hooks not installed (optional)"
-    fi
+Options:
+  --tools TOOLS    Comma-separated list of tools to install
+                   Available: claude, codex, antigravity
+                   Default: claude
+  --all            Install all available tools
+  --skip-backup    Skip backing up existing configuration
+  --force          Force installation without prompts
+  --help           Show this help message
 
-    if [ -f "$CLAUDE_CONFIG_DIR/CLAUDE.md" ]; then
-        info "✓ CLAUDE.md installed"
-    else
-        warn "✗ CLAUDE.md not found"
-        success=false
-    fi
-
-    if [ -d "$CODEX_CONFIG_DIR" ]; then
-        if [ -f "$CODEX_CONFIG_DIR/config.toml" ] || [ -f "$CODEX_CONFIG_DIR/AGENTS.md" ]; then
-            info "✓ Codex templates installed"
-        else
-            info "Codex templates not installed (optional)"
-        fi
-    else
-        info "Codex templates not installed (optional)"
-    fi
-    
-    if [ "$success" = true ]; then
-        log "Installation verified successfully!"
-    else
-        warn "Some components may be missing"
-    fi
+Examples:
+  $0                              # Install claude only (default)
+  $0 --tools codex                # Install codex only
+  $0 --tools claude,codex         # Install claude and codex
+  $0 --all                        # Install all tools
+  $0 --force --all                # Force install all tools
+EOF
 }
 
-# Main installation flow
 main() {
     echo ""
-    echo "=================================="
-    echo " Claude Code Configuration Setup"
-    echo "=================================="
+    echo "========================================"
+    echo " Dev Environment Configuration Installer"
+    echo "========================================"
     echo ""
-    
+
     # Parse arguments
     local skip_backup=false
     local force_install=false
-    
+    local tools="$DEFAULT_TOOLS"
+
     while [[ $# -gt 0 ]]; do
         case $1 in
+            --tools)
+                tools="${2//,/ }"  # Convert comma to space
+                shift 2
+                ;;
+            --all)
+                tools="$ALL_TOOLS"
+                shift
+                ;;
             --skip-backup)
                 skip_backup=true
                 shift
@@ -517,37 +602,40 @@ main() {
                 force_install=true
                 shift
                 ;;
-            --help)
-                echo "Usage: $0 [OPTIONS]"
-                echo ""
-                echo "Options:"
-                echo "  --skip-backup    Skip backing up existing configuration"
-                echo "  --force          Force installation without prompts"
-                echo "  --help           Show this help message"
+            --help|-h)
+                show_help
                 exit 0
                 ;;
             *)
                 error "Unknown option: $1"
+                show_help
                 exit 1
                 ;;
         esac
     done
-    
-    # Check OS
-    OS_INFO=$(detect_os)
-    info "Detected OS: $OS_INFO"
-    
+
+    # Validate tools
+    for tool in $tools; do
+        if [[ ! " $ALL_TOOLS " =~ " $tool " ]]; then
+            error "Unknown tool: $tool"
+            info "Available tools: $ALL_TOOLS"
+            exit 1
+        fi
+    done
+
+    # Show what will be installed
+    info "Tools to install: $tools"
+    info "Detected OS: $(detect_os)"
+
     # Check prerequisites
     check_prerequisites
-    
-    # Check Claude Code installation
-    check_claude_installation "$force_install"
-    
-    # Confirmation prompt (unless --force is used)
+
+    # Confirmation prompt (unless --force)
     if [ "$force_install" = false ]; then
         echo ""
-        warn "This will install Claude Code configuration files to $CLAUDE_CONFIG_DIR"
+        warn "This will install configuration for: $tools"
         echo -n "Continue? (y/N) "
+        local response
         if [ -t 0 ]; then
             read -r response
         else
@@ -558,25 +646,18 @@ main() {
             exit 0
         fi
     fi
-    
-    # Backup existing configuration
-    if [ "$skip_backup" = false ]; then
-        backup_existing_config
-    fi
-    
-    # Install configuration
-    install_config "$force_install"
-    
-    # Verify installation
-    verify_installation
-    
+
+    # Install
+    install_tools "$tools" "$force_install" "$skip_backup"
+
+    # Done
     echo ""
     log "Installation complete!"
     echo ""
     info "Next steps:"
-    info "1. Run 'claude' to start using Claude Code"
-    info "2. Review your configuration in $CLAUDE_CONFIG_DIR"
-    info "3. Customize settings.local.json for personal preferences"
+    for tool in $tools; do
+        info "  - Review $tool config in $(get_config_dir "$tool")"
+    done
     echo ""
 }
 

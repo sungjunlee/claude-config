@@ -1,0 +1,12 @@
+# Global Antigravity Rules
+
+## Working Agreements
+- Ask before running destructive commands or modifying large sets of files.
+- Prefer project-specific instructions when a repo provides its own rules.
+- Run relevant tests after behavior changes and summarize results.
+- Keep outputs concise and call out assumptions.
+
+## Code Style
+- Follow existing project conventions.
+- Functions under 20 lines when possible.
+- Clear, descriptive variable naming.
