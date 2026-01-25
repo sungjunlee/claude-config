@@ -6,7 +6,7 @@
 
 ### 현재 구조
 
-```
+```text
 ~/.claude/
 ├── commands/            # /my:* 커맨드
 ├── skills/

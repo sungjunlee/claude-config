@@ -139,18 +139,14 @@ def check_security() -> bool:
         (re.compile(r"\btoken\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Token"),
     ]
     ignore_dirs = {".git", ".venv", "venv", "node_modules", "dist", "build"}
-    safe_markers = {
-        "example",
-        "test",
-        "mock",
-        "fake",
-        "dummy",
-        "getenv",
-        "environ",
-        "config",
-        "setting",
-        "# ",
-    }
+    safe_markers = {"example", "dummy", "fake", "mock", "sample"}
+
+    def is_safe_path(path: Path) -> bool:
+        parts = {part.lower() for part in path.parts}
+        if parts & {"tests", "test", "examples", "example", "fixtures"}:
+            return True
+        name = path.name.lower()
+        return name.startswith("test_") or name.endswith("_test.py")
 
     found_issues = []
 
@@ -172,7 +168,7 @@ def check_security() -> bool:
                     continue
                 line = lines[line_no].strip()
                 lower = line.lower()
-                if any(marker in lower for marker in safe_markers):
+                if is_safe_path(path) and any(marker in lower for marker in safe_markers):
                     continue
                 found_issues.append(f"{path}:{line_no + 1}: {line[:100]}")
                 hits += 1

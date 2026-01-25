@@ -22,7 +22,7 @@ if ! command -v gemini &> /dev/null; then
   exit 1
 fi
 
-# Ensure using free tier
+# Ensure no API key is set
 unset GEMINI_API_KEY
 ```
 

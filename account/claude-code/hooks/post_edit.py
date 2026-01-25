@@ -20,13 +20,25 @@ Environment variables (from Claude Code):
 """
 
 import os
+import sys
 import subprocess
 import shutil
 import shlex
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Callable
 
-TIMEOUT = int(os.environ.get("CLAUDE_HOOK_TIMEOUT", "60"))
+def parse_timeout(value: Optional[str], default: int = 60) -> int:
+    if value is None:
+        return default
+    try:
+        parsed = int(value)
+        return parsed if parsed > 0 else default
+    except (TypeError, ValueError):
+        print("⚠️  Invalid CLAUDE_HOOK_TIMEOUT; using default 60", file=sys.stderr)
+        return default
+
+
+TIMEOUT = parse_timeout(os.environ.get("CLAUDE_HOOK_TIMEOUT"), 60)
 
 
 def run_command(

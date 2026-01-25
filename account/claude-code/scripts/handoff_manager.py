@@ -326,7 +326,9 @@ class HandoffManager:
                 text=True,
                 cwd=self.project_root,
             )
-            if result.returncode == 0 and result.stdout:
+            if result.returncode != 0:
+                return None
+            if result.stdout:
                 conflicts = result.stdout.strip().split("\n")
         except (subprocess.SubprocessError, FileNotFoundError, OSError):
             return None  # Git not available or not a git repo
