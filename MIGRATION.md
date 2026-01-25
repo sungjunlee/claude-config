@@ -1,18 +1,46 @@
 # Migration Guide
 
-## Unified My Skill Architecture (v4.1)
+## 저장소 구조 변경 (v4.2)
 
-2026년 1월, 모든 커스텀 기능을 단일 `my` skill로 통합했습니다.
+2026년 1월, 저장소 구조가 개편되었습니다.
 
-### 현재 구조
+### 주요 변경점
+
+1. **account/ 디렉토리 도입**: 계정 레벨 설정이 `account/` 하위로 이동
+2. **멀티 도구 지원**: Claude Code, Codex, Antigravity 동시 지원
+3. **커뮤니티 Skills**: `npx skills add`로 외부 skills 설치 가능
+
+### 저장소 구조
+
+```text
+.
+├── account/
+│   ├── claude-code/     # → ~/.claude/ (scripts, hooks, CLAUDE.md 등)
+│   ├── codex/           # → ~/.codex/
+│   └── antigravity/     # → ~/.gemini/antigravity/
+├── commands/            # → ~/.claude/commands/
+├── skills/              # → ~/.claude/skills/
+└── install.sh
+```
+
+### 설치 후 ~/.claude/ 구조
 
 ```text
 ~/.claude/
 ├── commands/            # /my:* 커맨드
 ├── skills/
 │   └── my/              # 개인 도구 모음 (컨텍스트)
-└── scripts/
+├── scripts/             # 지원 스크립트
+├── hooks/               # 이벤트 훅
+├── CLAUDE.md            # 글로벌 설정
+└── llm-models-latest.md
 ```
+
+---
+
+## Unified My Skill Architecture (v4.1)
+
+2026년 1월, 모든 커스텀 기능을 단일 `my` skill로 통합했습니다.
 
 ### 명령어 변경
 
