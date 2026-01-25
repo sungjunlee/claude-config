@@ -73,7 +73,7 @@ search: Add Elasticsearch full-text search (2h)
 Creates for each task:
 - `.worktrees/[task-name]/` - Independent worktree directory
 - `.worktrees/tasks/[task-name].md` - Detailed task instructions
-- Environment files copied and symlinks created
+- Environment files copied (no symlinks)
 - Branch `feature/[task-name]` ready for work
 
 ## Success Indicators

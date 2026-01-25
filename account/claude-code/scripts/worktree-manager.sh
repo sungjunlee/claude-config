@@ -147,7 +147,6 @@ copy_env_files() {
             fi
         fi
     done
-    return "$has_error"
     # Symlink node_modules (DISABLED: Too risky for shared state)
     # if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
     #     local abs_node_modules
@@ -173,6 +172,7 @@ copy_env_files() {
     if [[ $copied_count -eq 0 ]]; then
         echo "    ℹ No environment files found to copy"
     fi
+    return "$has_error"
 }
 
 # Distribute tasks
