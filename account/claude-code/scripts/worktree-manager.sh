@@ -217,6 +217,7 @@ distribute_tasks() {
             # Create worktree
             local worktree_path="$WORKTREES_DIR/$task_name"
             local branch_name="feature/$task_name"
+            local worktree_ok=true
             
             if [[ -d "$worktree_path" ]]; then
                 echo -e "    ${YELLOW}⚠ Worktree already exists${NC}"
@@ -229,6 +230,7 @@ distribute_tasks() {
                     else
                         echo -e "    ${YELLOW}⚠ Could not add worktree for $branch_name (branch may be checked out elsewhere)${NC}"
                         [[ -n "$worktree_output" ]] && echo "      ${worktree_output%%$'\n'*}"
+                        worktree_ok=false
                     fi
                 else
                     local worktree_output=""
@@ -237,9 +239,14 @@ distribute_tasks() {
                     else
                         echo -e "    ${RED}✗ Failed to create worktree/branch $branch_name${NC}"
                         [[ -n "$worktree_output" ]] && echo "      ${worktree_output%%$'\n'*}"
+                        worktree_ok=false
                     fi
                 fi
             
+            fi
+            if [[ "$worktree_ok" == false ]]; then
+                echo ""
+                continue
             fi
             # Copy environment files
             echo "    📄 Copying environment files..."

@@ -105,7 +105,7 @@ def handle_python(filepath: str) -> None:
 
     ok, out = run_command([*ruff, "check", "--fix", "--quiet", filepath])
     if not ok:
-        msg = out.split(chr(10))[0][:60] if out else "Linting failed"
+        msg = out.split("\n")[0][:60] if out else "Linting failed"
         print(f"  ⚠️  {msg}")
 
 
@@ -124,7 +124,7 @@ def handle_typescript(filepath: str) -> None:
         if ok:
             print("  ✓ eslint")
         else:
-            msg = out.split(chr(10))[0][:60] if out else "eslint failed"
+            msg = out.split("\n")[0][:60] if out else "eslint failed"
             print(f"  ⚠️  {msg}")
     else:
         print("  ⚠️  eslint not found")
@@ -152,7 +152,7 @@ def handle_rust(filepath: str) -> None:
     if relevant:
         print(f"  ⚠️  {relevant[0][:60]}")
     elif not ok:
-        msg = out.split(chr(10))[0][:60] if out else "clippy failed"
+        msg = out.split("\n")[0][:60] if out else "clippy failed"
         print(f"  ⚠️  {msg}")
 
 
@@ -174,7 +174,7 @@ def handle_go(filepath: str) -> None:
                 ["golangci-lint", "run", "--fast", filepath], cwd=project_root
             )
             if not ok:
-                msg = out.split(chr(10))[0][:60] if out else "golangci-lint failed"
+                msg = out.split("\n")[0][:60] if out else "golangci-lint failed"
                 print(f"  ⚠️  {msg}")
 
 

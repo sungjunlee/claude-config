@@ -12,7 +12,10 @@ Platform-independent alternative to symbolic links.
 import os
 import sys
 import json
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 import shutil
 import subprocess
 from datetime import datetime
@@ -50,7 +53,7 @@ class HandoffManager:
         filepath = self.handoff_dir / filename
 
         # Write handoff content
-        filepath.write_text(content)
+        filepath.write_text(content, encoding="utf-8")
 
         # Update metadata
         metadata = {
@@ -139,7 +142,7 @@ class HandoffManager:
                 return None
             handoff_path = Path(latest)
 
-        content = handoff_path.read_text()
+        content = handoff_path.read_text(encoding="utf-8", errors="replace")
         info = self._get_handoff_info(handoff_path)
 
         return {"content": content, "metadata": info}
@@ -193,7 +196,9 @@ class HandoffManager:
 
     def _write_metadata(self, metadata: Dict):
         """Write metadata to .current file."""
-        with open(self.metadata_file, "w") as f:
+        if yaml is None:
+            raise RuntimeError("pyyaml is required (pip install pyyaml)")
+        with open(self.metadata_file, "w", encoding="utf-8") as f:
             yaml.dump(metadata, f, default_flow_style=False)
 
     def _read_metadata(self) -> Optional[Dict]:
@@ -201,13 +206,15 @@ class HandoffManager:
         if not self.metadata_file.exists():
             return None
 
-        with open(self.metadata_file, "r") as f:
+        if yaml is None:
+            raise RuntimeError("pyyaml is required (pip install pyyaml)")
+        with open(self.metadata_file, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     def _get_handoff_info(self, filepath: Path) -> Dict:
         """Extract information from a handoff file."""
         created = datetime.fromtimestamp(filepath.stat().st_mtime)
-        content = filepath.read_text()
+        content = filepath.read_text(encoding="utf-8", errors="replace")
 
         # Extract summary from content (first heading after title)
         summary = "No summary available"

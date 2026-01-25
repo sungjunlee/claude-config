@@ -1,4 +1,4 @@
-#!/usr/bin/env -S uv run --quiet --with python-dateutil python3
+#!/usr/bin/env python3
 """
 Claude Code Enhanced Audit Logger
 Logs detailed command execution information with context
