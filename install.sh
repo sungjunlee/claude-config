@@ -6,7 +6,7 @@
 # Installs account-level configuration for AI coding assistants:
 # - Claude Code (~/.claude)
 # - Codex (~/.codex)
-# - Antigravity (~/.config/antigravity)
+# - Antigravity (~/.gemini/antigravity, ~/.gemini/GEMINI.md)
 
 set -euo pipefail
 
@@ -59,13 +59,11 @@ get_account_dir() {
 }
 
 # Get command name for a tool
+# Note: Currently same as tool name, but kept separate for future flexibility
+# (e.g., if a tool's CLI command differs from its name)
 get_tool_command() {
     local tool="$1"
-    case "$tool" in
-        claude) echo "claude" ;;
-        codex) echo "codex" ;;
-        antigravity) echo "antigravity" ;;
-    esac
+    echo "$tool"
 }
 
 # Colors for output (disabled if not TTY)
@@ -180,19 +178,29 @@ check_tool_installation() {
 # Install a tool
 install_tool() {
     local tool="$1"
+    local install_result=0
     log "Installing $tool..."
 
     case "$tool" in
         claude)
             if command -v npm &> /dev/null; then
-                npm install -g @anthropic-ai/claude-code
+                if ! npm install -g @anthropic-ai/claude-code; then
+                    error "npm install failed for Claude Code"
+                    install_result=1
+                fi
             else
-                curl -fsSL https://claude.ai/install.sh | bash
+                if ! curl -fsSL https://claude.ai/install.sh | bash; then
+                    error "Claude Code installation script failed"
+                    install_result=1
+                fi
             fi
             ;;
         codex)
             if command -v npm &> /dev/null; then
-                npm install -g @openai/codex
+                if ! npm install -g @openai/codex; then
+                    error "npm install failed for Codex"
+                    install_result=1
+                fi
             else
                 warn "npm required to install Codex"
                 return 1
@@ -204,12 +212,16 @@ install_tool() {
             ;;
     esac
 
+    if [ "$install_result" -ne 0 ]; then
+        return 1
+    fi
+
     local cmd
     cmd=$(get_tool_command "$tool")
     if command -v "$cmd" &> /dev/null; then
         log "$tool installed successfully!"
     else
-        warn "$tool installation may have failed"
+        warn "$tool installation may have failed - command '$cmd' not found"
     fi
 }
 
@@ -499,7 +511,8 @@ verify_antigravity() {
 clone_repo() {
     local temp_dir
     temp_dir=$(mktemp -d)
-    if ! git clone --depth 1 "$REPO_URL" "$temp_dir" 2>/dev/null; then
+    # Show git errors but capture them for better error messages
+    if ! git clone --depth 1 "$REPO_URL" "$temp_dir" 2>&1; then
         rm -rf "$temp_dir"
         return 1
     fi
@@ -511,17 +524,17 @@ install_tools() {
     local force_install="$2"
     local skip_backup="$3"
     local repo_dir="$REPO_DIR"
-    local cleanup_repo=false
 
     # Clone repo if running standalone
     if [ -z "$repo_dir" ]; then
         log "Downloading configuration from GitHub..."
         if ! repo_dir=$(clone_repo); then
             error "Failed to download configuration from GitHub"
+            error "Please ensure git is installed and you have internet connection"
             exit 1
         fi
-        cleanup_repo=true
-        trap "rm -rf $repo_dir" EXIT
+        # Use quoted variable in trap for paths with spaces
+        trap 'rm -rf "$repo_dir"' EXIT
     fi
 
     # Install each tool
