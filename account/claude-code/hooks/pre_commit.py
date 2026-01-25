@@ -79,7 +79,7 @@ def check_linting() -> bool:
 
     if not success:
         print("❌ Linting issues:")
-        print((output or error)[:500])
+        print("\n".join((output or error).splitlines()[:20]))
         print("\nRun: ruff check --fix .")
         return False
 
@@ -93,11 +93,13 @@ def check_types() -> bool:
         return True  # Skip if not available
 
     # Check if mypy is configured
-    has_config = any([
-        Path("mypy.ini").exists(),
-        Path("pyproject.toml").exists(),
-        Path("setup.cfg").exists(),
-    ])
+    has_config = any(
+        [
+            Path("mypy.ini").exists(),
+            Path("pyproject.toml").exists(),
+            Path("setup.cfg").exists(),
+        ]
+    )
 
     if not has_config:
         return True  # Skip if not configured
@@ -112,7 +114,7 @@ def check_types() -> bool:
             return True
 
         print("❌ Type errors:")
-        print((output or error)[:500])
+        print("\n".join((output or error).splitlines()[:20]))
         return False
 
     print("✅ Types OK")
@@ -125,8 +127,14 @@ def check_security() -> bool:
 
     # Patterns to search for
     patterns = [
-        (re.compile(r"\b(api_key|apikey)\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "API key"),
-        (re.compile(r"\bpassword\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Password"),
+        (
+            re.compile(r"\b(api_key|apikey)\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE),
+            "API key",
+        ),
+        (
+            re.compile(r"\bpassword\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE),
+            "Password",
+        ),
         (re.compile(r"\bsecret\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Secret"),
         (re.compile(r"\btoken\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Token"),
     ]
@@ -151,7 +159,8 @@ def check_security() -> bool:
             continue
         try:
             content = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
+        except OSError as e:
+            print(f"⚠️  Skipping unreadable file: {path} ({e})")
             continue
 
         lines = content.splitlines()

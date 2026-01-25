@@ -105,16 +105,23 @@ def handle_python(filepath: str) -> None:
 
     ok, out = run_command([*ruff, "check", "--fix", "--quiet", filepath])
     if not ok:
-        msg = out.split("\n")[0][:60] if out else "Linting failed"
-        print(f"  ⚠️  {msg}")
+        lines = out.strip().split("\n") if out else ["Linting failed"]
+        print(f"  ⚠️  Linting failed:")
+        for line in lines[:3]:
+            print(f"      {line}")
 
 
 def handle_typescript(filepath: str) -> None:
     """Handle TypeScript/JavaScript with prettier + eslint."""
     prettier = resolve_npm_tool("prettier")
     if prettier:
-        ok, _ = run_command([*prettier, "--write", filepath], timeout=15)
-        print("  ✓ prettier" if ok else "  ⚠️  prettier failed")
+        ok, out = run_command([*prettier, "--write", filepath], timeout=15)
+        if ok:
+            print("  ✓ prettier")
+        else:
+            print(
+                f"  ⚠️  prettier failed: {out.strip().splitlines()[0] if out else 'Unknown error'}"
+            )
     else:
         print("  ⚠️  prettier not found")
 
@@ -124,8 +131,10 @@ def handle_typescript(filepath: str) -> None:
         if ok:
             print("  ✓ eslint")
         else:
-            msg = out.split("\n")[0][:60] if out else "eslint failed"
-            print(f"  ⚠️  {msg}")
+            print(f"  ⚠️  eslint failed:")
+            lines = out.strip().split("\n") if out else ["Unknown error"]
+            for line in lines[:3]:
+                print(f"      {line}")
     else:
         print("  ⚠️  eslint not found")
 
@@ -150,10 +159,10 @@ def handle_rust(filepath: str) -> None:
     )
     relevant = [l for l in out.split("\n") if filepath in l] if out else []
     if relevant:
-        print(f"  ⚠️  {relevant[0][:60]}")
+        print(f"  ⚠️  {relevant[0]}")
     elif not ok:
-        msg = out.split("\n")[0][:60] if out else "clippy failed"
-        print(f"  ⚠️  {msg}")
+        lines = out.strip().split("\n") if out else ["clippy failed"]
+        print(f"  ⚠️  {lines[0]}")
 
 
 def handle_go(filepath: str) -> None:
@@ -174,8 +183,8 @@ def handle_go(filepath: str) -> None:
                 ["golangci-lint", "run", "--fast", filepath], cwd=project_root
             )
             if not ok:
-                msg = out.split("\n")[0][:60] if out else "golangci-lint failed"
-                print(f"  ⚠️  {msg}")
+                lines = out.strip().split("\n") if out else ["golangci-lint failed"]
+                print(f"  ⚠️  {lines[0]}")
 
 
 # =============================================================================

@@ -12,6 +12,7 @@ Platform-independent alternative to symbolic links.
 import os
 import sys
 import json
+
 try:
     import yaml
 except ImportError:
@@ -53,7 +54,10 @@ class HandoffManager:
         filepath = self.handoff_dir / filename
 
         # Write handoff content
-        filepath.write_text(content, encoding="utf-8")
+        try:
+            filepath.write_text(content, encoding="utf-8")
+        except OSError as e:
+            raise OSError(f"Failed to write handoff file {filepath}: {e}")
 
         # Update metadata
         metadata = {
@@ -243,7 +247,7 @@ class HandoffManager:
             encoding = tiktoken.get_encoding("cl100k_base")
             return len(encoding.encode(content))
         except ImportError:
-            # Fallback if tiktoken is not installed
+            print("Warning: tiktoken not installed; using fallback token estimate", file=sys.stderr)
             return len(content) // 4
         except Exception as e:
             # Log unexpected errors but don't crash

@@ -176,90 +176,67 @@ copy_env_files() {
 }
 
 # Distribute tasks
-distribute_tasks() {
+ensure_plan_file() {
     if [[ ! -f "$WORKTREES_DIR/PLAN.md" ]]; then
         echo -e "${RED}✗ PLAN.md not found${NC}"
         echo -e "${YELLOW}Creating template...${NC}"
         create_plan_template
         return 1
     fi
-    
-    # Create tasks directory
+}
+
+ensure_tasks_dir() {
     if ! mkdir -p "$WORKTREES_DIR/tasks"; then
         echo -e "${RED}✗ Failed to create $WORKTREES_DIR/tasks${NC}"
         return 1
     fi
-    
-    echo -e "${BLUE}📋 Parsing PLAN.md...${NC}\n"
-    
-    local task_count=0
-    local in_block=false
-    
-    # Parse PLAN.md
-    while IFS= read -r line; do
-        if [[ "$line" =~ ^\`\`\`(bash)?[[:space:]]*$ ]]; then
-            in_block=true
-        elif [[ "$in_block" == true && "$line" =~ ^\`\`\`[[:space:]]*$ ]]; then
-            in_block=false
-        elif [[ "$in_block" == true ]]; then
-            # Skip comment lines
-            [[ "$line" =~ ^[[:space:]]*# ]] && continue
-            if [[ "$line" =~ ^([a-z][a-z0-9-]*):\ *(.+)$ ]]; then
-                local task_name="${BASH_REMATCH[1]}"
-                local task_desc="${BASH_REMATCH[2]}"
-            else
-                continue
-            fi
-            
-            echo -e "${BLUE}📦 Setting up: $task_name${NC}"
-            echo "   Description: $task_desc"
-            
-            # Create worktree
-            local worktree_path="$WORKTREES_DIR/$task_name"
-            local branch_name="feature/$task_name"
-            local worktree_ok=true
-            
-            if [[ -d "$worktree_path" ]]; then
-                echo -e "    ${YELLOW}⚠ Worktree already exists${NC}"
-            else
-                # Check if branch already exists
-                if git show-ref --verify --quiet "refs/heads/$branch_name"; then
-                    local worktree_output=""
-                    if worktree_output=$(git worktree add "$worktree_path" "$branch_name" 2>&1); then
-                        echo "    ✓ Added worktree (existing branch)"
-                    else
-                        echo -e "    ${YELLOW}⚠ Could not add worktree for $branch_name (branch may be checked out elsewhere)${NC}"
-                        [[ -n "$worktree_output" ]] && echo "      ${worktree_output%%$'\n'*}"
-                        worktree_ok=false
-                    fi
-                else
-                    local worktree_output=""
-                    if worktree_output=$(git worktree add "$worktree_path" -b "$branch_name" 2>&1); then
-                        echo "    ✓ Created worktree (new branch)"
-                    else
-                        echo -e "    ${RED}✗ Failed to create worktree/branch $branch_name${NC}"
-                        [[ -n "$worktree_output" ]] && echo "      ${worktree_output%%$'\n'*}"
-                        worktree_ok=false
-                    fi
-                fi
-            
-            fi
-            if [[ "$worktree_ok" == false ]]; then
-                echo ""
-                continue
-            fi
-            # Copy environment files
-            echo "    📄 Copying environment files..."
-            if ! copy_env_files "$worktree_path" "."; then
-                echo "    ⚠ Environment file copy had failures"
-            fi
-            
-            # Generate task instructions
-            if ! cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF; then
-                echo -e "    ${RED}✗ Failed to write task file for $task_name${NC}"
-                echo ""
-                continue
-            fi
+}
+
+parse_task_line() {
+    local line="$1"
+    if [[ "$line" =~ ^([A-Za-z][A-Za-z0-9_-]*):\ *(.+)$ ]]; then
+        TASK_NAME="$(echo "${BASH_REMATCH[1]}" | tr '[:upper:]' '[:lower:]')"
+        TASK_DESC="${BASH_REMATCH[2]}"
+        return 0
+    fi
+    return 1
+}
+
+create_worktree_for_task() {
+    local worktree_path="$1"
+    local branch_name="$2"
+    if [[ -d "$worktree_path" ]]; then
+        echo -e "    ${YELLOW}⚠ Worktree already exists${NC}"
+        return 0
+    fi
+    local output=""
+    if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+        if output=$(git worktree add "$worktree_path" "$branch_name" 2>&1); then
+            echo "    ✓ Added worktree (existing branch)"
+            return 0
+        fi
+        echo -e "    ${YELLOW}⚠ Could not add worktree for $branch_name${NC}"
+    else
+        if output=$(git worktree add "$worktree_path" -b "$branch_name" 2>&1); then
+            echo "    ✓ Created worktree (new branch)"
+            return 0
+        fi
+        echo -e "    ${RED}✗ Failed to create worktree/branch $branch_name${NC}"
+    fi
+    [[ -n "$output" ]] && echo "      ${output%%$'\n'*}"
+    return 1
+}
+
+write_task_file() {
+    local task_name="$1"
+    local task_desc="$2"
+    local worktree_path="$3"
+    local branch_name="$4"
+    if ! cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF; then
+        echo -e "    ${RED}✗ Failed to write task file for $task_name${NC}"
+        echo ""
+        return 1
+    fi
 # Task: $task_name
 
 ## 📋 Task Description
@@ -299,26 +276,37 @@ claude
 ---
 Generated: $(date '+%Y-%m-%d %H:%M:%S')
 EOF
-            echo "    ✓ Created task file: tasks/$task_name.md"
-            echo ""
-            
-            ((task_count++))
-        fi
-    done < "$WORKTREES_DIR/PLAN.md"
-    
-    if [[ $task_count -eq 0 ]]; then
-        echo -e "${YELLOW}⚠ No tasks found in PLAN.md${NC}"
-        echo "Please check the format in PLAN.md"
+    echo "    ✓ Created task file: tasks/$task_name.md"
+    echo ""
+}
+
+handle_task() {
+    local task_name="$1"
+    local task_desc="$2"
+    local worktree_path="$WORKTREES_DIR/$task_name"
+    local branch_name="feature/$task_name"
+
+    echo -e "${BLUE}📦 Setting up: $task_name${NC}"
+    echo "   Description: $task_desc"
+
+    if ! create_worktree_for_task "$worktree_path" "$branch_name"; then
+        echo ""
         return 1
     fi
-    
-    # Completion message
+
+    echo "    📄 Copying environment files..."
+    if ! copy_env_files "$worktree_path" "."; then
+        echo "    ⚠ Environment file copy had failures"
+    fi
+    write_task_file "$task_name" "$task_desc" "$worktree_path" "$branch_name"
+}
+
+show_distribution_summary() {
+    local task_count="$1"
     echo -e "${GREEN}✅ Task distribution complete! ($task_count tasks)${NC}\n"
     echo -e "${BLUE}Next steps:${NC}"
     echo "Run Claude in each worktree:"
     echo ""
-    
-    # Display list of created worktrees
     for dir in "$WORKTREES_DIR"/*/; do
         if [[ -d "$dir" && -f "$dir/.git" ]]; then
             local task_name
@@ -326,9 +314,42 @@ EOF
             echo "  cd .worktrees/$task_name && claude"
         fi
     done
-    
     echo ""
     echo -e "${YELLOW}Tip:${NC} Run separately in each terminal/tab for parallel work"
+}
+
+parse_plan_tasks() {
+    local in_block=false
+    TASK_COUNT=0
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^\`\`\`(bash)?[[:space:]]*$ ]]; then
+            in_block=true
+        elif [[ "$in_block" == true && "$line" =~ ^\`\`\`[[:space:]]*$ ]]; then
+            in_block=false
+        elif [[ "$in_block" == true ]]; then
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            parse_task_line "$line" || continue
+            if handle_task "$TASK_NAME" "$TASK_DESC"; then
+                TASK_COUNT=$((TASK_COUNT + 1))
+            fi
+        fi
+    done < "$WORKTREES_DIR/PLAN.md"
+}
+
+distribute_tasks() {
+    ensure_plan_file || return 1
+    ensure_tasks_dir || return 1
+
+    echo -e "${BLUE}📋 Parsing PLAN.md...${NC}\n"
+    parse_plan_tasks
+
+    if [[ $TASK_COUNT -eq 0 ]]; then
+        echo -e "${YELLOW}⚠ No tasks found in PLAN.md${NC}"
+        echo "Please check the format in PLAN.md"
+        return 1
+    fi
+
+    show_distribution_summary "$TASK_COUNT"
 }
 
 # Check status
@@ -535,6 +556,80 @@ check_tmux() {
     fi
 }
 
+tmux_session_name() {
+    local project_name
+    project_name=$(basename "$(pwd)")
+    project_name="${project_name//[^a-zA-Z0-9_-]/_}"
+    echo "${project_name}-wt"
+}
+
+tmux_add_window() {
+    local session="$1"
+    local name="$2"
+    local path="$3"
+    local is_first="$4"
+    if [[ "$is_first" == true ]]; then
+        tmux new-session -d -s "$session" -n "$name" -c "$path"
+    else
+        tmux new-window -t "$session" -n "$name" -c "$path"
+    fi
+}
+
+tmux_launch_worktrees() {
+    local session="$1"
+    TMUX_FIRST=true
+    TMUX_COUNT=0
+    TMUX_FAILURES=0
+    TMUX_WARNINGS=0
+    shopt -s nullglob
+    for dir in "$WORKTREES_DIR"/*/; do
+        if [[ -d "$dir" && -f "$dir/.git" ]]; then
+            local name
+            name=$(basename "$dir")
+            local path
+            if ! path=$(cd "$dir" && pwd); then
+                echo -e "  ${RED}✗ $name (directory inaccessible)${NC}" >&2
+                TMUX_FAILURES=$((TMUX_FAILURES + 1))
+                continue
+            fi
+            if ! tmux_add_window "$session" "$name" "$path" "$TMUX_FIRST"; then
+                echo -e "  ${RED}✗ $name (failed to create window)${NC}" >&2
+                TMUX_FAILURES=$((TMUX_FAILURES + 1))
+                continue
+            fi
+            TMUX_FIRST=false
+            TMUX_COUNT=$((TMUX_COUNT + 1))
+            if ! tmux send-keys -t "$session:$name" "claude" C-m; then
+                echo -e "  ${YELLOW}⚠ $name (window created, failed to start claude)${NC}" >&2
+                TMUX_WARNINGS=$((TMUX_WARNINGS + 1))
+            else
+                echo "  ✓ $name"
+            fi
+        fi
+    done
+    shopt -u nullglob
+}
+
+tmux_summary() {
+    local session="$1"
+    if [[ $TMUX_COUNT -eq 0 && $TMUX_FAILURES -eq 0 ]]; then
+        echo -e "${YELLOW}No worktrees to launch${NC}"
+        return 1
+    fi
+    echo ""
+    if [[ $TMUX_FAILURES -gt 0 ]]; then
+        echo -e "${YELLOW}⚠ $TMUX_FAILURES worktree(s) failed to launch${NC}"
+    fi
+    if [[ $TMUX_WARNINGS -gt 0 ]]; then
+        echo -e "${YELLOW}⚠ $TMUX_WARNINGS worktree(s) created without starting claude${NC}"
+    fi
+    if [[ $TMUX_COUNT -gt 0 ]]; then
+        echo -e "${GREEN}✅ Launched $TMUX_COUNT worktree(s) in tmux${NC}"
+        echo "Attach: tmux attach -t $session"
+    fi
+    [[ $TMUX_FAILURES -gt 0 ]] && return 1
+}
+
 # Launch tmux session
 launch_tmux() {
     check_tmux || return 1
@@ -544,11 +639,8 @@ launch_tmux() {
         return 1
     fi
 
-    local project_name
-    project_name=$(basename "$(pwd)")
-    # Sanitize session name: only allow alphanumeric, underscore, hyphen
-    project_name="${project_name//[^a-zA-Z0-9_-]/_}"
-    local session_name="${project_name}-wt"
+    local session_name
+    session_name="$(tmux_session_name)"
 
     # Check existing session
     if tmux has-session -t "$session_name" 2>/dev/null; then
@@ -561,68 +653,8 @@ launch_tmux() {
 
     echo -e "${BLUE}🚀 Creating tmux session: $session_name${NC}"
 
-    local first=true
-    local count=0
-    local failures=0
-    local warnings=0
-
-    shopt -s nullglob
-    for dir in "$WORKTREES_DIR"/*/; do
-        if [[ -d "$dir" && -f "$dir/.git" ]]; then
-            local name
-            name=$(basename "$dir")
-            local path
-            if ! path=$(cd "$dir" && pwd); then
-                echo -e "  ${RED}✗ $name (directory inaccessible)${NC}" >&2
-                failures=$((failures + 1))
-                continue
-            fi
-
-            if [[ "$first" == true ]]; then
-                if ! tmux new-session -d -s "$session_name" -n "$name" -c "$path"; then
-                    echo -e "  ${RED}✗ $name (failed to create session)${NC}" >&2
-                    failures=$((failures + 1))
-                    continue
-                fi
-                first=false
-            else
-                if ! tmux new-window -t "$session_name" -n "$name" -c "$path"; then
-                    echo -e "  ${RED}✗ $name (failed to create window)${NC}" >&2
-                    failures=$((failures + 1))
-                    continue
-                fi
-            fi
-
-            count=$((count + 1))
-            if ! tmux send-keys -t "$session_name:$name" "claude" C-m; then
-                echo -e "  ${YELLOW}⚠ $name (window created, failed to start claude)${NC}" >&2
-                warnings=$((warnings + 1))
-            else
-                echo "  ✓ $name"
-            fi
-        fi
-    done
-    shopt -u nullglob
-
-    if [[ $count -eq 0 && $failures -eq 0 ]]; then
-        echo -e "${YELLOW}No worktrees to launch${NC}"
-        return 1
-    fi
-
-    echo ""
-    if [[ $failures -gt 0 ]]; then
-        echo -e "${YELLOW}⚠ $failures worktree(s) failed to launch${NC}"
-    fi
-    if [[ $warnings -gt 0 ]]; then
-        echo -e "${YELLOW}⚠ $warnings worktree(s) created without starting claude${NC}"
-    fi
-    if [[ $count -gt 0 ]]; then
-        echo -e "${GREEN}✅ Launched $count worktree(s) in tmux${NC}"
-        echo "Attach: tmux attach -t $session_name"
-    fi
-
-    [[ $failures -gt 0 ]] && return 1
-    return 0
+    tmux_launch_worktrees "$session_name"
+    tmux_summary "$session_name"
 }
 
 # Check iTerm availability (macOS only)

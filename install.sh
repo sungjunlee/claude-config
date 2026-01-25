@@ -313,6 +313,97 @@ install_codex_templates() {
     fi
 }
 
+install_dir() {
+    local label="$1"
+    local src="$2"
+    local dest="$3"
+    local exec_flag="${4:-false}"
+    if [ -d "$src" ]; then
+        log "Installing $label..."
+        cp -r "$src" "$dest"
+        if [ "$exec_flag" = "true" ]; then
+            local target="$dest/$(basename "$src")"
+            find "$target" -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod +x {} \;
+        fi
+    else
+        info "$label not found (optional)"
+    fi
+}
+
+install_file() {
+    local label="$1"
+    local src="$2"
+    local dest="$3"
+    if [ -f "$src" ]; then
+        log "Installing $label..."
+        cp "$src" "$dest"
+    else
+        warn "$label not found"
+    fi
+}
+
+install_account_dirs() {
+    local dir="$1"
+    install_dir "agents" "$dir/agents" "$CLAUDE_CONFIG_DIR/" "false"
+    install_dir "scripts" "$dir/scripts" "$CLAUDE_CONFIG_DIR/" "true"
+    install_dir "hooks" "$dir/hooks" "$CLAUDE_CONFIG_DIR/" "true"
+}
+
+install_repo_dirs() {
+    local repo="$1"
+    install_dir "commands" "$repo/commands" "$CLAUDE_CONFIG_DIR/" "false"
+    install_dir "skills" "$repo/skills" "$CLAUDE_CONFIG_DIR/" "false"
+}
+
+install_account_files() {
+    local dir="$1"
+    install_file "CLAUDE.md" "$dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
+    install_file "llm-models-latest.md" "$dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
+}
+
+install_settings_files() {
+    local dir="$1"
+    local force_install="$2"
+    if [ -f "$dir/settings.json" ]; then
+        handle_settings_merge "$dir/settings.json" "$CLAUDE_CONFIG_DIR/settings.json" "$force_install"
+    fi
+    if [ -f "$dir/settings.local.json.example" ] && [ ! -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]; then
+        cp "$dir/settings.local.json.example" "$CLAUDE_CONFIG_DIR/settings.local.json"
+        warn "Please edit $CLAUDE_CONFIG_DIR/settings.local.json with your personal settings"
+    fi
+}
+
+install_codex_dir() {
+    local repo="$1"
+    local force_install="$2"
+    if [ -d "$repo/account/codex" ]; then
+        install_codex_templates "$repo/account/codex" "$force_install"
+    else
+        info "Codex templates not found (optional)"
+    fi
+}
+
+install_from_dirs() {
+    local repo="$1"
+    local account="$2"
+    local force_install="$3"
+    install_account_dirs "$account"
+    install_repo_dirs "$repo"
+    install_account_files "$account"
+    install_settings_files "$account" "$force_install"
+    install_codex_dir "$repo" "$force_install"
+}
+
+clone_repo() {
+    local temp_dir
+    temp_dir=$(mktemp -d)
+    if ! git clone --depth 1 "$REPO_URL" "$temp_dir" 2>/dev/null; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+    echo "$temp_dir"
+}
+
 # Install configuration files
 install_config() {
     local force_install="${1:-false}"
@@ -321,157 +412,19 @@ install_config() {
     # Create config directory if it doesn't exist
     mkdir -p "$CLAUDE_CONFIG_DIR"
     
-    # Check if running from local directory or need to download
     if [ -n "$ACCOUNT_DIR" ] && [ -d "$ACCOUNT_DIR" ]; then
-        # Local installation from repo
         log "Installing from local repository..."
-        
-        # Copy account-level configuration
-        if [ -d "$ACCOUNT_DIR/agents" ]; then
-            log "Installing agents..."
-            cp -r "$ACCOUNT_DIR/agents" "$CLAUDE_CONFIG_DIR/"
-        else
-            info "Agents not installed (optional)"
-        fi
-        
-        if [ -n "$REPO_DIR" ] && [ -d "$REPO_DIR/commands" ]; then
-            log "Installing commands..."
-            cp -r "$REPO_DIR/commands" "$CLAUDE_CONFIG_DIR/"
-        else
-            warn "Commands directory not found in repo"
-        fi
-        
-        if [ -d "$ACCOUNT_DIR/scripts" ]; then
-            log "Installing scripts..."
-            cp -r "$ACCOUNT_DIR/scripts" "$CLAUDE_CONFIG_DIR/"
-            # Set execution permissions for all scripts
-            find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
-            find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.py" -exec chmod +x {} \;
-        else
-            debug "Scripts directory not found (optional)"
-        fi
-
-        if [ -n "$REPO_DIR" ] && [ -d "$REPO_DIR/skills" ]; then
-            log "Installing skills..."
-            cp -r "$REPO_DIR/skills" "$CLAUDE_CONFIG_DIR/"
-        else
-            info "Skills directory not found (optional)"
-        fi
-
-        if [ -d "$ACCOUNT_DIR/hooks" ]; then
-            log "Installing hooks..."
-            cp -r "$ACCOUNT_DIR/hooks" "$CLAUDE_CONFIG_DIR/"
-            # Set execution permissions for hook scripts
-            find "$CLAUDE_CONFIG_DIR/hooks" -type f -name "*.sh" -exec chmod +x {} \;
-            find "$CLAUDE_CONFIG_DIR/hooks" -type f -name "*.py" -exec chmod +x {} \;
-        else
-            debug "Hooks directory not found (optional)"
-        fi
-        
-        if [ -f "$ACCOUNT_DIR/CLAUDE.md" ]; then
-            log "Installing CLAUDE.md..."
-            cp "$ACCOUNT_DIR/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
-        else
-            warn "CLAUDE.md not found in profile"
-        fi
-        
-        if [ -f "$ACCOUNT_DIR/llm-models-latest.md" ]; then
-            log "Installing llm-models-latest.md..."
-            cp "$ACCOUNT_DIR/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
-        else
-            debug "llm-models-latest.md not found (optional)"
-        fi
-        
-        # Handle settings.json with interactive merge
-        if [ -f "$ACCOUNT_DIR/settings.json" ]; then
-            handle_settings_merge "$ACCOUNT_DIR/settings.json" "$CLAUDE_CONFIG_DIR/settings.json" "$force_install"
-        fi
-        
-        # Create settings.local.json from example if it exists
-        if [ -f "$ACCOUNT_DIR/settings.local.json.example" ]; then
-            if [ ! -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]; then
-                log "Creating settings.local.json from example..."
-                cp "$ACCOUNT_DIR/settings.local.json.example" "$CLAUDE_CONFIG_DIR/settings.local.json"
-                warn "Please edit $CLAUDE_CONFIG_DIR/settings.local.json with your personal settings"
-            fi
-        fi
-
-        if [ -n "$REPO_DIR" ] && [ -d "$REPO_DIR/account/codex" ]; then
-            install_codex_templates "$REPO_DIR/account/codex" "$force_install"
-        else
-            info "Codex templates not found (optional)"
-        fi
+        install_from_dirs "$REPO_DIR" "$ACCOUNT_DIR" "$force_install"
     else
-        # Remote installation - need to clone from git
         log "Downloading configuration from GitHub..."
-        
-        # Create temporary directory
-        local temp_dir=$(mktemp -d)
-        trap "rm -rf $temp_dir" EXIT
-        
-        # Clone the repository
-        if ! git clone --depth 1 "$REPO_URL" "$temp_dir" 2>/dev/null; then
+        local temp_dir
+        if ! temp_dir=$(clone_repo); then
             error "Failed to download configuration files from GitHub"
             error "Please ensure git is installed and you have internet connection"
             exit 1
         fi
-        
-        # Copy files from account config
-        local source_dir="$temp_dir/account/claude-code"
-        
-        if [ -d "$source_dir/agents" ]; then
-            log "Installing agents..."
-            cp -r "$source_dir/agents" "$CLAUDE_CONFIG_DIR/"
-        fi
-        
-        if [ -d "$temp_dir/commands" ]; then
-            log "Installing commands..."
-            cp -r "$temp_dir/commands" "$CLAUDE_CONFIG_DIR/"
-        fi
-        
-        if [ -d "$source_dir/scripts" ]; then
-            log "Installing scripts..."
-            cp -r "$source_dir/scripts" "$CLAUDE_CONFIG_DIR/"
-            # Set execution permissions for all scripts
-            find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.sh" -exec chmod +x {} \;
-            find "$CLAUDE_CONFIG_DIR/scripts" -type f -name "*.py" -exec chmod +x {} \;
-        fi
-
-        if [ -d "$temp_dir/skills" ]; then
-            log "Installing skills..."
-            cp -r "$temp_dir/skills" "$CLAUDE_CONFIG_DIR/"
-        fi
-
-        if [ -d "$source_dir/hooks" ]; then
-            log "Installing hooks..."
-            cp -r "$source_dir/hooks" "$CLAUDE_CONFIG_DIR/"
-            find "$CLAUDE_CONFIG_DIR/hooks" -type f -name "*.sh" -exec chmod +x {} \;
-            find "$CLAUDE_CONFIG_DIR/hooks" -type f -name "*.py" -exec chmod +x {} \;
-        fi
-
-        log "Installing CLAUDE.md..."
-        cp "$source_dir/CLAUDE.md" "$CLAUDE_CONFIG_DIR/"
-        
-        log "Installing llm-models-latest.md..."
-        cp "$source_dir/llm-models-latest.md" "$CLAUDE_CONFIG_DIR/"
-        
-        # Handle settings.json with interactive merge
-        handle_settings_merge "$source_dir/settings.json" "$CLAUDE_CONFIG_DIR/settings.json" "$force_install"
-        
-        # Create settings.local.json from example
-        if [ ! -f "$CLAUDE_CONFIG_DIR/settings.local.json" ]; then
-            log "Creating settings.local.json from example..."
-            cp "$source_dir/settings.local.json.example" "$CLAUDE_CONFIG_DIR/settings.local.json"
-            warn "Please edit $CLAUDE_CONFIG_DIR/settings.local.json with your personal settings"
-        fi
-
-        if [ -d "$temp_dir/account/codex" ]; then
-            install_codex_templates "$temp_dir/account/codex" "$force_install"
-        else
-            info "Codex templates not found (optional)"
-        fi
-        
-        # Copy docs directory if it exists
+        trap "rm -rf $temp_dir" EXIT
+        install_from_dirs "$temp_dir" "$temp_dir/account/claude-code" "$force_install"
         if [ -d "$temp_dir/docs" ]; then
             log "Installing documentation..."
             cp -r "$temp_dir/docs" "$CLAUDE_CONFIG_DIR/"
