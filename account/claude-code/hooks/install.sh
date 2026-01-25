@@ -9,13 +9,16 @@
 #   2. Copies unified hooks (post_edit.py, pre_commit.py)
 #   3. Adds hook config to .claude/settings.json (overwrites existing hooks config)
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="${1:-.}"
 
 # Resolve to absolute path
-PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
+if ! PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"; then
+    echo "❌ Failed to access project directory: $PROJECT_DIR"
+    exit 1
+fi
 
 echo "🔧 Installing hooks to: $PROJECT_DIR"
 

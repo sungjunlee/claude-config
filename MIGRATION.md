@@ -1,17 +1,16 @@
 # Migration Guide
 
-## Unified My Skill Architecture (v4.0)
+## Unified My Skill Architecture (v4.1)
 
-2025년 12월, 모든 커스텀 기능을 단일 `my` skill로 통합했습니다.
+2026년 1월, 모든 커스텀 기능을 단일 `my` skill로 통합했습니다.
 
 ### 현재 구조
 
-```
+```text
 ~/.claude/
+├── commands/            # /my:* 커맨드
 ├── skills/
-│   └── my/               # 개인 도구 모음
-│       ├── commands/     # AI, 세션, 워크트리 명령어
-│       └── context/      # 참조 문서
+│   └── my/              # 개인 도구 모음 (컨텍스트)
 └── scripts/
 ```
 
@@ -63,7 +62,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 
 # 구 파일 정리 (선택)
 rm -rf ~/.claude/skills/{workflow,worktree,ai,testing,linting,frameworks}
-rm -rf ~/.claude/commands/
+rm -rf ~/.claude/skills/my/commands
 ```
 
 ### My Skill 명령어 요약

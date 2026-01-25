@@ -42,12 +42,11 @@ elif --list:
     show available handoffs
 ```
 
-### Phase 2: Load Scratch Notes
+### Phase 2: Optional Scratch Notes
 
-Check `docs/handoff/.scratch.md`:
-- Load as priority context
-- Display blockers prominently
-- Use as immediate working memory
+If `docs/handoff/.scratch.md` exists, you may load it manually:
+- Treat as optional context
+- Summarize key blockers if relevant
 
 ### Phase 3: Flow State Assessment
 
@@ -149,7 +148,7 @@ Automatically check:
 ### Missing Handoff
 ```markdown
 No handoff found. Options:
-1. /flow:plan [requirements]
+1. /feature-dev:code-architect [requirements]
 2. /flow:handoff (create initial)
 ```
 

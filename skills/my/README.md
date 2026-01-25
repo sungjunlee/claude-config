@@ -33,35 +33,35 @@ codex auth login  # Sign in with ChatGPT
 
 ```bash
 # In Claude Code
-/ai:gemini "analyze this architecture"
-/ai:codex "optimize this algorithm"
-/ai:consensus "PostgreSQL vs MongoDB?"
+/my:gemini "analyze this architecture"
+/my:codex "optimize this algorithm"
+/my:consensus "PostgreSQL vs MongoDB?"
 ```
 
 ## 🚀 Available Commands
 
 | Command | Purpose | Cost | Best For |
 |---------|---------|------|----------|
-| `/ai:gemini` | Large analysis | 🆓 Free | 1000+ line files, architecture |
-| `/ai:codex` | Code optimization | 💳 Paid | Algorithms, debugging |
-| `/ai:consensus` | Multi-AI opinions | 🆓+💳 | Critical decisions |
-| `/ai:pipeline` | Multi-stage analysis | 🆓+💳 | Complex projects |
+| `/my:gemini` | Large analysis | 🆓 Free | 1000+ line files, architecture |
+| `/my:codex` | Code optimization | 💳 Paid | Algorithms, debugging |
+| `/my:consensus` | Multi-AI opinions | 🆓+💳 | Critical decisions |
+| `/my:pipeline` | Multi-stage analysis | 🆓+💳 | Complex projects |
 
 ### Usage Examples
 
 ```bash
 # Large file analysis (Free!)
-/ai:gemini "analyze entire auth system architecture"
+/my:gemini "analyze entire auth system architecture"
 
 # Algorithm optimization (ChatGPT Plus/Pro)
-/ai:codex "optimize this sorting algorithm"
+/my:codex "optimize this sorting algorithm"
 
 # Critical decisions (multiple perspectives)
-/ai:consensus "PostgreSQL vs MongoDB for this use case?"
+/my:consensus "PostgreSQL vs MongoDB for this use case?"
 
 # Complex projects (multi-stage pipeline)
-/ai:pipeline auth.py "security audit"
-/ai:pipeline api/ "performance optimization"
+/my:pipeline auth.py "security audit"
+/my:pipeline api/ "performance optimization"
 ```
 
 ## 🔧 Model Capabilities
@@ -114,10 +114,10 @@ codex auth login  # Select 'Sign in with ChatGPT'
 
 ```bash
 # Step 1: Broad analysis (Free)
-/ai:gemini "analyze legacy_system/ for modernization opportunities"
+/my:gemini "analyze legacy_system/ for modernization opportunities"
 
 # Step 2: Specific optimization (Paid)
-/ai:codex "optimize database access patterns in models.py"
+/my:codex "optimize database access patterns in models.py"
 
 # Step 3: Final synthesis (Claude)
 "Create migration roadmap based on above analyses"
@@ -127,7 +127,7 @@ codex auth login  # Select 'Sign in with ChatGPT'
 
 ```bash
 # Get multiple AI perspectives
-/ai:consensus "Should we use microservices or monolith for 10-person team?"
+/my:consensus "Should we use microservices or monolith for 10-person team?"
 
 # Returns:
 # - Gemini's perspective (free)
@@ -141,7 +141,7 @@ codex auth login  # Select 'Sign in with ChatGPT'
 
 ```bash
 # Multi-stage pipeline
-/ai:pipeline api_server.py "performance bottlenecks"
+/my:pipeline api_server.py "performance bottlenecks"
 
 # Executes:
 # 1. Gemini: Broad analysis
@@ -156,7 +156,7 @@ codex auth login  # Select 'Sign in with ChatGPT'
 ### Pipeline for Security Audit
 
 ```bash
-/ai:pipeline auth_system.py "security vulnerabilities"
+/my:pipeline auth_system.py "security vulnerabilities"
 ```
 
 **Stages:**
@@ -167,7 +167,7 @@ codex auth login  # Select 'Sign in with ChatGPT'
 ### Consensus for Tech Stack
 
 ```bash
-/ai:consensus "React vs Vue for our team's skillset and project requirements?"
+/my:consensus "React vs Vue for our team's skillset and project requirements?"
 ```
 
 **Output:**
@@ -177,22 +177,22 @@ codex auth login  # Select 'Sign in with ChatGPT'
 
 ## 🔍 Command Details
 
-### `/ai:gemini`
+### `/my:gemini`
 - Direct access to Gemini models
 - Free with Google account
 - Best for large context needs
 
-### `/ai:codex`
+### `/my:codex`
 - Direct access to OpenAI Codex
 - Requires ChatGPT subscription
 - Best for code optimization
 
-### `/ai:consensus`
+### `/my:consensus`
 - Gathers multiple AI opinions
 - Shows diverse perspectives
 - Best for critical decisions
 
-### `/ai:pipeline`
+### `/my:pipeline`
 - Multi-stage analysis workflow
 - Combines model strengths
 - Best for complex projects
@@ -253,7 +253,7 @@ codex /model  # Choose gpt-5 variant
 
 ```bash
 # Verify installation
-ls ~/.claude/commands/ai/
+ls ~/.claude/commands/
 
 # Reinstall if needed
 cd /path/to/claude-config
@@ -269,4 +269,4 @@ cd /path/to/claude-config
 
 ---
 
-**Start using:** Install Gemini CLI (free) and use `/ai:gemini` for large file analysis!
+**Start using:** Install Gemini CLI (free) and use `/my:gemini` for large file analysis!

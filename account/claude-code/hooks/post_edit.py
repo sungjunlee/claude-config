@@ -20,13 +20,25 @@ Environment variables (from Claude Code):
 """
 
 import os
+import sys
 import subprocess
 import shutil
 import shlex
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Callable
 
-TIMEOUT = 30
+def parse_timeout(value: Optional[str], default: int = 60) -> int:
+    if value is None:
+        return default
+    try:
+        parsed = int(value)
+        return parsed if parsed > 0 else default
+    except (TypeError, ValueError):
+        print("⚠️  Invalid CLAUDE_HOOK_TIMEOUT; using default 60", file=sys.stderr)
+        return default
+
+
+TIMEOUT = parse_timeout(os.environ.get("CLAUDE_HOOK_TIMEOUT"), 60)
 
 
 def run_command(
@@ -38,13 +50,22 @@ def run_command(
     cmd_list = shlex.split(cmd) if isinstance(cmd, str) else cmd
     try:
         result = subprocess.run(
-            cmd_list, shell=False, capture_output=True, text=True,
-            timeout=timeout, cwd=cwd, check=False,
+            cmd_list,
+            shell=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=cwd,
+            check=False,
         )
         output = result.stdout or result.stderr or ""
         return result.returncode == 0, output.strip()
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
-        return False, ""
+    except subprocess.TimeoutExpired:
+        return False, "Command timed out"
+    except FileNotFoundError:
+        return False, f"Command not found: {cmd_list[0]}"
+    except OSError as e:
+        return False, f"OS error: {e}"
 
 
 def has_tool(tool: str) -> bool:
@@ -83,6 +104,7 @@ def find_project_root(start: str) -> Optional[str]:
 # Language handlers
 # =============================================================================
 
+
 def handle_python(filepath: str) -> None:
     """Handle Python files with ruff."""
     ruff = resolve_tool("ruff")
@@ -94,16 +116,24 @@ def handle_python(filepath: str) -> None:
     print("  ✓ formatted" if ok else "  ⚠️  format failed")
 
     ok, out = run_command([*ruff, "check", "--fix", "--quiet", filepath])
-    if not ok and out:
-        print(f"  ⚠️  {out.split(chr(10))[0][:60]}")
+    if not ok:
+        lines = out.strip().split("\n") if out else ["Linting failed"]
+        print(f"  ⚠️  Linting failed:")
+        for line in lines[:3]:
+            print(f"      {line}")
 
 
 def handle_typescript(filepath: str) -> None:
     """Handle TypeScript/JavaScript with prettier + eslint."""
     prettier = resolve_npm_tool("prettier")
     if prettier:
-        ok, _ = run_command([*prettier, "--write", filepath], timeout=15)
-        print("  ✓ prettier" if ok else "  ⚠️  prettier failed")
+        ok, out = run_command([*prettier, "--write", filepath], timeout=15)
+        if ok:
+            print("  ✓ prettier")
+        else:
+            print(
+                f"  ⚠️  prettier failed: {out.strip().splitlines()[0] if out else 'Unknown error'}"
+            )
     else:
         print("  ⚠️  prettier not found")
 
@@ -112,8 +142,11 @@ def handle_typescript(filepath: str) -> None:
         ok, out = run_command([*eslint, "--fix", filepath])
         if ok:
             print("  ✓ eslint")
-        elif out:
-            print(f"  ⚠️  {out.split(chr(10))[0][:60]}")
+        else:
+            print(f"  ⚠️  eslint failed:")
+            lines = out.strip().split("\n") if out else ["Unknown error"]
+            for line in lines[:3]:
+                print(f"      {line}")
     else:
         print("  ⚠️  eslint not found")
 
@@ -133,13 +166,15 @@ def handle_rust(filepath: str) -> None:
 
     ok, out = run_command(
         ["cargo", "clippy", "--message-format=short", "-q"],
-        cwd=project_root, timeout=60,
+        cwd=project_root,
+        timeout=60,
     )
     relevant = [l for l in out.split("\n") if filepath in l] if out else []
     if relevant:
-        print(f"  ⚠️  {relevant[0][:60]}")
+        print(f"  ⚠️  {relevant[0]}")
     elif not ok:
-        print("  ⚠️  clippy failed")
+        lines = out.strip().split("\n") if out else ["clippy failed"]
+        print(f"  ⚠️  {lines[0]}")
 
 
 def handle_go(filepath: str) -> None:
@@ -159,8 +194,9 @@ def handle_go(filepath: str) -> None:
             ok, out = run_command(
                 ["golangci-lint", "run", "--fast", filepath], cwd=project_root
             )
-            if not ok and out:
-                print(f"  ⚠️  {out.split(chr(10))[0][:60]}")
+            if not ok:
+                lines = out.strip().split("\n") if out else ["golangci-lint failed"]
+                print(f"  ⚠️  {lines[0]}")
 
 
 # =============================================================================
@@ -168,10 +204,14 @@ def handle_go(filepath: str) -> None:
 # =============================================================================
 
 HANDLERS: dict[str, Callable[[str], None]] = {
-    ".py": handle_python, ".pyi": handle_python,
-    ".ts": handle_typescript, ".tsx": handle_typescript,
-    ".js": handle_typescript, ".jsx": handle_typescript,
-    ".mjs": handle_typescript, ".mts": handle_typescript,
+    ".py": handle_python,
+    ".pyi": handle_python,
+    ".ts": handle_typescript,
+    ".tsx": handle_typescript,
+    ".js": handle_typescript,
+    ".jsx": handle_typescript,
+    ".mjs": handle_typescript,
+    ".mts": handle_typescript,
     ".rs": handle_rust,
     ".go": handle_go,
 }

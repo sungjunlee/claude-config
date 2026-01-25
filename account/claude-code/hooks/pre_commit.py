@@ -13,6 +13,7 @@ Usage:
 """
 
 import os
+import re
 import sys
 import subprocess
 import shutil
@@ -78,7 +79,7 @@ def check_linting() -> bool:
 
     if not success:
         print("❌ Linting issues:")
-        print((output or error)[:500])
+        print("\n".join((output or error).splitlines()[:20]))
         print("\nRun: ruff check --fix .")
         return False
 
@@ -92,11 +93,13 @@ def check_types() -> bool:
         return True  # Skip if not available
 
     # Check if mypy is configured
-    has_config = any([
-        Path("mypy.ini").exists(),
-        Path("pyproject.toml").exists(),
-        Path("setup.cfg").exists(),
-    ])
+    has_config = any(
+        [
+            Path("mypy.ini").exists(),
+            Path("pyproject.toml").exists(),
+            Path("setup.cfg").exists(),
+        ]
+    )
 
     if not has_config:
         return True  # Skip if not configured
@@ -111,7 +114,7 @@ def check_types() -> bool:
             return True
 
         print("❌ Type errors:")
-        print((output or error)[:500])
+        print("\n".join((output or error).splitlines()[:20]))
         return False
 
     print("✅ Types OK")
@@ -124,44 +127,53 @@ def check_security() -> bool:
 
     # Patterns to search for
     patterns = [
-        ("api_key.*=.*['\"]", "API key"),
-        ("password.*=.*['\"]", "Password"),
-        ("secret.*=.*['\"]", "Secret"),
-        ("token.*=.*['\"]", "Token"),
+        (
+            re.compile(r"\b(api_key|apikey)\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE),
+            "API key",
+        ),
+        (
+            re.compile(r"\bpassword\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE),
+            "Password",
+        ),
+        (re.compile(r"\bsecret\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Secret"),
+        (re.compile(r"\btoken\b\s*=\s*['\"][^'\"]+['\"]", re.IGNORECASE), "Token"),
     ]
+    ignore_dirs = {".git", ".venv", "venv", "node_modules", "dist", "build"}
+    safe_markers = {"example", "dummy", "fake", "mock", "sample"}
+
+    def is_safe_path(path: Path) -> bool:
+        parts = {part.lower() for part in path.parts}
+        if parts & {"tests", "test", "examples", "example", "fixtures"}:
+            return True
+        name = path.name.lower()
+        return name.startswith("test_") or name.endswith("_test.py")
 
     found_issues = []
 
-    for pattern, name in patterns:
-        success, output, _ = run_command(
-            ["grep", "-r", "-n", "-E", pattern, "--include=*.py", "."]
-        )
+    for path in Path(".").rglob("*.py"):
+        if any(part in ignore_dirs for part in path.parts):
+            continue
+        try:
+            content = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError as e:
+            print(f"⚠️  Skipping unreadable file: {path} ({e})")
+            continue
 
-        if success and output:
-            lines = output.strip().split("\n")
-            # Filter out false positives
-            real_issues = [
-                line
-                for line in lines
-                if not any(
-                    safe in line.lower()
-                    for safe in [
-                        "example",
-                        "test",
-                        "mock",
-                        "fake",
-                        "dummy",
-                        "getenv",
-                        "environ",
-                        "config",
-                        "setting",
-                        "# ",
-                    ]
-                )
-            ]
-
-            if real_issues:
-                found_issues.extend(real_issues[:2])
+        lines = content.splitlines()
+        for pattern, _ in patterns:
+            hits = 0
+            for match in pattern.finditer(content):
+                line_no = content.count("\n", 0, match.start())
+                if line_no >= len(lines):
+                    continue
+                line = lines[line_no].strip()
+                lower = line.lower()
+                if is_safe_path(path) and any(marker in lower for marker in safe_markers):
+                    continue
+                found_issues.append(f"{path}:{line_no + 1}: {line[:100]}")
+                hits += 1
+                if hits >= 2:
+                    break
 
     if found_issues:
         print("⚠️  Potential hardcoded secrets:")

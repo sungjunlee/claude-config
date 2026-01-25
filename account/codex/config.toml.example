@@ -1,0 +1,17 @@
+# Codex local config template
+# Installed to ~/.codex/config.toml by the installer.
+
+# Ask before running model-generated commands unless requested otherwise.
+approval_policy = "on-request"
+
+# Allow writes inside the workspace while keeping sandbox protections.
+sandbox_mode = "workspace-write"
+
+# Optional defaults:
+# model = "gpt-5.2"
+# model_reasoning_effort = "high"
+
+# Example profile:
+# [profiles.full_auto]
+# approval_policy = "on-request"
+# sandbox_mode = "workspace-write"
