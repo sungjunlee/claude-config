@@ -1,0 +1,8 @@
+{
+  "ai.model": "gemini-3-pro",
+  "ai.contextWindow": 128000,
+  "ai.agentMode.enabled": true,
+  "editor.fontSize": 14,
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true
+}
