@@ -270,7 +270,7 @@ claude
 
 ## 📝 Notes
 - Environment files (.env, etc.) already copied
-- node_modules is symlinked
+- node_modules is not symlinked (shared state disabled)
 - Can work independently from other worktrees
 
 ---

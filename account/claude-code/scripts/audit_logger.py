@@ -79,13 +79,13 @@ def get_system_info():
     """Get system information"""
     try:
         hostname = socket.gethostname()
-    except Exception as e:
+    except OSError as e:
         print(f"audit_logger: failed to get hostname: {e}", file=sys.stderr)
         hostname = "unknown"
 
     try:
         username = getpass.getuser()
-    except Exception as e:
+    except (OSError, KeyError) as e:
         print(f"audit_logger: failed to get username: {e}", file=sys.stderr)
         username = "unknown"
 

@@ -12,7 +12,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SESSION_LOG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/session.log"
 if [ -f "$SESSION_LOG" ]; then
     # Try to find the last session start time
-    LAST_START=$(grep "start:" "$SESSION_LOG" 2>/dev/null | tail -1 | cut -d' ' -f1-2 | tr -d '[]')
+    LAST_START=$(grep "start:" "$SESSION_LOG" 2>/dev/null | tail -1 | cut -d' ' -f1-2 | tr -d '[]' || true)
     if [ -n "$LAST_START" ]; then
         # Cross-platform date parsing
         if [[ "$OSTYPE" == "darwin"* ]]; then

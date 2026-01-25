@@ -1,5 +1,5 @@
 ---
-description: Use Gemini for large file analysis (Free with Google account)
+description: Use Gemini for large file analysis (Google account required)
 ---
 
 # Gemini Analysis
@@ -15,13 +15,10 @@ if ! command -v gemini &> /dev/null; then
   echo "📦 Install:"
   echo "   npm install -g @google/gemini-cli"
   echo ""
-  echo "🔐 Login (Free!):"
+  echo "🔐 Login:"
   echo "   gemini login"
   echo ""
-  echo "✅ Free Tier:"
-  echo "   - 60 requests/minute"
-  echo "   - 1,000 requests/day"
-  echo "   - No API key needed"
+  echo "✅ Login required (no API key needed)"
   exit 1
 fi
 
@@ -38,15 +35,14 @@ unset GEMINI_API_KEY
 - 🔬 Complex mathematical/scientific problems
 - 📊 Data analysis and pattern recognition
 
-**Free Tier Benefits:**
-- Massive context window (2M tokens)
-- No cost with Google account
-- 60 requests/min, 1,000 requests/day
+**Notes:**
+- Large context window
+- No API key needed
 
 ## Execute Gemini Analysis
 
 ```bash
-echo "🧠 Analyzing with Gemini (free tier)..."
+echo "🧠 Analyzing with Gemini..."
 gemini "$ARGUMENTS"
 ```
 

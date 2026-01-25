@@ -28,7 +28,7 @@ Parse `.worktrees/PLAN.md` and create isolated worktrees for parallel developmen
 
 4. **Environment Setup**:
    - Copy environment files (.env, package.json, lock files)
-   - Create node_modules symlinks for efficiency
+   - Skip node_modules symlinks (disabled to avoid shared state risks)
    - Link Python venv if present
    - Copy 25+ config file types automatically
 

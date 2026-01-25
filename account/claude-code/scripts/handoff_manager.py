@@ -249,8 +249,8 @@ class HandoffManager:
         except ImportError:
             print("Warning: tiktoken not installed; using fallback token estimate", file=sys.stderr)
             return len(content) // 4
-        except Exception as e:
-            # Log unexpected errors but don't crash
+        except (ValueError, TypeError, AttributeError) as e:
+            # Log common encoding issues but don't crash
             print(
                 f"Warning: Token estimation failed ({e}), using fallback",
                 file=sys.stderr,

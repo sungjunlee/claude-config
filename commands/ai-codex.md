@@ -1,5 +1,5 @@
 ---
-description: Use OpenAI Codex for specialized coding tasks (ChatGPT Plus/Pro)
+description: Use OpenAI Codex for specialized coding tasks
 ---
 
 # OpenAI Codex
@@ -19,9 +19,7 @@ if ! command -v codex &> /dev/null; then
   echo "   codex auth login"
   echo "   (Select 'Sign in with ChatGPT')"
   echo ""
-  echo "💳 Requires:"
-  echo "   - ChatGPT Plus (\$20/month) → \$5 bonus credits"
-  echo "   - ChatGPT Pro (\$200/month) → \$50 bonus credits"
+  echo "💳 Requires an active Codex/ChatGPT account"
   exit 1
 fi
 
