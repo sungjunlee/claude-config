@@ -76,21 +76,12 @@ npx skills add sungjunlee/claude-config --list      # 목록 보기
 
 공식 플러그인에 없는 개인 확장 기능입니다.
 
-### AI Integration
-
-| 명령어 | 용도 |
-|--------|------|
-| `/my:ai-gemini` | 대용량 파일 분석 (무료, 2M 컨텍스트) |
-| `/my:ai-codex` | 알고리즘 최적화, 디버깅 |
-| `/my:ai-consensus` | 중요 결정 시 여러 AI 관점 |
-| `/my:ai-pipeline` | 복잡한 프로젝트 멀티스테이지 분석 |
-
 ### Session Management
 
 | 명령어 | 용도 |
 |--------|------|
-| `/my:handoff` | 세션 상태 저장 (`/clear` 전) |
-| `/my:resume` | 이전 세션 컨텍스트 복원 |
+| `/my:session-handoff` | 세션 상태 저장 (`/clear` 전) |
+| `/my:session-resume` | 이전 세션 컨텍스트 복원 |
 
 ### Worktree
 

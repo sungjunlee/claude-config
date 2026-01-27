@@ -46,16 +46,16 @@
 
 | 이전 | 현재 |
 |------|------|
-| `/flow:handoff` | `/my:handoff` |
-| `/flow:resume` | `/my:resume` |
+| `/flow:handoff` | `/my:session-handoff` |
+| `/flow:resume` | `/my:session-resume` |
 | `/worktree:plan` | `/my:wt-plan` |
 | `/worktree:distribute` | `/my:wt-distribute` |
 | `/worktree:status` | `/my:wt-status` |
 | `/worktree:sync` | `/my:wt-sync` |
-| `/ai:gemini` | `/my:ai-gemini` |
-| `/ai:codex` | `/my:ai-codex` |
-| `/ai:consensus` | `/my:ai-consensus` |
-| `/ai:pipeline` | `/my:ai-pipeline` |
+| `/ai:gemini` | 제거됨 |
+| `/ai:codex` | 제거됨 |
+| `/ai:consensus` | 제거됨 |
+| `/ai:pipeline` | 제거됨 |
 
 ### 공식 플러그인으로 대체
 
@@ -99,8 +99,6 @@ rm -rf ~/.claude/skills/my/commands
 
 | 카테고리 | 명령어 | 용도 |
 |----------|--------|------|
-| AI | `/my:ai-gemini`, `/my:ai-codex` | 외부 AI 모델 활용 |
-| AI | `/my:ai-consensus`, `/my:ai-pipeline` | 멀티모델 분석 |
-| Session | `/my:handoff`, `/my:resume` | 세션 연속성 |
+| Session | `/my:session-handoff`, `/my:session-resume` | 세션 연속성 |
 | Worktree | `/my:wt-plan`, `/my:wt-distribute` | 병렬 개발 |
 | Worktree | `/my:wt-status`, `/my:wt-sync` | 워크트리 관리 |

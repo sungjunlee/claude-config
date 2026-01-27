@@ -149,7 +149,7 @@ Automatically check:
 ```markdown
 No handoff found. Options:
 1. /feature-dev:code-architect [requirements]
-2. /flow:handoff (create initial)
+2. /session-handoff (create initial)
 ```
 
 ### Outdated Handoff (> 3 days)
