@@ -9,8 +9,8 @@
 - Test before commit
 
 ## Context Management (Handoff)
-- Use `/my:handoff` before `/clear` to save session state
-- Use `/my:resume` to restore context
+- Use `/my:session-handoff` before `/clear` to save session state
+- Use `/my:session-resume` to restore context
 - Handoff modes: quick (default), --detailed, --team
 - Auto-trigger at 80% context usage
 - Handoffs stored in `docs/handoff/` (max 5 recent)
@@ -21,9 +21,8 @@
 - Clear variable naming
 
 ## My Skill (공식 대안 없음)
-- `/my:handoff`, `/my:resume` → 세션 연속성
+- `/my:session-handoff`, `/my:session-resume` → 세션 연속성
 - `/my:wt-*` → Git worktree 병렬 작업
-- `/my:ai-*` → 멀티모델 AI 통합
 
 ## Official Plugins (권장)
 Use official plugins for common tasks:
