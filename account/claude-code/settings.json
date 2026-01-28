@@ -70,6 +70,17 @@
           }
         ]
       }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/notify_permission.sh"
+          }
+        ]
+      }
     ]
   },
   "permissions": {
