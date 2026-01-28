@@ -4,7 +4,7 @@ description: |
   Development environment automation - gitleaks, gitignore, hooks.
   Triggers: "setup", "gitleaks", "pre-commit", "gitignore"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
-model: claude-sonnet-4-5
+model: claude-sonnet-4-5-20250929
 ---
 
 # My Setup Skill

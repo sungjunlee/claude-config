@@ -105,4 +105,4 @@ git worktree prune
 ```
 
 ## 참조
-상세 가이드: `context/worktree-guide.md`
+Git worktree 공식 문서: https://git-scm.com/docs/git-worktree

@@ -4,7 +4,7 @@ description: |
   Personal toolkit - session handoff, git worktree.
   Triggers: "handoff", "resume", "worktree"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
-model: claude-sonnet-4-5
+model: claude-sonnet-4-5-20250929
 ---
 
 # My Skill
@@ -15,11 +15,11 @@ model: claude-sonnet-4-5
 
 ### Session (`session-*`)
 세션 컨텍스트 연속성: `/my:session-handoff`, `/my:session-resume`
-→ 자세한 내용: `context/session.md`
+See: `context/session.md`
 
 ### Worktree (`wt-*`)
 병렬 개발: `/my:wt-plan`, `/my:wt-distribute`, `/my:wt-launch`, `/my:wt-status`, `/my:wt-sync`
-→ 자세한 내용: `context/worktree.md`
+See: `context/worktree.md`
 
 ## Context Files
 

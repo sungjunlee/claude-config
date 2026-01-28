@@ -18,11 +18,11 @@ ls .gitignore .gitleaks.toml .pre-commit-config.yaml 2>/dev/null
 # pre-commit 설치 확인
 pip install pre-commit || pipx install pre-commit
 
-# gitleaks hook 추가
+# gitleaks hook 추가 (check latest: https://github.com/gitleaks/gitleaks/releases)
 cat >> .pre-commit-config.yaml << 'EOF'
 repos:
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.0
+    rev: v8.21.2  # Update to latest
     hooks:
       - id: gitleaks
 EOF
@@ -80,10 +80,10 @@ git status --ignored
 ## 출력 예시
 
 ```
-✓ Pre-commit installed
-✓ Gitleaks hook added
-✓ Gitignore updated (12 patterns added)
-✓ Verification passed
+[OK] Pre-commit installed
+[OK] Gitleaks hook added
+[OK] Gitignore updated (15 patterns added)
+[OK] Verification passed
 
 Setup complete! Run 'pre-commit run --all-files' to verify.
 ```

@@ -14,26 +14,19 @@ paths = [
     '''package-lock\.json$''',
     '''yarn\.lock$''',
     '''pnpm-lock\.yaml$''',
+    '''(test|spec|fixture|mock)''',
+    '''(README|docs|\.md$)''',
 ]
-
-# 테스트 파일 제외
-[[rules]]
-description = "Ignore test fixtures"
-path = '''(test|spec|fixture|mock)'''
-
-# 문서 내 예시 제외
-[[rules]]
-description = "Ignore documentation examples"
-path = '''(README|docs|\.md$)'''
 ```
 
 ## Pre-commit 설정
 
 ### .pre-commit-config.yaml
 ```yaml
+# Check latest version: https://github.com/gitleaks/gitleaks/releases
 repos:
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.0
+    rev: v8.21.2  # Update to latest
     hooks:
       - id: gitleaks
         args: ["--config", ".gitleaks.toml"]
