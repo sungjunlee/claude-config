@@ -13,11 +13,11 @@ You are a terminal session orchestrator. Your job is to launch multiple Claude C
 ## Arguments
 
 Parse `$ARGUMENTS` for:
-- `tmux` - Create tmux session with windows (default, works everywhere)
+- `tmux` - Create tmux session with windows (works everywhere)
 - `iterm` - Open iTerm tabs (macOS only)
-- `list` - Show existing worktrees without launching
+- `list` - Show existing worktrees without launching (default)
 
-If no argument provided, default to `tmux`.
+If no argument provided, defaults to `list`.
 
 ## Prerequisites Check
 

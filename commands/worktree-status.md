@@ -72,8 +72,6 @@ Summary: 3 worktrees (1 ready, 2 in progress)
 | ✅ | Ready | No uncommitted changes, has commits |
 | 📝 | In Progress | Has uncommitted changes |
 | 🔄 | Starting | No commits yet |
-| ⚠️ | Conflict | Merge conflicts detected |
-| 🗑️ | Merged | PR merged, can be cleaned up |
 
 ## Cleanup Hints
 

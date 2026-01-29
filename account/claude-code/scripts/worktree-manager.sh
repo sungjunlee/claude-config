@@ -93,7 +93,7 @@ search: Implement search feature (Elasticsearch)
 EOF
     
     echo -e "${GREEN}✓ Created PLAN.md template at $WORKTREES_DIR/PLAN.md${NC}"
-    echo -e "${BLUE}Next step: Edit the file and run '$0 distribute'${NC}"
+    echo -e "${BLUE}Next step: Edit the file and run '$0 init --continue'${NC}"
 }
 
 # Copy environment files
@@ -151,17 +151,7 @@ copy_env_files() {
             fi
         fi
     done
-    # Symlink node_modules (DISABLED: Too risky for shared state)
-    # if [[ -d "$root_path/node_modules" && ! -e "$worktree_path/node_modules" ]]; then
-    #     local abs_node_modules
-    #     abs_node_modules="$(cd "$root_path" && pwd)"/node_modules
-    #     if ln -s "$abs_node_modules" "$worktree_path/node_modules"; then
-    #         echo "    ✓ Linked node_modules"
-    #     else
-    #         echo "    ⚠ Failed to link node_modules"
-    #     fi
-    # fi
-    
+
     # Symlink Python venv
     if [[ -d "$root_path/venv" && ! -e "$worktree_path/venv" ]]; then
         local abs_venv
@@ -288,6 +278,17 @@ EOF
 run_package_setup() {
     local worktree_path="$1"
 
+    # Validate path exists
+    if [[ -z "$worktree_path" ]]; then
+        echo "    ⚠ Internal error: empty worktree path"
+        return 1
+    fi
+
+    if [[ ! -d "$worktree_path" ]]; then
+        echo "    ⚠ Worktree path does not exist: $worktree_path"
+        return 1
+    fi
+
     if [[ -f "$worktree_path/pnpm-lock.yaml" ]]; then
         echo "    🔧 Running: pnpm install..."
         if (cd "$worktree_path" && pnpm install --silent 2>/dev/null); then
@@ -349,6 +350,12 @@ write_worktree_claude_md() {
     local worktree_path="$3"
     local all_tasks="$4"
 
+    # Validate path exists
+    if [[ ! -d "$worktree_path" ]]; then
+        echo "    ⚠ Worktree path does not exist: $worktree_path"
+        return 1
+    fi
+
     # Build out-of-scope list (other tasks)
     local out_of_scope=""
     for other in $all_tasks; do
@@ -357,7 +364,10 @@ write_worktree_claude_md() {
         fi
     done
 
-    cat > "$worktree_path/CLAUDE.md" <<EOF
+    if ! cat > "$worktree_path/CLAUDE.md" <<EOF; then
+        echo "    ⚠ Failed to create CLAUDE.md"
+        return 1
+    fi
 # Task: $task_name
 
 ## Objective
@@ -375,8 +385,8 @@ $(echo -e "$out_of_scope")
 - Check /worktree-status for overall progress
 
 ## Context
-- Task Plan: \`../.worktrees/PLAN.md\`
-- Task Details: \`../.worktrees/tasks/$task_name.md\`
+- Task Plan: \`../PLAN.md\`
+- Task Details: \`../tasks/$task_name.md\`
 
 ---
 Generated: $(date '+%Y-%m-%d %H:%M:%S')
@@ -411,7 +421,9 @@ handle_task() {
     fi
 
     # Generate per-worktree CLAUDE.md
-    write_worktree_claude_md "$task_name" "$task_desc" "$worktree_path" "$all_tasks"
+    if ! write_worktree_claude_md "$task_name" "$task_desc" "$worktree_path" "$all_tasks"; then
+        echo "    ⚠ CLAUDE.md creation failed - worktree may not work as expected"
+    fi
 
     write_task_file "$task_name" "$task_desc" "$worktree_path" "$branch_name"
 }
@@ -569,7 +581,7 @@ show_status() {
     
     if [[ "$worktree_found" == false ]]; then
         echo -e "${YELLOW}No worktrees found${NC}"
-        echo "Run '$0 distribute' after creating PLAN.md"
+        echo "Run '$0 init --continue' after editing PLAN.md"
     fi
     
     # Git worktree list summary
@@ -695,7 +707,7 @@ list_worktrees() {
 
     if [[ $count -eq 0 ]]; then
         echo -e "${YELLOW}No worktrees found${NC}"
-        echo "Use '$0 distribute' to create worktrees first"
+        echo "Use '$0 init --continue' to create worktrees first"
         return 1
     fi
 

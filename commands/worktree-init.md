@@ -155,9 +155,9 @@ Implement OAuth2.0 authentication system
 
 | Flag | Description |
 |------|-------------|
-| (default) | Full flow: plan → distribute → setup |
-| `--no-setup` | Skip package manager install |
-| `--plan-only` | Only generate PLAN.md, don't distribute |
+| (no flag) | Create PLAN.md template only |
+| `--continue` | Distribute worktrees + auto-setup (after editing PLAN.md) |
+| `--no-setup` | Distribute worktrees without package manager install |
 
 ## Error Handling
 

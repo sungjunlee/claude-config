@@ -87,10 +87,9 @@ npx skills add sungjunlee/claude-config --list      # 목록 보기
 
 | 명령어 | 용도 |
 |--------|------|
-| `/my:wt-plan` | 병렬 작업 계획 생성 |
-| `/my:wt-distribute` | 워크트리에 작업 분배 |
-| `/my:wt-status` | 전체 워크트리 상태 확인 |
-| `/my:wt-sync` | 환경 파일 동기화 |
+| `/worktree-init` | 병렬 워크트리 초기화 (계획 + 분배 + 설정) |
+| `/worktree-launch` | tmux/iTerm에서 Claude 세션 실행 |
+| `/worktree-status` | 전체 워크트리 상태 확인 |
 
 ## 업데이트
 
