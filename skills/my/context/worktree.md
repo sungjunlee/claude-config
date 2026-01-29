@@ -1,62 +1,48 @@
-# Worktree Operations Guide
+# Git Worktree Guide
 
-Git worktree를 활용한 병렬 개발 상세 가이드입니다.
+Git worktree를 활용한 병렬 개발 가이드입니다.
 
 ## 핵심 명령어
 
 | Command | Purpose |
 |---------|---------|
-| `/my:wt-plan` | 병렬 작업 계획 생성 |
-| `/my:wt-distribute` | 작업을 worktree로 분배 |
-| `/my:wt-launch` | 세션 실행 (tmux/iterm) |
-| `/my:wt-status` | 전체 상태 확인 |
-| `/my:wt-sync` | 환경 파일 동기화 |
+| `/worktree-init` | 계획 + 분배 + 환경 세팅 |
+| `/worktree-launch` | 세션 실행 (tmux/iterm) |
+| `/worktree-status` | 전체 상태 확인 |
 
 ## 워크플로우
 
-### 1. 계획 (Plan)
+### 1. 초기화 (Init)
 ```bash
-/my:wt-plan "auth, payment, search 기능 구현"
+/worktree-init "auth, payment, search 기능 구현"
 ```
-생성물: `.worktrees/PLAN.md`
-
-### 2. 분배 (Distribute)
-```bash
-/my:wt-distribute
-```
+한 번에:
+- PLAN.md 생성
 - Worktrees 생성
-- 브랜치 설정
 - 환경 파일 복사
-- 작업 지침 배치
+- 패키지 매니저 실행 (npm/pnpm/uv)
+- 작업별 CLAUDE.md 생성
 
-### 3. 실행 (Launch)
+### 2. 실행 (Launch)
 ```bash
-/my:wt-launch tmux    # tmux 세션
-/my:wt-launch iterm   # iTerm 탭 (macOS)
+/worktree-launch tmux    # tmux 세션
+/worktree-launch iterm   # iTerm 탭 (macOS)
 ```
 
-### 4. 모니터링 (Status)
+### 3. 모니터링 (Status)
 ```bash
-/my:wt-status
+/worktree-status
 ```
-- 각 worktree 진행률
-- 변경된 파일 수
-- 마지막 커밋
 
-### 5. 동기화 (Sync)
+### 4. 병합 & 정리 (Merge & Cleanup)
 ```bash
-/my:wt-sync
-```
-- .env 파일 동기화
-- 설정 파일 업데이트
-
-### 6. 병합 (Merge)
-```bash
-# PLAN.md의 권장 순서 따라
+# 병합
 git checkout main
 git merge feature/auth
-git merge feature/payment
-git merge feature/search
+
+# 정리
+git worktree remove .worktrees/auth
+git branch -d feature/auth
 ```
 
 ## 디렉토리 구조
@@ -64,26 +50,44 @@ git merge feature/search
 ```
 project/
 ├── .worktrees/
-│   ├── PLAN.md           # 전체 계획
-│   ├── tasks/            # 작업별 지침
+│   ├── PLAN.md              # 전체 계획
+│   ├── tasks/               # 작업별 지침
 │   │   ├── auth.md
 │   │   └── payment.md
-│   ├── auth/             # Auth worktree
-│   └── payment/          # Payment worktree
-└── src/                  # Main directory
+│   ├── auth/                # Auth worktree
+│   │   ├── CLAUDE.md       # 작업 컨텍스트
+│   │   └── ...
+│   └── payment/             # Payment worktree
+└── src/                     # Main directory
+```
+
+## 기본 Git Worktree 명령어
+
+```bash
+# 생성
+git worktree add .worktrees/feature-name -b feature/feature-name
+
+# 목록
+git worktree list
+
+# 제거
+git worktree remove .worktrees/feature-name
+
+# 정리 (고아 참조)
+git worktree prune
 ```
 
 ## 작업 분리 원칙
 
 ### 독립성 확보
-- 서로 다른 파일 수정
-- 공유 파일은 최소화
-- 의존성 명시
+- 각 작업이 서로 다른 파일 수정
+- 공유 파일 수정은 최소화
+- 파일 겹침 시 merge 충돌 발생
 
 ### 리소스 관리
-- 포트 충돌 방지
-- DB 연결 제한 고려
-- 디스크 공간 모니터링
+- 포트 충돌 방지 (각 worktree에 다른 포트)
+- DB 연결 수 제한 고려
+- 토큰 소비 주의 (병렬 실행 시 빠름)
 
 ## 문제 해결
 
@@ -105,4 +109,5 @@ git worktree prune
 ```
 
 ## 참조
-Git worktree 공식 문서: https://git-scm.com/docs/git-worktree
+
+- [Git Worktree Documentation](https://git-scm.com/docs/git-worktree)

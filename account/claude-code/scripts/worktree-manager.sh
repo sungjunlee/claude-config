@@ -18,24 +18,28 @@ show_help() {
     cat <<EOF
 Worktree Manager - Git Worktree task distribution tool
 
-Usage: $0 {init|distribute|status|sync|launch|list|help}
+Usage: $0 {init|status|launch|list|help}
 
 Commands:
-  init       - Create PLAN.md template
-  distribute - Distribute tasks based on PLAN.md
-  status     - Check all worktree status
-  sync       - Synchronize environment files between worktrees
-  launch     - Launch claude in worktrees (tmux|iterm|list)
-  list       - List existing worktrees (alias for launch list)
-  help       - Show this help message
+  init [--continue]  - Initialize worktrees (plan + distribute + setup)
+                       Without flag: create PLAN.md template
+                       With --continue: distribute + auto-setup
+  status             - Check all worktree status
+  launch [tmux|iterm]- Launch claude in worktrees
+  list               - List existing worktrees
+  help               - Show this help message
 
 Example:
-  $0 init                    # Initial setup
+  $0 init                    # Create PLAN.md template
   vim .worktrees/PLAN.md     # Edit task plan
-  $0 distribute              # Distribute tasks
+  $0 init --continue         # Distribute + setup
   $0 launch tmux             # Launch claude in tmux session
-  cd .worktrees/auth         # Move to worktree
-  claude                     # Run Claude
+  $0 status                  # Check progress
+
+Slash commands:
+  /worktree-init     - Plan + distribute + setup
+  /worktree-launch   - Launch sessions
+  /worktree-status   - Check status
 
 EOF
 }
@@ -280,9 +284,111 @@ EOF
     echo ""
 }
 
+# Auto-detect and run package manager
+run_package_setup() {
+    local worktree_path="$1"
+
+    if [[ -f "$worktree_path/pnpm-lock.yaml" ]]; then
+        echo "    🔧 Running: pnpm install..."
+        if (cd "$worktree_path" && pnpm install --silent 2>/dev/null); then
+            echo "    ✓ pnpm install complete"
+        else
+            echo "    ⚠ pnpm install failed (run manually)"
+        fi
+    elif [[ -f "$worktree_path/yarn.lock" ]]; then
+        echo "    🔧 Running: yarn install..."
+        if (cd "$worktree_path" && yarn install --silent 2>/dev/null); then
+            echo "    ✓ yarn install complete"
+        else
+            echo "    ⚠ yarn install failed (run manually)"
+        fi
+    elif [[ -f "$worktree_path/package-lock.json" ]]; then
+        echo "    🔧 Running: npm install..."
+        if (cd "$worktree_path" && npm install --silent 2>/dev/null); then
+            echo "    ✓ npm install complete"
+        else
+            echo "    ⚠ npm install failed (run manually)"
+        fi
+    elif [[ -f "$worktree_path/bun.lockb" ]]; then
+        echo "    🔧 Running: bun install..."
+        if (cd "$worktree_path" && bun install 2>/dev/null); then
+            echo "    ✓ bun install complete"
+        else
+            echo "    ⚠ bun install failed (run manually)"
+        fi
+    elif [[ -f "$worktree_path/uv.lock" ]]; then
+        echo "    🔧 Running: uv sync..."
+        if (cd "$worktree_path" && uv sync 2>/dev/null); then
+            echo "    ✓ uv sync complete"
+        else
+            echo "    ⚠ uv sync failed (run manually)"
+        fi
+    elif [[ -f "$worktree_path/pyproject.toml" ]]; then
+        echo "    🔧 Running: pip install -e ..."
+        if (cd "$worktree_path" && pip install -e . -q 2>/dev/null); then
+            echo "    ✓ pip install complete"
+        else
+            echo "    ⚠ pip install failed (run manually)"
+        fi
+    elif [[ -f "$worktree_path/requirements.txt" ]]; then
+        echo "    🔧 Running: pip install -r requirements.txt..."
+        if (cd "$worktree_path" && pip install -r requirements.txt -q 2>/dev/null); then
+            echo "    ✓ pip install complete"
+        else
+            echo "    ⚠ pip install failed (run manually)"
+        fi
+    else
+        echo "    ℹ No package manager detected"
+    fi
+}
+
+# Generate per-worktree CLAUDE.md
+write_worktree_claude_md() {
+    local task_name="$1"
+    local task_desc="$2"
+    local worktree_path="$3"
+    local all_tasks="$4"
+
+    # Build out-of-scope list (other tasks)
+    local out_of_scope=""
+    for other in $all_tasks; do
+        if [[ "$other" != "$task_name" ]]; then
+            out_of_scope="${out_of_scope}- .worktrees/$other/* (another worktree)\n"
+        fi
+    done
+
+    cat > "$worktree_path/CLAUDE.md" <<EOF
+# Task: $task_name
+
+## Objective
+$task_desc
+
+## Scope
+This worktree is dedicated to the "$task_name" task only.
+
+## Out of Scope - DO NOT MODIFY
+$(echo -e "$out_of_scope")
+## Guidelines
+- Focus only on this task
+- Commit changes frequently
+- Run tests before completing
+- Check /worktree-status for overall progress
+
+## Context
+- Task Plan: \`../.worktrees/PLAN.md\`
+- Task Details: \`../.worktrees/tasks/$task_name.md\`
+
+---
+Generated: $(date '+%Y-%m-%d %H:%M:%S')
+EOF
+    echo "    ✓ Created CLAUDE.md"
+}
+
 handle_task() {
     local task_name="$1"
     local task_desc="$2"
+    local all_tasks="$3"
+    local skip_setup="${4:-false}"
     local worktree_path="$WORKTREES_DIR/$task_name"
     local branch_name="feature/$task_name"
 
@@ -298,6 +404,15 @@ handle_task() {
     if ! copy_env_files "$worktree_path" "."; then
         echo "    ⚠ Environment file copy had failures"
     fi
+
+    # Auto-setup (unless skipped)
+    if [[ "$skip_setup" != "true" ]]; then
+        run_package_setup "$worktree_path"
+    fi
+
+    # Generate per-worktree CLAUDE.md
+    write_worktree_claude_md "$task_name" "$task_desc" "$worktree_path" "$all_tasks"
+
     write_task_file "$task_name" "$task_desc" "$worktree_path" "$branch_name"
 }
 
@@ -318,9 +433,32 @@ show_distribution_summary() {
     echo -e "${YELLOW}Tip:${NC} Run separately in each terminal/tab for parallel work"
 }
 
+collect_task_names() {
+    local in_block=false
+    ALL_TASK_NAMES=""
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^\`\`\`(bash)?[[:space:]]*$ ]]; then
+            in_block=true
+        elif [[ "$in_block" == true && "$line" =~ ^\`\`\`[[:space:]]*$ ]]; then
+            in_block=false
+        elif [[ "$in_block" == true ]]; then
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            if parse_task_line "$line"; then
+                ALL_TASK_NAMES="$ALL_TASK_NAMES $TASK_NAME"
+            fi
+        fi
+    done < "$WORKTREES_DIR/PLAN.md"
+}
+
 parse_plan_tasks() {
+    local skip_setup="${1:-false}"
     local in_block=false
     TASK_COUNT=0
+
+    # First pass: collect all task names
+    collect_task_names
+
+    # Second pass: create worktrees
     while IFS= read -r line; do
         if [[ "$line" =~ ^\`\`\`(bash)?[[:space:]]*$ ]]; then
             in_block=true
@@ -329,7 +467,7 @@ parse_plan_tasks() {
         elif [[ "$in_block" == true ]]; then
             [[ "$line" =~ ^[[:space:]]*# ]] && continue
             parse_task_line "$line" || continue
-            if handle_task "$TASK_NAME" "$TASK_DESC"; then
+            if handle_task "$TASK_NAME" "$TASK_DESC" "$ALL_TASK_NAMES" "$skip_setup"; then
                 TASK_COUNT=$((TASK_COUNT + 1))
             fi
         fi
@@ -337,11 +475,13 @@ parse_plan_tasks() {
 }
 
 distribute_tasks() {
+    local skip_setup="${1:-false}"
+
     ensure_plan_file || return 1
     ensure_tasks_dir || return 1
 
     echo -e "${BLUE}📋 Parsing PLAN.md...${NC}\n"
-    parse_plan_tasks
+    parse_plan_tasks "$skip_setup"
 
     if [[ $TASK_COUNT -eq 0 ]]; then
         echo -e "${YELLOW}⚠ No tasks found in PLAN.md${NC}"
@@ -350,6 +490,22 @@ distribute_tasks() {
     fi
 
     show_distribution_summary "$TASK_COUNT"
+}
+
+# Init command: plan template or continue with distribute
+init_worktrees() {
+    local continue_flag="${1:-}"
+
+    if [[ "$continue_flag" == "--continue" ]]; then
+        echo -e "${BLUE}🚀 Initializing worktrees (distribute + setup)...${NC}\n"
+        distribute_tasks "false"
+    elif [[ "$continue_flag" == "--no-setup" ]]; then
+        echo -e "${BLUE}🚀 Initializing worktrees (distribute only)...${NC}\n"
+        distribute_tasks "true"
+    else
+        # Default: create PLAN.md template
+        create_plan_template
+    fi
 }
 
 # Check status
@@ -812,19 +968,22 @@ main() {
         echo "Please run this script in a git repository"
         exit 1
     fi
-    
+
     case "${1:-help}" in
         init)
-            create_plan_template
+            init_worktrees "${2:-}"
             ;;
         distribute)
-            distribute_tasks
+            # Deprecated: use 'init --continue' instead
+            echo -e "${YELLOW}⚠ 'distribute' is deprecated. Use 'init --continue' instead.${NC}"
+            distribute_tasks "false"
             ;;
         status)
             show_status
             ;;
         sync)
-            sync_env_files
+            # Deprecated: removed feature
+            echo -e "${YELLOW}⚠ 'sync' has been removed. Environment files are copied during init.${NC}"
             ;;
         launch)
             launch_worktrees "${2:-}"
