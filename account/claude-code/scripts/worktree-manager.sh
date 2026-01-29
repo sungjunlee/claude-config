@@ -65,10 +65,7 @@ create_plan_template() {
         fi
     fi
     
-    if ! cat > "$WORKTREES_DIR/PLAN.md" <<'EOF'; then
-        echo -e "${RED}✗ Failed to write $WORKTREES_DIR/PLAN.md${NC}"
-        return 1
-    fi
+    cat > "$WORKTREES_DIR/PLAN.md" <<'EOF'
 # Task Plan
 
 ## Task List
@@ -91,7 +88,12 @@ search: Implement search feature (Elasticsearch)
 - Branch names are automatically generated as feature/task-name
 - Task instructions are generated in .worktrees/tasks/ folder
 EOF
-    
+
+    if [[ $? -ne 0 ]]; then
+        echo -e "${RED}✗ Failed to write $WORKTREES_DIR/PLAN.md${NC}"
+        return 1
+    fi
+
     echo -e "${GREEN}✓ Created PLAN.md template at $WORKTREES_DIR/PLAN.md${NC}"
     echo -e "${BLUE}Next step: Edit the file and run '$0 init --continue'${NC}"
 }
@@ -226,11 +228,8 @@ write_task_file() {
     local task_desc="$2"
     local worktree_path="$3"
     local branch_name="$4"
-    if ! cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF; then
-        echo -e "    ${RED}✗ Failed to write task file for $task_name${NC}"
-        echo ""
-        return 1
-    fi
+
+    cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF
 # Task: $task_name
 
 ## 📋 Task Description
@@ -270,6 +269,12 @@ claude
 ---
 Generated: $(date '+%Y-%m-%d %H:%M:%S')
 EOF
+
+    if [[ $? -ne 0 ]]; then
+        echo -e "    ${RED}✗ Failed to write task file for $task_name${NC}"
+        return 1
+    fi
+
     echo "    ✓ Created task file: tasks/$task_name.md"
     echo ""
 }
@@ -364,10 +369,7 @@ write_worktree_claude_md() {
         fi
     done
 
-    if ! cat > "$worktree_path/CLAUDE.md" <<EOF; then
-        echo "    ⚠ Failed to create CLAUDE.md"
-        return 1
-    fi
+    cat > "$worktree_path/CLAUDE.md" <<EOF
 # Task: $task_name
 
 ## Objective
@@ -391,6 +393,12 @@ $(echo -e "$out_of_scope")
 ---
 Generated: $(date '+%Y-%m-%d %H:%M:%S')
 EOF
+
+    if [[ $? -ne 0 ]]; then
+        echo "    ⚠ Failed to create CLAUDE.md"
+        return 1
+    fi
+
     echo "    ✓ Created CLAUDE.md"
 }
 
