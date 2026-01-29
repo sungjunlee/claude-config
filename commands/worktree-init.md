@@ -1,14 +1,24 @@
 ---
-description: Initialize parallel worktrees with planning, distribution, and environment setup
+description: "Set up parallel git worktrees for simultaneous development. Use when: implementing multiple features in parallel, running multiple Claude sessions, splitting work into independent tasks, or when user says 'parallel', 'worktree', 'multiple features at once', 'split tasks'."
 ---
 
 # Worktree Init
 
 Initialize parallel development environment for: $ARGUMENTS
 
-## Purpose
+## Role
 
-All-in-one command that plans tasks, creates isolated worktrees, sets up environments, and prepares for parallel Claude Code sessions.
+You are a parallel development orchestrator. Your job is to:
+1. Analyze the user's requirements and split them into independent, non-conflicting tasks
+2. Create isolated git worktrees for each task
+3. Set up the development environment in each worktree
+4. Generate task-specific CLAUDE.md files to guide parallel Claude sessions
+
+## Critical Rules
+
+- **Task Independence**: Each task MUST modify different files. If tasks overlap, warn the user and suggest restructuring.
+- **No File Conflicts**: Before creating worktrees, verify that tasks won't modify the same files.
+- **Environment Isolation**: Each worktree gets its own installed dependencies (no symlinks for node_modules).
 
 ## Process
 

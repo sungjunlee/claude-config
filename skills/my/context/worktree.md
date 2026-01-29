@@ -1,113 +1,119 @@
 # Git Worktree Guide
 
-Git worktree를 활용한 병렬 개발 가이드입니다.
+Reference guide for parallel development using git worktrees with Claude Code.
 
-## 핵심 명령어
+## Quick Reference
 
 | Command | Purpose |
 |---------|---------|
-| `/worktree-init` | 계획 + 분배 + 환경 세팅 |
-| `/worktree-launch` | 세션 실행 (tmux/iterm) |
-| `/worktree-status` | 전체 상태 확인 |
+| `/worktree-init` | Plan + distribute + environment setup |
+| `/worktree-launch` | Start Claude sessions (tmux/iTerm) |
+| `/worktree-status` | Monitor all worktree progress |
 
-## 워크플로우
+## Workflow
 
-### 1. 초기화 (Init)
+### 1. Initialize
+
 ```bash
-/worktree-init "auth, payment, search 기능 구현"
-```
-한 번에:
-- PLAN.md 생성
-- Worktrees 생성
-- 환경 파일 복사
-- 패키지 매니저 실행 (npm/pnpm/uv)
-- 작업별 CLAUDE.md 생성
-
-### 2. 실행 (Launch)
-```bash
-/worktree-launch tmux    # tmux 세션
-/worktree-launch iterm   # iTerm 탭 (macOS)
+/worktree-init "implement auth, payment, search features"
 ```
 
-### 3. 모니터링 (Status)
+This command:
+- Creates `.worktrees/PLAN.md` with task breakdown
+- Creates isolated worktrees for each task
+- Copies environment files (.env, package.json, etc.)
+- Runs package manager (pnpm/npm/yarn/uv/pip)
+- Generates per-worktree CLAUDE.md
+
+### 2. Launch Sessions
+
+```bash
+/worktree-launch tmux    # Recommended (works everywhere)
+/worktree-launch iterm   # macOS only
+```
+
+### 3. Monitor Progress
+
 ```bash
 /worktree-status
 ```
 
-### 4. 병합 & 정리 (Merge & Cleanup)
+### 4. Merge & Cleanup
+
 ```bash
-# 병합
+# Merge completed work
 git checkout main
 git merge feature/auth
 
-# 정리
+# Remove worktree
 git worktree remove .worktrees/auth
 git branch -d feature/auth
 ```
 
-## 디렉토리 구조
+## Directory Structure
 
 ```
 project/
 ├── .worktrees/
-│   ├── PLAN.md              # 전체 계획
-│   ├── tasks/               # 작업별 지침
+│   ├── PLAN.md              # Overall task plan
+│   ├── tasks/               # Task instructions
 │   │   ├── auth.md
 │   │   └── payment.md
-│   ├── auth/                # Auth worktree
-│   │   ├── CLAUDE.md       # 작업 컨텍스트
-│   │   └── ...
-│   └── payment/             # Payment worktree
-└── src/                     # Main directory
+│   ├── auth/                # Worktree: auth feature
+│   │   ├── CLAUDE.md       # Task-specific context
+│   │   ├── .env            # Copied from main
+│   │   └── node_modules/   # Installed dependencies
+│   └── payment/             # Worktree: payment feature
+└── src/                     # Main working directory
 ```
 
-## 기본 Git Worktree 명령어
+## Essential Git Commands
 
 ```bash
-# 생성
+# Create worktree with new branch
 git worktree add .worktrees/feature-name -b feature/feature-name
 
-# 목록
+# List all worktrees
 git worktree list
 
-# 제거
+# Remove worktree
 git worktree remove .worktrees/feature-name
 
-# 정리 (고아 참조)
+# Prune orphaned references
 git worktree prune
 ```
 
-## 작업 분리 원칙
+## Critical Rules
 
-### 독립성 확보
-- 각 작업이 서로 다른 파일 수정
-- 공유 파일 수정은 최소화
-- 파일 겹침 시 merge 충돌 발생
+### Task Independence
+- Each task MUST modify different files
+- Overlapping file modifications cause merge conflicts
+- If tasks must share files, merge them sequentially
 
-### 리소스 관리
-- 포트 충돌 방지 (각 worktree에 다른 포트)
-- DB 연결 수 제한 고려
-- 토큰 소비 주의 (병렬 실행 시 빠름)
+### Resource Management
+- Use different ports per worktree (e.g., 3000, 3001, 3002)
+- Consider database connection limits
+- Token consumption increases with parallel sessions
 
-## 문제 해결
+## Troubleshooting
 
-### 브랜치 충돌
+### Branch Already Exists
 ```bash
 git branch -D feature/name
-# 또는
+# Or use different name
 git worktree add .worktrees/name -b feature/name-v2
 ```
 
-### Worktree 잠금
+### Worktree Locked
 ```bash
 git worktree unlock .worktrees/name
 ```
 
-### 정리
+### Cleanup Orphaned Worktrees
 ```bash
 git worktree prune
 ```
 
-## 참조
+## References
 
 - [Git Worktree Documentation](https://git-scm.com/docs/git-worktree)

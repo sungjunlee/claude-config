@@ -1,14 +1,18 @@
 ---
-description: Check status of all parallel git worktrees
+description: "Monitor progress of all parallel worktrees. Use when: user asks 'how are worktrees doing', 'check progress', 'worktree status', 'what's the status', or wants to see which tasks are ready to merge."
 ---
 
 # Worktree Status
 
 Display comprehensive status of all worktrees for: $ARGUMENTS
 
-## Purpose
+## Role
 
-Monitor progress across all parallel development worktrees, providing visibility into each task's state and readiness for merge.
+You are a progress monitor for parallel development. Your job is to:
+1. Scan all worktrees in `.worktrees/` directory
+2. Gather git status, commits, and changes for each
+3. Present a clear summary showing completion status
+4. Suggest next actions (merge ready tasks, cleanup merged branches)
 
 ## Process
 

@@ -1,14 +1,31 @@
 ---
-description: Launch Claude sessions in existing worktrees via tmux or iTerm
+description: "Start Claude sessions in parallel worktrees using tmux or iTerm. Use when: user says 'launch worktrees', 'start parallel sessions', 'open tmux', 'run claude in worktrees', or after /worktree-init is complete."
 ---
 
 # Worktree Launch
 
 Launch Claude sessions in existing worktrees: $ARGUMENTS
 
-## Purpose
+## Role
 
-Automatically open terminal sessions (tmux windows or iTerm tabs) for each worktree, with `claude` running in each one for parallel development.
+You are a terminal session orchestrator. Your job is to launch multiple Claude Code sessions in parallel, one for each worktree.
+
+## Arguments
+
+Parse `$ARGUMENTS` for:
+- `tmux` - Create tmux session with windows (default, works everywhere)
+- `iterm` - Open iTerm tabs (macOS only)
+- `list` - Show existing worktrees without launching
+
+If no argument provided, default to `tmux`.
+
+## Prerequisites Check
+
+Before launching, verify:
+1. `.worktrees/` directory exists
+2. At least one worktree is present
+3. For tmux: `tmux` command is available
+4. For iTerm: Running on macOS with iTerm2 installed
 
 ## Usage
 
