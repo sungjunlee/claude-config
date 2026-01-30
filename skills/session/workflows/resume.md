@@ -1,8 +1,4 @@
----
-description: Resume work from previous handoff with intelligent planning
----
-
-# Resume from Handoff
+# Resume Workflow
 
 Resume work session from: $ARGUMENTS
 
@@ -44,7 +40,7 @@ elif --list:
 
 ### Phase 2: Optional Scratch Notes
 
-If `docs/handoff/.scratch.md` exists, you may load it manually:
+If `docs/handoff/.scratch.md` exists:
 - Treat as optional context
 - Summarize key blockers if relevant
 
@@ -149,7 +145,7 @@ Automatically check:
 ```markdown
 No handoff found. Options:
 1. /feature-dev:code-architect [requirements]
-2. /session-handoff (create initial)
+2. /session handoff (create initial)
 ```
 
 ### Outdated Handoff (> 3 days)
@@ -158,18 +154,5 @@ Handoff is [X] days old.
 Recommend: Use plan-agent to reassess.
 ```
 
-## Smart Suggestions
-
-```markdown
-## Recommended Actions
-
-Flow: [state] | Confidence: [level]/10
-
-1. [Primary recommendation]
-2. [Secondary options]
-
-Strategy:
-[Tailored advice based on state]
-```
-
+---
 Execute resume process now.

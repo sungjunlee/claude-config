@@ -1,7 +1,3 @@
----
-description: "Start Claude sessions in parallel worktrees using tmux or iTerm. Use when: user says 'launch worktrees', 'start parallel sessions', 'open tmux', 'run claude in worktrees', or after /worktree-init is complete."
----
-
 # Worktree Launch
 
 Launch Claude sessions in existing worktrees: $ARGUMENTS

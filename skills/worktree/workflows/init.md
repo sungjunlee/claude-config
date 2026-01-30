@@ -1,7 +1,3 @@
----
-description: "Set up parallel git worktrees for simultaneous development. Use when: implementing multiple features in parallel, running multiple Claude sessions, splitting work into independent tasks, or when user says 'parallel', 'worktree', 'multiple features at once', 'split tasks'."
----
-
 # Worktree Init
 
 Initialize parallel development environment for: $ARGUMENTS

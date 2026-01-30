@@ -1,7 +1,3 @@
----
-description: "Monitor progress of all parallel worktrees. Use when: user asks 'how are worktrees doing', 'check progress', 'worktree status', 'what's the status', or wants to see which tasks are ready to merge."
----
-
 # Worktree Status
 
 Display comprehensive status of all worktrees for: $ARGUMENTS
