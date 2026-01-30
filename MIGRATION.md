@@ -18,7 +18,6 @@
 │   ├── claude-code/     # → ~/.claude/ (scripts, hooks, CLAUDE.md 등)
 │   ├── codex/           # → ~/.codex/
 │   └── antigravity/     # → ~/.gemini/antigravity/
-├── commands/            # → ~/.claude/commands/
 ├── skills/              # → ~/.claude/skills/
 └── install.sh
 ```
@@ -27,7 +26,6 @@
 
 ```text
 ~/.claude/
-├── commands/            # /my:* 커맨드
 ├── skills/
 │   ├── session/         # 세션 연속성 도구
 │   ├── worktree/        # 병렬 개발 도구

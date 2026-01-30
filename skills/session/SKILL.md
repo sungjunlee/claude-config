@@ -25,9 +25,9 @@ Maintain context continuity across Claude Code sessions.
 
 ## Dynamic Context
 
-- Session ID: ${CLAUDE_SESSION_ID}
 - Current branch: !`git branch --show-current 2>/dev/null || echo "not a git repo"`
 - Uncommitted changes: !`git status --short 2>/dev/null | wc -l | tr -d ' '`
+- Working directory: !`basename "$(pwd)"`
 
 ## Workflows
 

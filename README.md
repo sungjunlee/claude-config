@@ -25,7 +25,7 @@ skills만 따로 설치하고 싶다면 [npx skills](https://skills.sh)를 사�
 
 ```bash
 npx skills add sungjunlee/claude-config
-npx skills add sungjunlee/claude-config --skill my  # 특정 skill만
+npx skills add sungjunlee/claude-config --skill session  # 특정 skill만
 npx skills add sungjunlee/claude-config --list      # 목록 보기
 ```
 
@@ -52,7 +52,6 @@ npx skills add sungjunlee/claude-config --list      # 목록 보기
 │   ├── codex/               # → ~/.codex/
 │   └── antigravity/         # → ~/.gemini/antigravity/
 │
-├── commands/                # /my:* 슬래시 커맨드 → ~/.claude/commands/
 ├── skills/                  # 커스텀 skills → ~/.claude/skills/
 │   ├── session/             # 세션 연속성 도구
 │   ├── worktree/            # 병렬 개발 도구
@@ -65,7 +64,6 @@ npx skills add sungjunlee/claude-config --list      # 목록 보기
 
 ```
 ~/.claude/
-├── commands/           # /my:* 슬래시 커맨드
 ├── skills/
 │   ├── session/        # 세션 연속성 도구
 │   ├── worktree/       # 병렬 개발 도구
