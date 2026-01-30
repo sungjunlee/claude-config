@@ -83,7 +83,7 @@ When a worktree is ready to be removed:
 
 ```bash
 # View detailed status
-/worktree-status
+/worktree status
 
 # After work is complete
 git worktree remove .worktrees/[name]
@@ -92,8 +92,8 @@ git branch -d feature/[name]
 
 ## Related Commands
 
-- `/worktree-init` - Initialize new worktrees
-- `/worktree-launch` - Launch Claude sessions
+- `/worktree init` - Initialize new worktrees
+- `/worktree launch` - Launch Claude sessions
 
 ## Execution
 

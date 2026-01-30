@@ -4,7 +4,7 @@ description: |
   Parallel development using git worktrees for multi-task development.
   Use when: "parallel development", "multiple features", "worktree", "split tasks",
   "simultaneous work", "run multiple Claude sessions", "tmux", "distribute tasks".
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 model: claude-sonnet-4-5-20250929
 argument-hint: "[init|launch|status] [tasks|tmux|iterm]"
 ---

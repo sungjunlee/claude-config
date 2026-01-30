@@ -4,7 +4,7 @@ description: |
   Development environment automation - gitleaks, gitignore, pre-commit hooks.
   Use when: "setup", "gitleaks", "pre-commit", "gitignore", "security setup",
   "initialize project", "add hooks", "protect secrets".
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 model: claude-sonnet-4-5-20250929
 argument-hint: "[gitleaks|gitignore|hooks|all]"
 disable-model-invocation: true

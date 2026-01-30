@@ -6,16 +6,16 @@ Reference guide for parallel development using git worktrees with Claude Code.
 
 | Command | Purpose |
 |---------|---------|
-| `/worktree-init` | Plan + distribute + environment setup |
-| `/worktree-launch` | Start Claude sessions (tmux/iTerm) |
-| `/worktree-status` | Monitor all worktree progress |
+| `/worktree init` | Plan + distribute + environment setup |
+| `/worktree launch` | Start Claude sessions (tmux/iTerm) |
+| `/worktree status` | Monitor all worktree progress |
 
 ## Workflow
 
 ### 1. Initialize
 
 ```bash
-/worktree-init "implement auth, payment, search features"
+/worktree init "implement auth, payment, search features"
 ```
 
 This command:
@@ -28,14 +28,14 @@ This command:
 ### 2. Launch Sessions
 
 ```bash
-/worktree-launch tmux    # Recommended (works everywhere)
-/worktree-launch iterm   # macOS only
+/worktree launch tmux    # Recommended (works everywhere)
+/worktree launch iterm   # macOS only
 ```
 
 ### 3. Monitor Progress
 
 ```bash
-/worktree-status
+/worktree status
 ```
 
 ### 4. Merge & Cleanup

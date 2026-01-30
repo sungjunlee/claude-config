@@ -4,7 +4,7 @@ description: |
   Session continuity tools for context preservation across Claude sessions.
   Use when: "handoff", "resume", "save context", "continue later", "session summary",
   "before clear", "restore session", "pick up where I left off".
-allowed-tools: Read, Write, Edit, Glob, Grep
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 model: claude-sonnet-4-5-20250929
 argument-hint: "[handoff|resume] [--detailed|--team|--list]"
 ---
