@@ -378,11 +378,9 @@ install_claude() {
     log "Installing Claude Code configuration..."
     mkdir -p "$config_dir"
 
-    # Account-level directories (agents only - scripts/hooks/skills are now in plugin)
-    install_dir "agents" "$account_dir/agents" "$config_dir/" "false"
-
     # NOTE: scripts, hooks, and skills are now bundled in the plugin
     # They are no longer installed via this script
+    # Reason: Plugin architecture enables auto-updates via /plugin update
 
     # Files
     install_file "CLAUDE.md" "$account_dir/CLAUDE.md" "$config_dir/CLAUDE.md"
@@ -400,35 +398,41 @@ install_claude() {
     fi
 
     # Cleanup legacy files (now handled by plugin)
-    cleanup_claude_legacy "$config_dir"
+    if ! cleanup_claude_legacy "$config_dir"; then
+        warn "Some legacy directories could not be removed. Manual cleanup may be required."
+    fi
 }
 
 # Cleanup legacy files that are now bundled in the plugin
+# Returns 0 on success, 1 if any cleanup failed
 cleanup_claude_legacy() {
     local config_dir="$1"
     local cleaned=false
+    local failed=false
 
-    if [ -d "$config_dir/scripts" ]; then
-        warn "Removing legacy scripts directory (now in plugin)..."
-        rm -rf "$config_dir/scripts"
-        cleaned=true
-    fi
-
-    if [ -d "$config_dir/hooks" ]; then
-        warn "Removing legacy hooks directory (now in plugin)..."
-        rm -rf "$config_dir/hooks"
-        cleaned=true
-    fi
-
-    if [ -d "$config_dir/skills" ]; then
-        warn "Removing legacy skills directory (now in plugin)..."
-        rm -rf "$config_dir/skills"
-        cleaned=true
-    fi
+    for legacy_dir in scripts hooks skills; do
+        if [ -d "$config_dir/$legacy_dir" ]; then
+            warn "Removing legacy $legacy_dir directory (now in plugin)..."
+            rm -rf "$config_dir/$legacy_dir" 2>/dev/null || true
+            # Verify removal actually worked (rm -rf can silently fail)
+            if [ -d "$config_dir/$legacy_dir" ]; then
+                error "Failed to remove $config_dir/$legacy_dir"
+                error "  Try: rm -rf \"$config_dir/$legacy_dir\""
+                failed=true
+            else
+                cleaned=true
+            fi
+        fi
+    done
 
     if [ "$cleaned" = true ]; then
         info "Legacy files cleaned up. Skills/hooks are now provided via plugin."
     fi
+
+    if [ "$failed" = true ]; then
+        return 1
+    fi
+    return 0
 }
 
 install_codex() {
@@ -495,9 +499,23 @@ verify_claude() {
     [ -f "$config_dir/llm-models-latest.md" ] && info "  ✓ llm-models-latest.md" || info "  - llm-models-latest.md (optional)"
 
     # Plugin components (should NOT exist - they're in the plugin now)
-    [ ! -d "$config_dir/scripts" ] && info "  ✓ No legacy scripts" || warn "  ! Legacy scripts still present"
-    [ ! -d "$config_dir/hooks" ] && info "  ✓ No legacy hooks" || warn "  ! Legacy hooks still present"
-    [ ! -d "$config_dir/skills" ] && info "  ✓ No legacy skills" || warn "  ! Legacy skills still present"
+    local legacy_warning=false
+    for legacy_dir in scripts hooks skills; do
+        if [ -d "$config_dir/$legacy_dir" ]; then
+            warn "  ! Legacy $legacy_dir still present"
+            legacy_warning=true
+        else
+            info "  ✓ No legacy $legacy_dir"
+        fi
+    done
+
+    if [ "$legacy_warning" = true ]; then
+        echo ""
+        warn "Some legacy directories could not be removed automatically."
+        warn "This may cause conflicts with the plugin. Please remove manually:"
+        warn "  rm -rf \"$config_dir/scripts\" \"$config_dir/hooks\" \"$config_dir/skills\""
+        echo ""
+    fi
 
     [ "$success" = true ]
 }
@@ -751,7 +769,7 @@ show_claude_plugin_guide() {
     echo ""
     info "The plugin provides:"
     info "  - Skills: /session, /worktree, /dev-setup"
-    info "  - Hooks: datetime injection, audit logging, auto-formatting"
+    info "  - Hooks: datetime injection, audit logging, permission notifications, auto-formatting"
     echo ""
 }
 
