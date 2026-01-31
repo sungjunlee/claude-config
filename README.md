@@ -32,7 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 | 컴포넌트 | 설치 위치 | 설치 방법 | 자동 업데이트 |
 |----------|-----------|-----------|---------------|
 | Skills (session, worktree, dev-setup) | Plugin | `/plugin install` | ✅ Yes |
-| Hooks (PostToolUse, etc.) | Plugin | `/plugin install` | ✅ Yes |
+| Hooks | Plugin | `/plugin install` | ✅ Yes |
 | Permissions | ~/.claude/settings.json | install.sh | ❌ Manual |
 | Global preferences | ~/.claude/CLAUDE.md | install.sh | ❌ Manual |
 | LLM models reference | ~/.claude/llm-models-latest.md | install.sh | ❌ Manual |
@@ -108,7 +108,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 | UserPromptSubmit | * | 현재 시간 주입 |
 | PreToolUse | Bash | Bash 명령 감사 로깅 |
 | PermissionRequest | * | 권한 요청 알림 |
-| PostToolUse | Edit\|Write\|MultiEdit | 자동 포맷팅 |
+| PostToolUse | Edit\|Write\|MultiEdit | 포맷팅 및 린트 체크 |
 
 ## 업데이트
 

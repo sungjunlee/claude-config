@@ -378,8 +378,9 @@ install_claude() {
     log "Installing Claude Code configuration..."
     mkdir -p "$config_dir"
 
-    # NOTE: scripts, hooks, and skills are now bundled in the plugin.
-    # They are no longer installed via this script.
+    # NOTE: scripts, hooks, and skills are now distributed via the plugin.
+    # They are no longer installed to ~/.claude/ by this script.
+    # Instead, they reside in the plugin directory and are referenced via ${CLAUDE_PLUGIN_ROOT}.
     # Reason: Plugin architecture enables:
     #   - Auto-updates via /plugin update (no manual re-installation)
     #   - Version management via marketplace
@@ -402,9 +403,12 @@ install_claude() {
         warn "Please edit $config_dir/settings.local.json with your personal settings"
     fi
 
-    # Cleanup legacy files (now handled by plugin)
+    # Cleanup legacy files that are no longer needed (now in plugin)
     # Note: verify_claude() will give detailed message if cleanup fails
-    cleanup_claude_legacy "$config_dir" || true
+    if ! cleanup_claude_legacy "$config_dir"; then
+        warn "Legacy cleanup failed - see errors above"
+        warn "Installation will continue, but manual cleanup may be required"
+    fi
 }
 
 # Cleanup legacy files from pre-v2.1.0 installations
@@ -441,9 +445,15 @@ cleanup_claude_legacy() {
         elif [ -d "$target" ]; then
             warn "Removing legacy $legacy_dir directory (now in plugin)..."
             local rm_output
-            rm_output=$(rm -rf "$target" 2>&1) || true
+            if ! rm_output=$(rm -rf "$target" 2>&1); then
+                error "rm -rf $target failed"
+                if [ -n "$rm_output" ]; then
+                    error "  Reason: $rm_output"
+                fi
+                failed=true
+            fi
 
-            # Verify removal actually worked (rm -rf can silently fail)
+            # Belt-and-suspenders: verify removal actually worked
             if [ -d "$target" ]; then
                 error "Failed to remove $target"
                 if [ -n "$rm_output" ]; then

@@ -235,7 +235,8 @@ def main() -> None:
     try:
         handler(file_path)
     except (OSError, subprocess.SubprocessError) as e:
-        print(f"  ⚠️  {e}")
+        print(f"  ⚠️  Error processing file: {e}", file=sys.stderr)
+        sys.exit(1)
     print()
 
 
