@@ -20,6 +20,7 @@ if command -v notify-send &> /dev/null; then
     fi
 fi
 
-# No notification system available
-echo "notify_permission: WARNING - No notification system available (osascript/notify-send)" >&2
-exit 1
+# No notification system available (headless server or missing tools)
+# Exit 0 to not block operations - notification is optional
+echo "notify_permission: INFO - No notification system available (osascript/notify-send)" >&2
+exit 0

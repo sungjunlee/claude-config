@@ -164,8 +164,11 @@ def handle_rust(filepath: str) -> None:
         print("  ⚠️  cargo not found")
         return
 
-    ok, _ = run_command(["cargo", "fmt", "--", filepath], cwd=project_root)
-    print("  ✓ cargo fmt" if ok else "  ⚠️  fmt failed")
+    ok, out = run_command(["cargo", "fmt", "--", filepath], cwd=project_root)
+    if ok:
+        print("  ✓ cargo fmt")
+    else:
+        print(f"  ⚠️  fmt failed: {out[:80] if out else 'Unknown error'}")
 
     ok, out = run_command(
         ["cargo", "clippy", "--message-format=short", "-q"],
@@ -183,11 +186,17 @@ def handle_rust(filepath: str) -> None:
 def handle_go(filepath: str) -> None:
     """Handle Go files with gofmt + golangci-lint."""
     if has_tool("gofmt"):
-        ok, _ = run_command(["gofmt", "-w", filepath])
-        print("  ✓ gofmt" if ok else "  ⚠️  gofmt failed")
+        ok, out = run_command(["gofmt", "-w", filepath])
+        if ok:
+            print("  ✓ gofmt")
+        else:
+            print(f"  ⚠️  gofmt failed: {out[:80] if out else 'Unknown error'}")
     elif has_tool("go"):
-        ok, _ = run_command(["go", "fmt", filepath])
-        print("  ✓ go fmt" if ok else "  ⚠️  go fmt failed")
+        ok, out = run_command(["go", "fmt", filepath])
+        if ok:
+            print("  ✓ go fmt")
+        else:
+            print(f"  ⚠️  go fmt failed: {out[:80] if out else 'Unknown error'}")
     else:
         print("  ⚠️  gofmt/go not found")
 
@@ -256,4 +265,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        # Catch-all for unexpected errors - don't block operations (exit code 2)
+        import traceback
+        print(f"post_edit: Unexpected error ({type(e).__name__}): {e}", file=sys.stderr)
+        print(f"post_edit: {traceback.format_exc()}", file=sys.stderr)
+        sys.exit(2)

@@ -253,8 +253,14 @@ handle_config_merge() {
 
     if [ ! -f "$target_file" ]; then
         log "Installing $file_label..."
-        mkdir -p "$(dirname "$target_file")"
-        cp "$source_file" "$target_file"
+        if ! mkdir -p "$(dirname "$target_file")"; then
+            error "Failed to create directory for $file_label"
+            return 1
+        fi
+        if ! cp "$source_file" "$target_file"; then
+            error "Failed to install $file_label"
+            return 1
+        fi
         return 0
     fi
 
@@ -262,8 +268,16 @@ handle_config_merge() {
 
     if [ "$force_mode" = "true" ]; then
         warn "Force mode: backing up existing and installing new"
-        cp "$target_file" "${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
-        cp "$source_file" "$target_file"
+        local backup_path="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
+        if ! cp "$target_file" "$backup_path"; then
+            error "Failed to create backup at $backup_path"
+            error "  Aborting to prevent data loss"
+            return 1
+        fi
+        if ! cp "$source_file" "$target_file"; then
+            error "Failed to install $file_label"
+            return 1
+        fi
         return 0
     fi
 
@@ -307,7 +321,12 @@ handle_config_merge() {
             echo "----------------------------------------"
             diff -u "$target_file" "$source_file" || true
             echo "----------------------------------------"
-            handle_config_merge "$source_file" "$target_file" "$force_mode" "$file_label"
+            # Prevent infinite recursion in non-interactive mode
+            if [ ! -t 0 ]; then
+                warn "Non-interactive mode: keeping existing after diff"
+            else
+                handle_config_merge "$source_file" "$target_file" "$force_mode" "$file_label"
+            fi
             ;;
         n|new)
             warn "Saving as ${target_file}.new"
@@ -408,7 +427,10 @@ install_claude() {
     config_dir=$(get_config_dir "claude")
 
     log "Installing Claude Code configuration..."
-    mkdir -p "$config_dir"
+    if ! mkdir -p "$config_dir"; then
+        error "Failed to create config directory: $config_dir"
+        return 1
+    fi
 
     # NOTE: scripts, hooks, and skills are now distributed via the plugin.
     # They are no longer installed to ~/.claude/ by this script.
@@ -527,7 +549,10 @@ install_codex() {
     fi
 
     log "Installing Codex configuration..."
-    mkdir -p "$config_dir"
+    if ! mkdir -p "$config_dir"; then
+        error "Failed to create config directory: $config_dir"
+        return 1
+    fi
 
     # Install example files (only if not exists)
     install_example_file "$account_dir/config.toml.example" "$config_dir/config.toml" "Codex config.toml"
@@ -549,8 +574,14 @@ install_antigravity() {
     fi
 
     log "Installing Antigravity configuration..."
-    mkdir -p "$config_dir"
-    mkdir -p "$gemini_dir"
+    if ! mkdir -p "$config_dir"; then
+        error "Failed to create config directory: $config_dir"
+        return 1
+    fi
+    if ! mkdir -p "$gemini_dir"; then
+        error "Failed to create gemini directory: $gemini_dir"
+        return 1
+    fi
 
     # Install example files (only if not exists)
     # Settings go to ~/.gemini/antigravity/

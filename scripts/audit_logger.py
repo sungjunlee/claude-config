@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
 Claude Code Enhanced Audit Logger
-Logs detailed command execution information with context
+Logs detailed command execution information with context.
+
+Exit codes:
+    0 - Success
+    1 - Invalid JSON input (blocking error)
+    2 - Non-critical error (file write failed, unexpected error) - does not block operations
 """
 
 import json
