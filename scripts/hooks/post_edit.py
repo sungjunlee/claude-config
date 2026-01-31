@@ -221,10 +221,17 @@ def main() -> None:
     tool_use = os.environ.get("TOOL_USE", "")
     file_path = os.environ.get("FILE_PATH", "")
 
+    # Warn on missing env vars (suggests misconfigured hook)
+    if not tool_use:
+        print("post_edit: WARNING - TOOL_USE not set", file=sys.stderr)
+        return
     if tool_use not in ("Edit", "Write", "MultiEdit"):
         return
-    if not file_path or not os.path.exists(file_path):
+    if not file_path:
+        print("post_edit: WARNING - FILE_PATH not set", file=sys.stderr)
         return
+    if not os.path.exists(file_path):
+        return  # File may have been deleted, this is expected
 
     ext = Path(file_path).suffix.lower()
     handler = HANDLERS.get(ext)

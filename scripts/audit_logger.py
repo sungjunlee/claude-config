@@ -154,11 +154,16 @@ def main():
         # Silent operation - no output unless error
 
     except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+        print(f"audit_logger: Invalid JSON input: {e}", file=sys.stderr)
         sys.exit(1)
+    except OSError as e:
+        # Audit failure should not block operations; use exit code 2 for monitoring
+        print(f"audit_logger: Failed to write log: {e}", file=sys.stderr)
+        sys.exit(2)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        # Catch-all for unexpected errors - don't block operations
+        print(f"audit_logger: Unexpected error: {e}", file=sys.stderr)
+        sys.exit(2)
 
 
 if __name__ == "__main__":

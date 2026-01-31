@@ -4,7 +4,10 @@ set -euo pipefail
 # Adds current timestamp to user prompts
 
 # Output timestamp in ISO 8601 format with UTC for consistency
-# Fallback to non-TZ version if TZ=UTC causes issues
+# Fallback chain: TZ=UTC date -> date -u -> placeholder with error log
 if ! TZ=UTC date +'%Y-%m-%dT%H:%M:%SZ' 2>/dev/null; then
-    date -u +'%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || echo "timestamp-unavailable"
+    if ! date -u +'%Y-%m-%dT%H:%M:%SZ' 2>/dev/null; then
+        echo "inject_datetime: ERROR - date commands failed" >&2
+        echo "timestamp-unavailable"
+    fi
 fi

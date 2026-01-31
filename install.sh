@@ -433,50 +433,41 @@ cleanup_claude_legacy() {
         # Handle symlinks separately to avoid deleting symlink targets
         if [ -L "$target" ]; then
             local symlink_target
-            symlink_target=$(readlink "$target" 2>/dev/null || echo "unknown")
-            warn "Removing legacy $legacy_dir symlink (was pointing to: $symlink_target)..."
-            if rm "$target" 2>/dev/null; then
-                info "Symlink removed. Original target at $symlink_target was preserved."
+            symlink_target=$(readlink "$target" 2>/dev/null) || symlink_target=""
+            if [ -n "$symlink_target" ]; then
+                warn "Removing legacy $legacy_dir symlink (was pointing to: $symlink_target)..."
+            else
+                warn "Removing legacy $legacy_dir symlink (target could not be determined)..."
+            fi
+            local rm_err
+            if rm_err=$(rm "$target" 2>&1); then
+                [ -n "$symlink_target" ] && info "Symlink removed. Original target at $symlink_target was preserved."
                 cleaned=true
             else
                 error "Failed to remove symlink $target"
+                [ -n "$rm_err" ] && error "  Reason: $rm_err"
                 error "  Try: rm -f \"$target\""
                 failed=true
             fi
         elif [ -d "$target" ]; then
             warn "Removing legacy $legacy_dir directory (now in plugin)..."
-            # Pre-check writability before attempting removal
+
             if [ ! -w "$target" ]; then
                 error "Cannot remove $target: directory is not writable"
                 error "  Try: chmod -R u+w \"$target\" && rm -rf \"$target\""
                 failed=true
                 continue
             fi
-            # Use rm -r (not -rf) to capture error messages
-            local rm_output
-            if ! rm_output=$(rm -r "$target" 2>&1); then
-                error "rm -r $target failed"
-                if [ -n "$rm_output" ]; then
-                    error "  Reason: $rm_output"
-                fi
-                failed=true
-            fi
 
-            # Double-check: verify removal actually worked (rm can silently fail)
-            if [ -d "$target" ]; then
-                error "Failed to remove $target"
-                if [ -n "$rm_output" ]; then
-                    error "  Reason: $rm_output"
-                fi
-                # Provide helpful diagnostics
-                if [ ! -w "$target" ]; then
-                    error "  Directory is not writable. Try: chmod -R u+w \"$target\" && rm -rf \"$target\""
-                else
-                    error "  Try: sudo rm -rf \"$target\""
-                fi
-                failed=true
-            else
+            # Attempt removal and verify the directory is gone
+            local rm_output
+            if rm_output=$(rm -r "$target" 2>&1) && [ ! -d "$target" ]; then
                 cleaned=true
+            else
+                error "Failed to remove $target"
+                [ -n "$rm_output" ] && error "  Reason: $rm_output"
+                error "  Try: sudo rm -rf \"$target\""
+                failed=true
             fi
         fi
     done
