@@ -1,6 +1,6 @@
 {
   "name": "personal-dev-toolkit",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Personal development toolkit - session management, parallel git worktree development, and dev environment setup",
   "author": {
     "name": "sungjunlee"
@@ -13,16 +13,20 @@
     "git-worktree",
     "parallel-development",
     "dev-setup",
-    "productivity"
+    "productivity",
+    "hooks",
+    "automation"
   ],
   "category": "productivity",
   "tags": [
     "worktree",
     "session",
     "handoff",
-    "development-workflow"
+    "development-workflow",
+    "hooks"
   ],
   "skills": [
     "./skills/"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json"
 }
