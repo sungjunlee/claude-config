@@ -18,7 +18,6 @@
 │   ├── claude-code/     # → ~/.claude/ (scripts, hooks, CLAUDE.md 등)
 │   ├── codex/           # → ~/.codex/
 │   └── antigravity/     # → ~/.gemini/antigravity/
-├── commands/            # → ~/.claude/commands/
 ├── skills/              # → ~/.claude/skills/
 └── install.sh
 ```
@@ -27,9 +26,10 @@
 
 ```text
 ~/.claude/
-├── commands/            # /my:* 커맨드
 ├── skills/
-│   └── my/              # 개인 도구 모음 (컨텍스트)
+│   ├── session/         # 세션 연속성 도구
+│   ├── worktree/        # 병렬 개발 도구
+│   └── dev-setup/       # 개발 환경 설정
 ├── scripts/             # 지원 스크립트
 ├── hooks/               # 이벤트 훅
 ├── CLAUDE.md            # 글로벌 설정
@@ -46,12 +46,12 @@
 
 | 이전 | 현재 |
 |------|------|
-| `/flow:handoff` | `/my:session-handoff` |
-| `/flow:resume` | `/my:session-resume` |
-| `/worktree:plan` | `/my:wt-plan` |
-| `/worktree:distribute` | `/my:wt-distribute` |
-| `/worktree:status` | `/my:wt-status` |
-| `/worktree:sync` | `/my:wt-sync` |
+| `/flow:handoff` | `/session handoff` |
+| `/flow:resume` | `/session resume` |
+| `/worktree:plan` | `/worktree init` |
+| `/worktree:distribute` | `/worktree init --continue` |
+| `/worktree:status` | `/worktree status` |
+| `/worktree:sync` | 제거됨 (init 시 자동 복사) |
 | `/ai:gemini` | 제거됨 |
 | `/ai:codex` | 제거됨 |
 | `/ai:consensus` | 제거됨 |
@@ -93,12 +93,13 @@ rm -rf ~/.claude/skills/{workflow,worktree,ai,testing,linting,frameworks}
 rm -rf ~/.claude/skills/my/commands
 ```
 
-### My Skill 명령어 요약
+### Skills 명령어 요약
 
 공식 플러그인에 없는 기능:
 
-| 카테고리 | 명령어 | 용도 |
-|----------|--------|------|
-| Session | `/my:session-handoff`, `/my:session-resume` | 세션 연속성 |
-| Worktree | `/my:wt-plan`, `/my:wt-distribute` | 병렬 개발 |
-| Worktree | `/my:wt-status`, `/my:wt-sync` | 워크트리 관리 |
+| Skill | 명령어 | 용도 |
+|-------|--------|------|
+| session | `/session handoff`, `/session resume` | 세션 연속성 |
+| worktree | `/worktree init`, `/worktree launch` | 병렬 개발 |
+| worktree | `/worktree status` | 워크트리 관리 |
+| dev-setup | `/dev-setup [gitleaks\|gitignore\|hooks]` | 개발 환경 설정 |

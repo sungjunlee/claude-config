@@ -37,9 +37,9 @@ Example:
   $0 status                  # Check progress
 
 Slash commands:
-  /worktree-init     - Plan + distribute + setup
-  /worktree-launch   - Launch sessions
-  /worktree-status   - Check status
+  /worktree init     - Plan + distribute + setup
+  /worktree launch   - Launch sessions
+  /worktree status   - Check status
 
 EOF
 }
@@ -65,7 +65,7 @@ create_plan_template() {
         fi
     fi
     
-    cat > "$WORKTREES_DIR/PLAN.md" <<'EOF'
+    if ! cat > "$WORKTREES_DIR/PLAN.md" <<'EOF'
 # Task Plan
 
 ## Task List
@@ -88,8 +88,7 @@ search: Implement search feature (Elasticsearch)
 - Branch names are automatically generated as feature/task-name
 - Task instructions are generated in .worktrees/tasks/ folder
 EOF
-
-    if [[ $? -ne 0 ]]; then
+    then
         echo -e "${RED}✗ Failed to write $WORKTREES_DIR/PLAN.md${NC}"
         return 1
     fi
@@ -229,7 +228,7 @@ write_task_file() {
     local worktree_path="$3"
     local branch_name="$4"
 
-    cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF
+    if ! cat > "$WORKTREES_DIR/tasks/$task_name.md" <<EOF
 # Task: $task_name
 
 ## 📋 Task Description
@@ -269,8 +268,7 @@ claude
 ---
 Generated: $(date '+%Y-%m-%d %H:%M:%S')
 EOF
-
-    if [[ $? -ne 0 ]]; then
+    then
         echo -e "    ${RED}✗ Failed to write task file for $task_name${NC}"
         return 1
     fi
@@ -280,6 +278,9 @@ EOF
 }
 
 # Auto-detect and run package manager
+# NOTE: Package install failures are warnings, not fatal errors.
+# The worktree is still usable even if dependencies fail to install.
+# Users can manually run the package manager later.
 run_package_setup() {
     local worktree_path="$1"
 
@@ -294,54 +295,62 @@ run_package_setup() {
         return 1
     fi
 
+    local install_output
     if [[ -f "$worktree_path/pnpm-lock.yaml" ]]; then
         echo "    🔧 Running: pnpm install..."
-        if (cd "$worktree_path" && pnpm install --silent 2>/dev/null); then
+        if install_output=$(cd "$worktree_path" && pnpm install --silent 2>&1); then
             echo "    ✓ pnpm install complete"
         else
-            echo "    ⚠ pnpm install failed (run manually)"
+            echo "    ⚠ pnpm install failed:"
+            echo "      ${install_output:-No error output}"
         fi
     elif [[ -f "$worktree_path/yarn.lock" ]]; then
         echo "    🔧 Running: yarn install..."
-        if (cd "$worktree_path" && yarn install --silent 2>/dev/null); then
+        if install_output=$(cd "$worktree_path" && yarn install --silent 2>&1); then
             echo "    ✓ yarn install complete"
         else
-            echo "    ⚠ yarn install failed (run manually)"
+            echo "    ⚠ yarn install failed:"
+            echo "      ${install_output:-No error output}"
         fi
     elif [[ -f "$worktree_path/package-lock.json" ]]; then
         echo "    🔧 Running: npm install..."
-        if (cd "$worktree_path" && npm install --silent 2>/dev/null); then
+        if install_output=$(cd "$worktree_path" && npm install --silent 2>&1); then
             echo "    ✓ npm install complete"
         else
-            echo "    ⚠ npm install failed (run manually)"
+            echo "    ⚠ npm install failed:"
+            echo "      ${install_output:-No error output}"
         fi
     elif [[ -f "$worktree_path/bun.lockb" ]]; then
         echo "    🔧 Running: bun install..."
-        if (cd "$worktree_path" && bun install 2>/dev/null); then
+        if install_output=$(cd "$worktree_path" && bun install 2>&1); then
             echo "    ✓ bun install complete"
         else
-            echo "    ⚠ bun install failed (run manually)"
+            echo "    ⚠ bun install failed:"
+            echo "      ${install_output:-No error output}"
         fi
     elif [[ -f "$worktree_path/uv.lock" ]]; then
         echo "    🔧 Running: uv sync..."
-        if (cd "$worktree_path" && uv sync 2>/dev/null); then
+        if install_output=$(cd "$worktree_path" && uv sync 2>&1); then
             echo "    ✓ uv sync complete"
         else
-            echo "    ⚠ uv sync failed (run manually)"
+            echo "    ⚠ uv sync failed:"
+            echo "      ${install_output:-No error output}"
         fi
     elif [[ -f "$worktree_path/pyproject.toml" ]]; then
         echo "    🔧 Running: pip install -e ..."
-        if (cd "$worktree_path" && pip install -e . -q 2>/dev/null); then
+        if install_output=$(cd "$worktree_path" && pip install -e . -q 2>&1); then
             echo "    ✓ pip install complete"
         else
-            echo "    ⚠ pip install failed (run manually)"
+            echo "    ⚠ pip install failed:"
+            echo "      ${install_output:-No error output}"
         fi
     elif [[ -f "$worktree_path/requirements.txt" ]]; then
         echo "    🔧 Running: pip install -r requirements.txt..."
-        if (cd "$worktree_path" && pip install -r requirements.txt -q 2>/dev/null); then
+        if install_output=$(cd "$worktree_path" && pip install -r requirements.txt -q 2>&1); then
             echo "    ✓ pip install complete"
         else
-            echo "    ⚠ pip install failed (run manually)"
+            echo "    ⚠ pip install failed:"
+            echo "      ${install_output:-No error output}"
         fi
     else
         echo "    ℹ No package manager detected"
@@ -369,7 +378,7 @@ write_worktree_claude_md() {
         fi
     done
 
-    cat > "$worktree_path/CLAUDE.md" <<EOF
+    if ! cat > "$worktree_path/CLAUDE.md" <<EOF
 # Task: $task_name
 
 ## Objective
@@ -384,7 +393,7 @@ $(echo -e "$out_of_scope")
 - Focus only on this task
 - Commit changes frequently
 - Run tests before completing
-- Check /worktree-status for overall progress
+- Check /worktree status for overall progress
 
 ## Context
 - Task Plan: \`../PLAN.md\`
@@ -393,8 +402,7 @@ $(echo -e "$out_of_scope")
 ---
 Generated: $(date '+%Y-%m-%d %H:%M:%S')
 EOF
-
-    if [[ $? -ne 0 ]]; then
+    then
         echo "    ⚠ Failed to create CLAUDE.md"
         return 1
     fi

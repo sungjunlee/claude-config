@@ -1,8 +1,4 @@
----
-description: Create session handoff documentation for context transfer
----
-
-# Session Handoff
+# Handoff Workflow
 
 Generate handoff documentation for: $ARGUMENTS
 
@@ -28,7 +24,7 @@ Save current session state before `/clear` to maintain work continuity.
 - Setup instructions
 - Dependencies and blockers
 
-## Handoff Document Structure
+## Document Structure
 
 Create at `docs/handoff/HANDOFF-[YYYYMMDD-HHMM].md`:
 
@@ -105,39 +101,6 @@ confidence_level: [1-10]
 - 3-5: Multiple approaches being evaluated
 - 1-2: Blocked, need help
 
-## Scratch Notes
-
-Lightweight working memory at `docs/handoff/.scratch.md`:
-
-```markdown
-# Scratch Notes
-
-## Current Focus
-[One-line description]
-
-## Blockers
-- [Things stuck]
-
-## Quick Notes
-- [Ideas, reminders]
-
-## Try Next
-- [Approaches to attempt]
-```
-
-## Auto-trigger Conditions
-
-Suggest handoff when:
-- Context usage > 80%
-- Before `/clear`
-- After major milestone
-- When switching features
-
-## Archive Policy
-
-- Keep last 5 handoffs
-- Move older to `docs/handoff/archive/`
-
 ## Process
 
 1. **Analyze** - Review conversation, identify pending work
@@ -146,4 +109,10 @@ Suggest handoff when:
 4. **Validate** - Ensure completeness
 5. **Notify** - Confirm location and suggest `/clear`
 
+## Archive Policy
+
+- Keep last 5 handoffs
+- Move older to `docs/handoff/archive/`
+
+---
 Generate handoff documentation now.

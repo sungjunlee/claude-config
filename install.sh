@@ -383,8 +383,7 @@ install_claude() {
     install_dir "scripts" "$account_dir/scripts" "$config_dir/" "true"
     install_dir "hooks" "$account_dir/hooks" "$config_dir/" "true"
 
-    # Repo-level directories
-    install_dir "commands" "$repo_dir/commands" "$config_dir/" "false"
+    # Repo-level directories (skills only - commands merged into skills)
     install_dir "skills" "$repo_dir/skills" "$config_dir/" "false"
 
     # Files
@@ -461,10 +460,9 @@ verify_claude() {
 
     info "Verifying Claude Code installation..."
 
-    [ -d "$config_dir/commands" ] && info "  ✓ Commands" || { warn "  ✗ Commands"; success=false; }
+    [ -d "$config_dir/skills" ] && info "  ✓ Skills" || { warn "  ✗ Skills"; success=false; }
     [ -d "$config_dir/scripts" ] && info "  ✓ Scripts" || { warn "  ✗ Scripts"; success=false; }
     [ -f "$config_dir/CLAUDE.md" ] && info "  ✓ CLAUDE.md" || { warn "  ✗ CLAUDE.md"; success=false; }
-    [ -d "$config_dir/skills" ] && info "  ✓ Skills" || info "  - Skills (optional)"
     [ -d "$config_dir/hooks" ] && info "  ✓ Hooks" || info "  - Hooks (optional)"
 
     [ "$success" = true ]

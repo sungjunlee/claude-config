@@ -1,7 +1,3 @@
----
-description: "Monitor progress of all parallel worktrees. Use when: user asks 'how are worktrees doing', 'check progress', 'worktree status', 'what's the status', or wants to see which tasks are ready to merge."
----
-
 # Worktree Status
 
 Display comprehensive status of all worktrees for: $ARGUMENTS
@@ -87,7 +83,7 @@ When a worktree is ready to be removed:
 
 ```bash
 # View detailed status
-/worktree-status
+/worktree status
 
 # After work is complete
 git worktree remove .worktrees/[name]
@@ -96,8 +92,8 @@ git branch -d feature/[name]
 
 ## Related Commands
 
-- `/worktree-init` - Initialize new worktrees
-- `/worktree-launch` - Launch Claude sessions
+- `/worktree init` - Initialize new worktrees
+- `/worktree launch` - Launch Claude sessions
 
 ## Execution
 

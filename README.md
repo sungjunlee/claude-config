@@ -25,7 +25,7 @@ skills만 따로 설치하고 싶다면 [npx skills](https://skills.sh)를 사�
 
 ```bash
 npx skills add sungjunlee/claude-config
-npx skills add sungjunlee/claude-config --skill my  # 특정 skill만
+npx skills add sungjunlee/claude-config --skill session  # 특정 skill만
 npx skills add sungjunlee/claude-config --list      # 목록 보기
 ```
 
@@ -52,9 +52,10 @@ npx skills add sungjunlee/claude-config --list      # 목록 보기
 │   ├── codex/               # → ~/.codex/
 │   └── antigravity/         # → ~/.gemini/antigravity/
 │
-├── commands/                # /my:* 슬래시 커맨드 → ~/.claude/commands/
 ├── skills/                  # 커스텀 skills → ~/.claude/skills/
-│   └── my/                  # 개인 도구 모음
+│   ├── session/             # 세션 연속성 도구
+│   ├── worktree/            # 병렬 개발 도구
+│   └── dev-setup/           # 개발 환경 설정
 │
 └── install.sh               # 설치 스크립트
 ```
@@ -63,16 +64,17 @@ npx skills add sungjunlee/claude-config --list      # 목록 보기
 
 ```
 ~/.claude/
-├── commands/           # /my:* 슬래시 커맨드
 ├── skills/
-│   └── my/             # 개인 도구 모음 (컨텍스트/자동 호출)
+│   ├── session/        # 세션 연속성 도구
+│   ├── worktree/       # 병렬 개발 도구
+│   └── dev-setup/      # 개발 환경 설정
 ├── scripts/            # 지원 스크립트
 ├── hooks/              # 이벤트 훅 (선택)
 ├── CLAUDE.md           # 글로벌 설정
 └── llm-models-latest.md # LLM 모델 참조
 ```
 
-## My Skill - 개인 도구 모음
+## Skills - 개인 도구 모음
 
 공식 플러그인에 없는 개인 확장 기능입니다.
 
@@ -80,16 +82,24 @@ npx skills add sungjunlee/claude-config --list      # 목록 보기
 
 | 명령어 | 용도 |
 |--------|------|
-| `/my:session-handoff` | 세션 상태 저장 (`/clear` 전) |
-| `/my:session-resume` | 이전 세션 컨텍스트 복원 |
+| `/session handoff` | 세션 상태 저장 (`/clear` 전) |
+| `/session resume` | 이전 세션 컨텍스트 복원 |
 
 ### Worktree
 
 | 명령어 | 용도 |
 |--------|------|
-| `/worktree-init` | 병렬 워크트리 초기화 (계획 + 분배 + 설정) |
-| `/worktree-launch` | tmux/iTerm에서 Claude 세션 실행 |
-| `/worktree-status` | 전체 워크트리 상태 확인 |
+| `/worktree init` | 병렬 워크트리 초기화 (계획 + 분배 + 설정) |
+| `/worktree launch` | tmux/iTerm에서 Claude 세션 실행 |
+| `/worktree status` | 전체 워크트리 상태 확인 |
+
+### Dev Setup
+
+| 명령어 | 용도 |
+|--------|------|
+| `/dev-setup` | 개발 환경 보안 설정 (gitleaks, hooks) |
+| `/dev-setup gitleaks` | Gitleaks pre-commit 훅 설치 |
+| `/dev-setup gitignore` | .gitignore 패턴 강화 |
 
 ## 업데이트
 

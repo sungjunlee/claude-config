@@ -1,7 +1,3 @@
----
-description: "Start Claude sessions in parallel worktrees using tmux or iTerm. Use when: user says 'launch worktrees', 'start parallel sessions', 'open tmux', 'run claude in worktrees', or after /worktree-init is complete."
----
-
 # Worktree Launch
 
 Launch Claude sessions in existing worktrees: $ARGUMENTS
@@ -31,13 +27,13 @@ Before launching, verify:
 
 ```bash
 # Launch with tmux (recommended - works everywhere)
-/worktree-launch tmux
+/worktree launch tmux
 
 # Launch with iTerm (macOS only)
-/worktree-launch iterm
+/worktree launch iterm
 
 # List existing worktrees
-/worktree-launch list
+/worktree launch list
 ```
 
 ## Commands
@@ -65,16 +61,16 @@ Shows existing worktrees and their branches.
 
 ## Prerequisites
 
-- Worktrees must exist (use `/worktree-init` first)
+- Worktrees must exist (use `/worktree init` first)
 - For tmux: `tmux` installed (`brew install tmux`)
 - For iTerm: iTerm2 app installed, macOS only
 
 ## Workflow
 
 ```
-/worktree-init "tasks..."    # Create worktrees
+/worktree init "tasks..."    # Create worktrees
          ↓
-/worktree-launch tmux        # Launch terminals
+/worktree launch tmux        # Launch terminals
          ↓
 tmux attach -t {project}-wt  # Attach to session
 ```
@@ -118,8 +114,8 @@ To attach: tmux attach -t myproject-wt
 
 ## Related Commands
 
-- `/worktree-init` - Initialize worktrees (run first)
-- `/worktree-status` - Monitor worktree progress
+- `/worktree init` - Initialize worktrees (run first)
+- `/worktree status` - Monitor worktree progress
 
 ## Execution
 

@@ -1,7 +1,3 @@
----
-description: "Set up parallel git worktrees for simultaneous development. Use when: implementing multiple features in parallel, running multiple Claude sessions, splitting work into independent tasks, or when user says 'parallel', 'worktree', 'multiple features at once', 'split tasks'."
----
-
 # Worktree Init
 
 Initialize parallel development environment for: $ARGUMENTS
@@ -71,13 +67,13 @@ You are a parallel development orchestrator. Your job is to:
 
 ```bash
 # Feature development
-/worktree-init "Implement auth, payment, and search features"
+/worktree init "Implement auth, payment, and search features"
 
 # Bug fixes
-/worktree-init "Fix login timeout, payment error, and search ranking bugs"
+/worktree init "Fix login timeout, payment error, and search ranking bugs"
 
 # Refactoring
-/worktree-init "Migrate API routes to new pattern, update tests, update docs"
+/worktree init "Migrate API routes to new pattern, update tests, update docs"
 ```
 
 ## Generated Structure
@@ -147,8 +143,8 @@ Implement OAuth2.0 authentication system
 📝 CLAUDE.md generated for each worktree
 
 🎉 Ready! Next steps:
-   /worktree-launch tmux    # Launch Claude sessions
-   /worktree-status         # Monitor progress
+   /worktree launch tmux    # Launch Claude sessions
+   /worktree status         # Monitor progress
 ```
 
 ## Options
@@ -167,8 +163,8 @@ Implement OAuth2.0 authentication system
 
 ## Related Commands
 
-- `/worktree-launch` - Launch Claude sessions in worktrees
-- `/worktree-status` - Monitor worktree progress
+- `/worktree launch` - Launch Claude sessions in worktrees
+- `/worktree status` - Monitor worktree progress
 
 ## Execution
 

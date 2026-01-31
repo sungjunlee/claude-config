@@ -6,8 +6,7 @@ Claude Code Skills 기반 설정 저장소입니다.
 
 ```
 .claude-plugin/          # plugin metadata
-commands/                # /my:* slash commands
-skills/                  # Agent Skills
+skills/                  # Agent Skills (commands merged)
 account/
 ├── claude-code/          # Account 설정 (~/.claude/로 설치)
 │   ├── scripts/           # 지원 스크립트
@@ -30,11 +29,6 @@ account/
 2. `SKILL.md` 작성 (skill 정의)
 3. `workflows/*.md` 추가 (실행 워크플로)
 4. `context/*.md` 추가 (도메인 지식)
-
-### 새 Command 추가
-1. `commands/[name].md` 생성
-2. Frontmatter에 description 추가
-3. `$ARGUMENTS`로 파라미터 전달
 
 ### 테스트
 ```bash
