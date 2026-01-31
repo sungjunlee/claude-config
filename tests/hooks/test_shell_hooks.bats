@@ -117,6 +117,6 @@ SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/../.." && pwd)/scripts"
     cd "$(dirname "$SCRIPT_DIR")"
     run "$SCRIPT_DIR/git_status.sh"
     [ "$status" -eq 0 ]
-    # Should contain branch information
-    [[ "$output" =~ "branch" ]] || [[ "$output" =~ "main" ]] || [[ "$output" =~ "master" ]]
+    # Should contain branch information (case-insensitive)
+    [[ "$output" =~ [Bb]ranch ]]
 }
