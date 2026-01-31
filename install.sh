@@ -378,15 +378,20 @@ install_claude() {
     log "Installing Claude Code configuration..."
     mkdir -p "$config_dir"
 
-    # NOTE: scripts, hooks, and skills are now bundled in the plugin
-    # They are no longer installed via this script
-    # Reason: Plugin architecture enables auto-updates via /plugin update
+    # NOTE: scripts, hooks, and skills are now bundled in the plugin.
+    # They are no longer installed via this script.
+    # Reason: Plugin architecture enables:
+    #   - Auto-updates via /plugin update (no manual re-installation)
+    #   - Version management via marketplace
+    #   - Separation of frequently-updated code (skills/hooks) from stable configs
 
     # Files
     install_file "CLAUDE.md" "$account_dir/CLAUDE.md" "$config_dir/CLAUDE.md"
     install_file "llm-models-latest.md" "$account_dir/llm-models-latest.md" "$config_dir/llm-models-latest.md"
 
-    # Settings with merge handling (permissions cannot be bundled in plugins)
+    # Settings with merge handling
+    # Note: permissions must remain in ~/.claude/settings.json as plugins
+    # cannot modify account-level security settings (by design)
     if [ -f "$account_dir/settings.json" ]; then
         handle_config_merge "$account_dir/settings.json" "$config_dir/settings.json" "$force_install" "settings.json"
     fi
@@ -398,26 +403,58 @@ install_claude() {
     fi
 
     # Cleanup legacy files (now handled by plugin)
-    if ! cleanup_claude_legacy "$config_dir"; then
-        warn "Some legacy directories could not be removed. Manual cleanup may be required."
-    fi
+    # Note: verify_claude() will give detailed message if cleanup fails
+    cleanup_claude_legacy "$config_dir" || true
 }
 
-# Cleanup legacy files that are now bundled in the plugin
+# Cleanup legacy files from pre-v2.1.0 installations
+# Prior to v2.1.0, scripts/hooks/skills were installed to ~/.claude/
+# They are now distributed via the plugin and should not exist locally.
 # Returns 0 on success, 1 if any cleanup failed
 cleanup_claude_legacy() {
     local config_dir="$1"
     local cleaned=false
     local failed=false
 
+    # Pre-flight check: can we write to config_dir?
+    if [ ! -w "$config_dir" ]; then
+        error "Cannot clean up legacy directories: $config_dir is not writable"
+        error "  Try: chmod u+w \"$config_dir\" and re-run"
+        return 1
+    fi
+
     for legacy_dir in scripts hooks skills; do
-        if [ -d "$config_dir/$legacy_dir" ]; then
+        local target="$config_dir/$legacy_dir"
+
+        # Handle symlinks separately to avoid deleting symlink targets
+        if [ -L "$target" ]; then
+            local symlink_target
+            symlink_target=$(readlink "$target" 2>/dev/null || echo "unknown")
+            warn "Removing legacy $legacy_dir symlink (was pointing to: $symlink_target)..."
+            if rm "$target" 2>&1; then
+                info "Symlink removed. Original target at $symlink_target was preserved."
+                cleaned=true
+            else
+                error "Failed to remove symlink $target"
+                failed=true
+            fi
+        elif [ -d "$target" ]; then
             warn "Removing legacy $legacy_dir directory (now in plugin)..."
-            rm -rf "$config_dir/$legacy_dir" 2>/dev/null || true
+            local rm_output
+            rm_output=$(rm -rf "$target" 2>&1) || true
+
             # Verify removal actually worked (rm -rf can silently fail)
-            if [ -d "$config_dir/$legacy_dir" ]; then
-                error "Failed to remove $config_dir/$legacy_dir"
-                error "  Try: rm -rf \"$config_dir/$legacy_dir\""
+            if [ -d "$target" ]; then
+                error "Failed to remove $target"
+                if [ -n "$rm_output" ]; then
+                    error "  Reason: $rm_output"
+                fi
+                # Provide helpful diagnostics
+                if [ ! -w "$target" ]; then
+                    error "  Directory is not writable. Try: chmod -R u+w \"$target\" && rm -rf \"$target\""
+                else
+                    error "  Try: sudo rm -rf \"$target\""
+                fi
                 failed=true
             else
                 cleaned=true
@@ -501,7 +538,7 @@ verify_claude() {
     # Plugin components (should NOT exist - they're in the plugin now)
     local legacy_warning=false
     for legacy_dir in scripts hooks skills; do
-        if [ -d "$config_dir/$legacy_dir" ]; then
+        if [ -L "$config_dir/$legacy_dir" ] || [ -d "$config_dir/$legacy_dir" ]; then
             warn "  ! Legacy $legacy_dir still present"
             legacy_warning=true
         else
@@ -511,10 +548,12 @@ verify_claude() {
 
     if [ "$legacy_warning" = true ]; then
         echo ""
-        warn "Some legacy directories could not be removed automatically."
-        warn "This may cause conflicts with the plugin. Please remove manually:"
-        warn "  rm -rf \"$config_dir/scripts\" \"$config_dir/hooks\" \"$config_dir/skills\""
+        error "CLEANUP REQUIRED: Legacy directories still present"
+        error "This will cause conflicts with the plugin architecture."
+        error "Please remove manually:"
+        error "  rm -rf \"$config_dir/scripts\" \"$config_dir/hooks\" \"$config_dir/skills\""
         echo ""
+        success=false
     fi
 
     [ "$success" = true ]

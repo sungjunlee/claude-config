@@ -50,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 ```
 .
 ├── .claude-plugin/          # Plugin metadata
-│   ├── plugin.json          # Plugin manifest (v2.1.0)
+│   ├── plugin.json          # Plugin manifest
 │   └── marketplace.json     # Marketplace entry
 │
 ├── skills/                  # Plugin: Skills (자동 업데이트)
@@ -62,10 +62,8 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 │   └── hooks.json           # Hook configurations
 │
 ├── scripts/                 # Plugin: Scripts (hooks에서 사용)
-│   ├── inject_datetime.sh
-│   ├── audit_logger.py
-│   └── hooks/
-│       └── post_edit.py
+│   ├── *.sh, *.py           # Hook utility scripts
+│   └── hooks/               # Hook-specific scripts
 │
 ├── account/                 # install.sh: Account configs (수동 업데이트)
 │   └── claude-code/
