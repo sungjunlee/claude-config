@@ -1,82 +1,82 @@
 # Claude Config
 
-Claude Code 및 AI 코딩 에이전트를 위한 계정 레벨 설정입니다.
+Claude Code 및 AI 코딩 에이전트를 위한 개인 설정입니다.
 
 ## 설치
 
-### 전체 설치 (권장)
+### Quick Start (Plugin + Account Settings)
 
-skills, commands, hooks, scripts, CLAUDE.md 등 모든 설정을 설치합니다.
+Skills와 hooks는 플러그인으로, permissions와 global preferences는 install.sh로 설치합니다.
+
+**1. Account-level 설정 설치:**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
 ```
 
-옵션:
-```bash
-./install.sh --all              # 모든 도구 (Claude, Codex, Antigravity)
-./install.sh --tools claude,codex  # 특정 도구만
-./install.sh --force            # 기존 설정 백업 후 덮어쓰기
+**2. Plugin 설치 (Claude Code 내에서):**
+
+```
+/plugin marketplace add sungjunlee/claude-config
+/plugin install my@sungjunlee-claude-config
 ```
 
-### Skills만 설치
+**3. Auto-update 활성화 (권장):**
 
-skills만 따로 설치하고 싶다면 [npx skills](https://skills.sh)를 사용할 수 있습니다.
-
-```bash
-npx skills add sungjunlee/claude-config
-npx skills add sungjunlee/claude-config --skill session  # 특정 skill만
-npx skills add sungjunlee/claude-config --list      # 목록 보기
+```
+/plugin → Marketplace settings → Enable auto-update
 ```
 
-### 공식 플러그인 (권장)
+### 컴포넌트별 설치 위치
+
+| 컴포넌트 | 설치 위치 | 설치 방법 | 자동 업데이트 |
+|----------|-----------|-----------|---------------|
+| Skills (session, worktree, dev-setup) | Plugin | `/plugin install` | ✅ Yes |
+| Hooks (PostToolUse, etc.) | Plugin | `/plugin install` | ✅ Yes |
+| Permissions | ~/.claude/settings.json | install.sh | ❌ Manual |
+| Global preferences | ~/.claude/CLAUDE.md | install.sh | ❌ Manual |
+| LLM models reference | ~/.claude/llm-models-latest.md | install.sh | ❌ Manual |
+
+### 이전 버전에서 마이그레이션
+
+`~/.claude/scripts/` 또는 `~/.claude/hooks/`가 있는 경우:
 
 ```bash
-/plugin install pr-review-toolkit      # PR 리뷰 (6개 전문 에이전트)
-/plugin install commit-commands        # Git 워크플로우 자동화
-/plugin install feature-dev            # 가이드 기능 개발
-/plugin install document-skills@anthropic-agent-skills  # 문서 생성/편집
-/plugin install security-guidance      # 보안 패턴 모니터링
+./install.sh  # 자동으로 레거시 파일 정리
 ```
 
 ## 저장소 구조
 
 ```
 .
-├── account/                 # 계정 레벨 설정 (홈 디렉토리로 설치됨)
-│   ├── claude-code/         # → ~/.claude/
-│   │   ├── scripts/         # 지원 스크립트
-│   │   ├── hooks/           # 이벤트 훅
-│   │   ├── CLAUDE.md        # 글로벌 설정
-│   │   └── llm-models-latest.md
-│   ├── codex/               # → ~/.codex/
-│   └── antigravity/         # → ~/.gemini/antigravity/
+├── .claude-plugin/          # Plugin metadata
+│   ├── plugin.json          # Plugin manifest (v2.1.0)
+│   └── marketplace.json     # Marketplace entry
 │
-├── skills/                  # 커스텀 skills → ~/.claude/skills/
+├── skills/                  # Plugin: Skills (자동 업데이트)
 │   ├── session/             # 세션 연속성 도구
 │   ├── worktree/            # 병렬 개발 도구
 │   └── dev-setup/           # 개발 환경 설정
 │
-└── install.sh               # 설치 스크립트
-```
-
-설치 후 `~/.claude/` 구조:
-
-```
-~/.claude/
-├── skills/
-│   ├── session/        # 세션 연속성 도구
-│   ├── worktree/       # 병렬 개발 도구
-│   └── dev-setup/      # 개발 환경 설정
-├── scripts/            # 지원 스크립트
-├── hooks/              # 이벤트 훅 (선택)
-├── CLAUDE.md           # 글로벌 설정
-└── llm-models-latest.md # LLM 모델 참조
+├── hooks/                   # Plugin: Hooks (자동 업데이트)
+│   └── hooks.json           # Hook configurations
+│
+├── scripts/                 # Plugin: Scripts (hooks에서 사용)
+│   ├── inject_datetime.sh
+│   ├── audit_logger.py
+│   └── hooks/
+│       └── post_edit.py
+│
+├── account/                 # install.sh: Account configs (수동 업데이트)
+│   └── claude-code/
+│       ├── settings.json    # Permissions
+│       ├── CLAUDE.md        # Global preferences
+│       └── llm-models-latest.md
+│
+└── install.sh               # Account-level 설치 스크립트
 ```
 
 ## Skills - 개인 도구 모음
-
-공식 플러그인에 없는 개인 확장 기능입니다.
 
 ### Session Management
 
@@ -101,14 +101,42 @@ npx skills add sungjunlee/claude-config --list      # 목록 보기
 | `/dev-setup gitleaks` | Gitleaks pre-commit 훅 설치 |
 | `/dev-setup gitignore` | .gitignore 패턴 강화 |
 
+## Hooks
+
+플러그인에 포함된 hooks:
+
+| Event | Matcher | 기능 |
+|-------|---------|------|
+| UserPromptSubmit | * | 현재 시간 주입 |
+| PreToolUse | Bash | Bash 명령 감사 로깅 |
+| PermissionRequest | * | 권한 요청 알림 |
+| PostToolUse | Edit\|Write\|MultiEdit | 자동 포맷팅 |
+
 ## 업데이트
 
-```bash
-# 재설치로 업데이트
-curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/install.sh | bash
+### Plugin 업데이트 (Skills & Hooks)
 
-# 강제 업데이트 (기존 설정 백업 후 덮어쓰기)
+Auto-update가 활성화되어 있으면 자동으로 업데이트됩니다.
+
+수동 업데이트:
+```
+/plugin update my@sungjunlee-claude-config
+```
+
+### Account 설정 업데이트 (Permissions)
+
+```bash
 ./install.sh --force
+```
+
+## 공식 플러그인 (권장)
+
+```bash
+/plugin install pr-review-toolkit      # PR 리뷰 (6개 전문 에이전트)
+/plugin install commit-commands        # Git 워크플로우 자동화
+/plugin install feature-dev            # 가이드 기능 개발
+/plugin install document-skills@anthropic-agent-skills  # 문서 생성/편집
+/plugin install security-guidance      # 보안 패턴 모니터링
 ```
 
 ## 지원 도구
@@ -122,6 +150,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 ## 참고
 
 - [MIGRATION.md](MIGRATION.md) - 마이그레이션 가이드
+- [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference)
 - [skills.sh](https://skills.sh) - 커뮤니티 skills 디렉토리
 
 ## License
