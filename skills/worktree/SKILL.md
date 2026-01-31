@@ -6,7 +6,7 @@ description: |
   "simultaneous work", "run multiple Claude sessions", "tmux", "distribute tasks".
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 model: claude-sonnet-4-5-20250929
-argument-hint: "[init|launch|status] [tasks|tmux|iterm]"
+argument-hint: "[init|launch|status] [tmux|iterm]"
 ---
 
 # Git Worktree Management
@@ -25,7 +25,7 @@ Run multiple Claude sessions in isolated git worktrees for parallel development.
 ## Dynamic Context
 
 - Current branch: !`git branch --show-current 2>/dev/null || echo "not a git repo"`
-- Existing worktrees: !`ls -d .worktrees/*/ 2>/dev/null | wc -l | tr -d ' '`
+- Existing worktrees: !`[ -d .worktrees ] && ls -d .worktrees/*/ 2>/dev/null | wc -l | tr -d ' ' || echo 0`
 - Git status: !`git status --short 2>/dev/null | head -3`
 
 ## Workflows
@@ -79,6 +79,3 @@ project/
 | [workflows/status.md](workflows/status.md) | Monitor progress |
 | [context/guide.md](context/guide.md) | Reference guide |
 
-## Script Location
-
-Main script: `~/.claude/scripts/worktree-manager.sh`

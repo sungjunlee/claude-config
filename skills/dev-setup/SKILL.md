@@ -6,7 +6,7 @@ description: |
   "initialize project", "add hooks", "protect secrets".
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 model: claude-sonnet-4-5-20250929
-argument-hint: "[gitleaks|gitignore|hooks|all]"
+argument-hint: "[gitleaks|gitignore|hooks]"
 disable-model-invocation: true
 ---
 

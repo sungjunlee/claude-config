@@ -278,6 +278,9 @@ EOF
 }
 
 # Auto-detect and run package manager
+# NOTE: Package install failures are warnings, not fatal errors.
+# The worktree is still usable even if dependencies fail to install.
+# Users can manually run the package manager later.
 run_package_setup() {
     local worktree_path="$1"
 

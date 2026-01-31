@@ -65,4 +65,4 @@ Suggest handoff when:
 |------|---------|
 | [workflows/handoff.md](workflows/handoff.md) | Handoff creation process |
 | [workflows/resume.md](workflows/resume.md) | Resume restoration process |
-| [templates/](templates/) | Document templates |
+| [templates/handoff-template.md](templates/handoff-template.md) | Handoff document template |
