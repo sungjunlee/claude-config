@@ -1,0 +1,83 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python dependencies
+        run: |
+          pip install pytest pytest-mock
+
+      - name: Install bats (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats
+
+      - name: Install bats (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install bats-core
+
+      - name: Run syntax checks
+        run: |
+          echo "Checking shell scripts..."
+          bash -n install.sh
+          for f in scripts/*.sh; do [ -f "$f" ] && bash -n "$f"; done
+
+          echo "Checking Python scripts..."
+          python3 -m py_compile scripts/*.py
+          python3 -m py_compile scripts/hooks/*.py
+
+      - name: Run Python tests
+        run: |
+          pytest tests/ -v --tb=short
+
+      - name: Run shell tests
+        run: |
+          bats tests/install/*.bats tests/hooks/*.bats
+
+  install-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run install.sh
+        run: |
+          export CI_RESPONSE=y
+          ./install.sh --force
+
+      - name: Verify installation
+        run: |
+          [ -f ~/.claude/CLAUDE.md ] || exit 1
+          [ -f ~/.claude/settings.json ] || exit 1
+          echo "Installation verified!"
+
+      - name: Verify no legacy directories
+        run: |
+          [ ! -d ~/.claude/scripts ] || exit 1
+          [ ! -d ~/.claude/hooks ] || exit 1
+          [ ! -d ~/.claude/skills ] || exit 1
+          echo "No legacy directories!"

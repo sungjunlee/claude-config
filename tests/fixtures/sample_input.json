@@ -1,0 +1,10 @@
+{
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git status --short",
+    "description": "Check repository status"
+  },
+  "session_id": "abc12345-6789-0abc-def0-123456789abc",
+  "cwd": "/Users/test/project"
+}
