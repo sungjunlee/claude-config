@@ -378,19 +378,17 @@ install_claude() {
     log "Installing Claude Code configuration..."
     mkdir -p "$config_dir"
 
-    # Account-level directories
+    # Account-level directories (agents only - scripts/hooks/skills are now in plugin)
     install_dir "agents" "$account_dir/agents" "$config_dir/" "false"
-    install_dir "scripts" "$account_dir/scripts" "$config_dir/" "true"
-    install_dir "hooks" "$account_dir/hooks" "$config_dir/" "true"
 
-    # Repo-level directories (skills only - commands merged into skills)
-    install_dir "skills" "$repo_dir/skills" "$config_dir/" "false"
+    # NOTE: scripts, hooks, and skills are now bundled in the plugin
+    # They are no longer installed via this script
 
     # Files
     install_file "CLAUDE.md" "$account_dir/CLAUDE.md" "$config_dir/CLAUDE.md"
     install_file "llm-models-latest.md" "$account_dir/llm-models-latest.md" "$config_dir/llm-models-latest.md"
 
-    # Settings with merge handling
+    # Settings with merge handling (permissions cannot be bundled in plugins)
     if [ -f "$account_dir/settings.json" ]; then
         handle_config_merge "$account_dir/settings.json" "$config_dir/settings.json" "$force_install" "settings.json"
     fi
@@ -399,6 +397,37 @@ install_claude() {
     if [ -f "$account_dir/settings.local.json.example" ] && [ ! -f "$config_dir/settings.local.json" ]; then
         cp "$account_dir/settings.local.json.example" "$config_dir/settings.local.json"
         warn "Please edit $config_dir/settings.local.json with your personal settings"
+    fi
+
+    # Cleanup legacy files (now handled by plugin)
+    cleanup_claude_legacy "$config_dir"
+}
+
+# Cleanup legacy files that are now bundled in the plugin
+cleanup_claude_legacy() {
+    local config_dir="$1"
+    local cleaned=false
+
+    if [ -d "$config_dir/scripts" ]; then
+        warn "Removing legacy scripts directory (now in plugin)..."
+        rm -rf "$config_dir/scripts"
+        cleaned=true
+    fi
+
+    if [ -d "$config_dir/hooks" ]; then
+        warn "Removing legacy hooks directory (now in plugin)..."
+        rm -rf "$config_dir/hooks"
+        cleaned=true
+    fi
+
+    if [ -d "$config_dir/skills" ]; then
+        warn "Removing legacy skills directory (now in plugin)..."
+        rm -rf "$config_dir/skills"
+        cleaned=true
+    fi
+
+    if [ "$cleaned" = true ]; then
+        info "Legacy files cleaned up. Skills/hooks are now provided via plugin."
     fi
 }
 
@@ -460,10 +489,15 @@ verify_claude() {
 
     info "Verifying Claude Code installation..."
 
-    [ -d "$config_dir/skills" ] && info "  ✓ Skills" || { warn "  ✗ Skills"; success=false; }
-    [ -d "$config_dir/scripts" ] && info "  ✓ Scripts" || { warn "  ✗ Scripts"; success=false; }
+    # Account-level configs (installed by this script)
     [ -f "$config_dir/CLAUDE.md" ] && info "  ✓ CLAUDE.md" || { warn "  ✗ CLAUDE.md"; success=false; }
-    [ -d "$config_dir/hooks" ] && info "  ✓ Hooks" || info "  - Hooks (optional)"
+    [ -f "$config_dir/settings.json" ] && info "  ✓ settings.json (permissions)" || { warn "  ✗ settings.json"; success=false; }
+    [ -f "$config_dir/llm-models-latest.md" ] && info "  ✓ llm-models-latest.md" || info "  - llm-models-latest.md (optional)"
+
+    # Plugin components (should NOT exist - they're in the plugin now)
+    [ ! -d "$config_dir/scripts" ] && info "  ✓ No legacy scripts" || warn "  ! Legacy scripts still present"
+    [ ! -d "$config_dir/hooks" ] && info "  ✓ No legacy hooks" || warn "  ! Legacy hooks still present"
+    [ ! -d "$config_dir/skills" ] && info "  ✓ No legacy skills" || warn "  ! Legacy skills still present"
 
     [ "$success" = true ]
 }
@@ -683,10 +717,41 @@ main() {
     echo ""
     log "Installation complete!"
     echo ""
+
+    # Show plugin installation guide for Claude
+    if [[ " $tools " =~ " claude " ]]; then
+        show_claude_plugin_guide
+    fi
+
     info "Next steps:"
     for tool in $tools; do
         info "  - Review $tool config in $(get_config_dir "$tool")"
     done
+    echo ""
+}
+
+# Show plugin installation guide for Claude Code
+show_claude_plugin_guide() {
+    echo ""
+    echo "========================================"
+    echo " Plugin Installation (Skills & Hooks)"
+    echo "========================================"
+    echo ""
+    info "Skills and hooks are now distributed via plugin."
+    info "Run these commands in Claude Code:"
+    echo ""
+    echo "  1. Add marketplace:"
+    echo "     ${CYAN}/plugin marketplace add sungjunlee/claude-config${NC}"
+    echo ""
+    echo "  2. Install plugin:"
+    echo "     ${CYAN}/plugin install my@sungjunlee-claude-config${NC}"
+    echo ""
+    echo "  3. Enable auto-update (recommended):"
+    echo "     ${CYAN}/plugin${NC} → Select marketplace → Enable auto-update"
+    echo ""
+    info "The plugin provides:"
+    info "  - Skills: /session, /worktree, /dev-setup"
+    info "  - Hooks: datetime injection, audit logging, auto-formatting"
     echo ""
 }
 
