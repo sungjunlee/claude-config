@@ -105,10 +105,10 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 
 | Event | Matcher | 기능 |
 |-------|---------|------|
-| UserPromptSubmit | * | 현재 시간 주입 |
+| UserPromptSubmit | * | UTC 타임스탬프 주입 |
 | PreToolUse | Bash | Bash 명령 감사 로깅 |
 | PermissionRequest | * | 권한 요청 알림 |
-| PostToolUse | Edit\|Write\|MultiEdit | 포맷팅 및 린트 체크 |
+| PostToolUse | Edit\|Write\|MultiEdit | 포맷팅 및 린트 (Python, TS/JS, Rust, Go) |
 
 ## 업데이트
 

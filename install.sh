@@ -301,7 +301,10 @@ handle_config_merge() {
     case "$response" in
         r|replace)
             warn "Replacing $file_label"
-            cp "$source_file" "$target_file"
+            if ! cp "$source_file" "$target_file"; then
+                error "Failed to replace $file_label"
+                return 1
+            fi
             ;;
         b|backup)
             local backup_name="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
@@ -330,7 +333,10 @@ handle_config_merge() {
             ;;
         n|new)
             warn "Saving as ${target_file}.new"
-            cp "$source_file" "${target_file}.new"
+            if ! cp "$source_file" "${target_file}.new"; then
+                error "Failed to create ${target_file}.new"
+                return 1
+            fi
             info "Please manually merge ${target_file}.new"
             ;;
         k|keep|"")
@@ -453,8 +459,11 @@ install_claude() {
 
     # Local settings example
     if [ -f "$account_dir/settings.local.json.example" ] && [ ! -f "$config_dir/settings.local.json" ]; then
-        cp "$account_dir/settings.local.json.example" "$config_dir/settings.local.json"
-        warn "Please edit $config_dir/settings.local.json with your personal settings"
+        if cp "$account_dir/settings.local.json.example" "$config_dir/settings.local.json" 2>/dev/null; then
+            warn "Please edit $config_dir/settings.local.json with your personal settings"
+        else
+            warn "Could not create settings.local.json - you can copy it manually later"
+        fi
     fi
 
     # Cleanup legacy files that are no longer needed (now in plugin)

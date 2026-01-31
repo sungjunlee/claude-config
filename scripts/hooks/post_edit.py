@@ -24,6 +24,7 @@ import sys
 import subprocess
 import shutil
 import shlex
+import traceback
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Callable
 
@@ -269,7 +270,6 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         # Catch-all for unexpected errors - don't block operations (exit code 2)
-        import traceback
         print(f"post_edit: Unexpected error ({type(e).__name__}): {e}", file=sys.stderr)
         print(f"post_edit: {traceback.format_exc()}", file=sys.stderr)
         sys.exit(2)

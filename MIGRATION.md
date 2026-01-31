@@ -49,9 +49,10 @@
 
 ### 레거시 정리
 
-`~/.claude/` 에 이전 버전의 파일이 남아있는 경우:
+`install.sh`가 자동으로 레거시 디렉토리를 정리합니다. 자동 정리가 실패한 경우에만 수동 삭제가 필요합니다:
 
 ```bash
+# 자동 정리 실패 시에만 실행
 rm -rf ~/.claude/scripts ~/.claude/hooks ~/.claude/skills
 ```
 

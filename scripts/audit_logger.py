@@ -16,6 +16,7 @@ import subprocess
 import os
 import socket
 import getpass
+import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -39,7 +40,7 @@ def run_command(cmd, cwd=None, timeout=5):
         FileNotFoundError,
         OSError,
     ) as e:
-        print(f"audit_logger: command failed: {cmd_list[0]} ({e})", file=sys.stderr)
+        print(f"audit_logger: command failed: {' '.join(cmd_list)} ({e})", file=sys.stderr)
         return None
 
 
@@ -167,7 +168,6 @@ def main():
         sys.exit(2)
     except Exception as e:
         # Catch-all for unexpected errors - don't block operations
-        import traceback
         print(f"audit_logger: Unexpected error ({type(e).__name__}): {e}", file=sys.stderr)
         print(f"audit_logger: {traceback.format_exc()}", file=sys.stderr)
         sys.exit(2)
