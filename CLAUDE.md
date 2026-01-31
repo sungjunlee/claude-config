@@ -5,12 +5,13 @@ Claude Code Skills 기반 설정 저장소입니다.
 ## 저장소 구조
 
 ```
-.claude-plugin/          # plugin metadata
-skills/                  # Agent Skills (commands merged)
+.claude-plugin/          # Plugin metadata
+skills/                  # Plugin: Skills (자동 업데이트)
+hooks/                   # Plugin: Hooks (자동 업데이트)
+scripts/                 # Plugin: Scripts (hooks에서 사용)
 account/
 ├── claude-code/          # Account 설정 (~/.claude/로 설치)
-│   ├── scripts/           # 지원 스크립트
-│   ├── hooks/             # 훅
+│   ├── settings.json      # Permissions
 │   ├── CLAUDE.md          # 글로벌 설정
 │   └── llm-models-latest.md # LLM 모델 참조
 └── codex/                 # Codex 템플릿 (~/.codex)

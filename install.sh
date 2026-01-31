@@ -392,7 +392,7 @@ install_claude() {
 
     # Settings with merge handling
     # Note: permissions must remain in ~/.claude/settings.json as plugins
-    # cannot modify account-level security settings (by design)
+    # cannot modify account-level security settings (Claude Code platform restriction)
     if [ -f "$account_dir/settings.json" ]; then
         handle_config_merge "$account_dir/settings.json" "$config_dir/settings.json" "$force_install" "settings.json"
     fi
@@ -435,25 +435,34 @@ cleanup_claude_legacy() {
             local symlink_target
             symlink_target=$(readlink "$target" 2>/dev/null || echo "unknown")
             warn "Removing legacy $legacy_dir symlink (was pointing to: $symlink_target)..."
-            if rm "$target" 2>&1; then
+            if rm "$target" 2>/dev/null; then
                 info "Symlink removed. Original target at $symlink_target was preserved."
                 cleaned=true
             else
                 error "Failed to remove symlink $target"
+                error "  Try: rm -f \"$target\""
                 failed=true
             fi
         elif [ -d "$target" ]; then
             warn "Removing legacy $legacy_dir directory (now in plugin)..."
+            # Pre-check writability before attempting removal
+            if [ ! -w "$target" ]; then
+                error "Cannot remove $target: directory is not writable"
+                error "  Try: chmod -R u+w \"$target\" && rm -rf \"$target\""
+                failed=true
+                continue
+            fi
+            # Use rm -r (not -rf) to capture error messages
             local rm_output
-            if ! rm_output=$(rm -rf "$target" 2>&1); then
-                error "rm -rf $target failed"
+            if ! rm_output=$(rm -r "$target" 2>&1); then
+                error "rm -r $target failed"
                 if [ -n "$rm_output" ]; then
                     error "  Reason: $rm_output"
                 fi
                 failed=true
             fi
 
-            # Belt-and-suspenders: verify removal actually worked
+            # Double-check: verify removal actually worked (rm can silently fail)
             if [ -d "$target" ]; then
                 error "Failed to remove $target"
                 if [ -n "$rm_output" ]; then
@@ -669,13 +678,19 @@ install_tools() {
     # Verify installations
     echo ""
     log "=== Verification ==="
+    local verify_failed=false
     for tool in $tools; do
         case "$tool" in
-            claude) verify_claude ;;
-            codex) verify_codex ;;
-            antigravity) verify_antigravity ;;
+            claude) verify_claude || verify_failed=true ;;
+            codex) verify_codex || verify_failed=true ;;
+            antigravity) verify_antigravity || verify_failed=true ;;
         esac
     done
+
+    if [ "$verify_failed" = true ]; then
+        error "Verification failed - see errors above"
+        return 1
+    fi
 }
 
 show_help() {
@@ -778,7 +793,11 @@ main() {
     fi
 
     # Install
-    install_tools "$tools" "$force_install" "$skip_backup"
+    if ! install_tools "$tools" "$force_install" "$skip_backup"; then
+        echo ""
+        error "Installation completed with errors - see messages above"
+        exit 1
+    fi
 
     # Done
     echo ""

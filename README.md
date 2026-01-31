@@ -39,7 +39,7 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 
 ### 이전 버전에서 마이그레이션
 
-`~/.claude/scripts/` 또는 `~/.claude/hooks/`가 있는 경우:
+`~/.claude/scripts/`, `~/.claude/hooks/`, 또는 `~/.claude/skills/`가 있는 경우:
 
 ```bash
 ./install.sh  # 자동으로 레거시 파일 정리

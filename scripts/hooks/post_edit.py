@@ -13,7 +13,7 @@ Supported:
   - Rust (.rs): cargo fmt + clippy
   - Go (.go): gofmt + golangci-lint
 
-Usage: Set in .claude/settings.json PostToolUse hook
+Usage: Configured in hooks/hooks.json PostToolUse section (via plugin)
 Environment variables (from Claude Code):
   - TOOL_USE: The tool that was used (Edit, Write, MultiEdit)
   - FILE_PATH: Path to the edited file
