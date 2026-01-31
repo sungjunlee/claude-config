@@ -235,7 +235,11 @@ backup_tool_config() {
     if [ -d "$config_dir" ]; then
         local backup_dir="$HOME/.${tool}-backup-$(date +%Y%m%d-%H%M%S)"
         log "Backing up $tool config to $backup_dir"
-        cp -r "$config_dir" "$backup_dir"
+        if ! cp -r "$config_dir" "$backup_dir"; then
+            error "Failed to backup $config_dir to $backup_dir"
+            error "  Check disk space and permissions"
+            return 1
+        fi
         info "Backup created at: $backup_dir"
     fi
 }
@@ -249,8 +253,14 @@ handle_config_merge() {
 
     if [ ! -f "$target_file" ]; then
         log "Installing $file_label..."
-        mkdir -p "$(dirname "$target_file")"
-        cp "$source_file" "$target_file"
+        if ! mkdir -p "$(dirname "$target_file")"; then
+            error "Failed to create directory for $file_label"
+            return 1
+        fi
+        if ! cp "$source_file" "$target_file"; then
+            error "Failed to install $file_label"
+            return 1
+        fi
         return 0
     fi
 
@@ -258,8 +268,16 @@ handle_config_merge() {
 
     if [ "$force_mode" = "true" ]; then
         warn "Force mode: backing up existing and installing new"
-        cp "$target_file" "${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
-        cp "$source_file" "$target_file"
+        local backup_path="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
+        if ! cp "$target_file" "$backup_path"; then
+            error "Failed to create backup at $backup_path"
+            error "  Aborting to prevent data loss"
+            return 1
+        fi
+        if ! cp "$source_file" "$target_file"; then
+            error "Failed to install $file_label"
+            return 1
+        fi
         return 0
     fi
 
@@ -283,24 +301,42 @@ handle_config_merge() {
     case "$response" in
         r|replace)
             warn "Replacing $file_label"
-            cp "$source_file" "$target_file"
+            if ! cp "$source_file" "$target_file"; then
+                error "Failed to replace $file_label"
+                return 1
+            fi
             ;;
         b|backup)
             local backup_name="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
             log "Backing up to $backup_name"
-            cp "$target_file" "$backup_name"
-            cp "$source_file" "$target_file"
+            if ! cp "$target_file" "$backup_name"; then
+                error "Failed to create backup at $backup_name"
+                error "  Aborting to prevent data loss"
+                return 1
+            fi
+            if ! cp "$source_file" "$target_file"; then
+                error "Failed to install $target_file"
+                return 1
+            fi
             ;;
         d|diff)
             info "Showing differences (existing < > new):"
             echo "----------------------------------------"
             diff -u "$target_file" "$source_file" || true
             echo "----------------------------------------"
-            handle_config_merge "$source_file" "$target_file" "$force_mode" "$file_label"
+            # Prevent infinite recursion in non-interactive mode
+            if [ ! -t 0 ]; then
+                warn "Non-interactive mode: keeping existing after diff"
+            else
+                handle_config_merge "$source_file" "$target_file" "$force_mode" "$file_label"
+            fi
             ;;
         n|new)
             warn "Saving as ${target_file}.new"
-            cp "$source_file" "${target_file}.new"
+            if ! cp "$source_file" "${target_file}.new"; then
+                error "Failed to create ${target_file}.new"
+                return 1
+            fi
             info "Please manually merge ${target_file}.new"
             ;;
         k|keep|"")
@@ -320,8 +356,14 @@ install_example_file() {
 
     if [ -f "$src" ]; then
         if [ ! -f "$dest" ]; then
-            mkdir -p "$(dirname "$dest")"
-            cp "$src" "$dest"
+            if ! mkdir -p "$(dirname "$dest")"; then
+                error "Failed to create directory for $label"
+                return 1
+            fi
+            if ! cp "$src" "$dest"; then
+                error "Failed to install $label"
+                return 1
+            fi
             log "Installed $label"
         else
             info "$label already exists; leaving as-is"
@@ -338,11 +380,20 @@ install_dir() {
 
     if [ -d "$src" ]; then
         log "Installing $label..."
-        mkdir -p "$dest"
-        cp -r "$src" "$dest"
+        if ! mkdir -p "$dest"; then
+            error "Failed to create directory: $dest"
+            return 1
+        fi
+        if ! cp -r "$src" "$dest"; then
+            error "Failed to copy $src to $dest"
+            return 1
+        fi
         if [ "$exec_flag" = "true" ]; then
             local target="$dest/$(basename "$src")"
-            find "$target" -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod +x {} \;
+            if ! find "$target" -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod +x {} \; ; then
+                error "Failed to set executable permissions in $target"
+                return 1
+            fi
         fi
     else
         debug "$label not found at $src"
@@ -357,8 +408,14 @@ install_file() {
 
     if [ -f "$src" ]; then
         log "Installing $label..."
-        mkdir -p "$(dirname "$dest")"
-        cp "$src" "$dest"
+        if ! mkdir -p "$(dirname "$dest")"; then
+            error "Failed to create directory for $label"
+            return 1
+        fi
+        if ! cp "$src" "$dest"; then
+            error "Failed to install $label"
+            return 1
+        fi
     else
         debug "$label not found at $src"
     fi
@@ -376,30 +433,116 @@ install_claude() {
     config_dir=$(get_config_dir "claude")
 
     log "Installing Claude Code configuration..."
-    mkdir -p "$config_dir"
+    if ! mkdir -p "$config_dir"; then
+        error "Failed to create config directory: $config_dir"
+        return 1
+    fi
 
-    # Account-level directories
-    install_dir "agents" "$account_dir/agents" "$config_dir/" "false"
-    install_dir "scripts" "$account_dir/scripts" "$config_dir/" "true"
-    install_dir "hooks" "$account_dir/hooks" "$config_dir/" "true"
-
-    # Repo-level directories (skills only - commands merged into skills)
-    install_dir "skills" "$repo_dir/skills" "$config_dir/" "false"
+    # NOTE: scripts, hooks, and skills are now distributed via the plugin.
+    # They are no longer installed to ~/.claude/ by this script.
+    # Instead, they reside in the plugin directory and are referenced via ${CLAUDE_PLUGIN_ROOT}.
+    # Reason: Plugin architecture enables:
+    #   - Auto-updates via /plugin update (no manual re-installation)
+    #   - Version management via marketplace
+    #   - Separation of frequently-updated code (skills/hooks) from stable configs
 
     # Files
     install_file "CLAUDE.md" "$account_dir/CLAUDE.md" "$config_dir/CLAUDE.md"
     install_file "llm-models-latest.md" "$account_dir/llm-models-latest.md" "$config_dir/llm-models-latest.md"
 
     # Settings with merge handling
+    # Note: permissions must remain in ~/.claude/settings.json as plugins
+    # cannot modify account-level security settings (Claude Code platform restriction)
     if [ -f "$account_dir/settings.json" ]; then
         handle_config_merge "$account_dir/settings.json" "$config_dir/settings.json" "$force_install" "settings.json"
     fi
 
     # Local settings example
     if [ -f "$account_dir/settings.local.json.example" ] && [ ! -f "$config_dir/settings.local.json" ]; then
-        cp "$account_dir/settings.local.json.example" "$config_dir/settings.local.json"
-        warn "Please edit $config_dir/settings.local.json with your personal settings"
+        if cp "$account_dir/settings.local.json.example" "$config_dir/settings.local.json" 2>/dev/null; then
+            warn "Please edit $config_dir/settings.local.json with your personal settings"
+        else
+            warn "Could not create settings.local.json - you can copy it manually later"
+        fi
     fi
+
+    # Cleanup legacy files that are no longer needed (now in plugin)
+    # Note: verify_claude() will give detailed message if cleanup fails
+    if ! cleanup_claude_legacy "$config_dir"; then
+        warn "Legacy cleanup failed - see errors above"
+        warn "Installation will continue, but manual cleanup may be required"
+    fi
+}
+
+# Cleanup legacy files from pre-v2.1.0 installations
+# Prior to v2.1.0, scripts/hooks/skills were installed to ~/.claude/
+# They are now distributed via the plugin and should not exist locally.
+# Returns 0 on success, 1 if any cleanup failed
+cleanup_claude_legacy() {
+    local config_dir="$1"
+    local cleaned=false
+    local failed=false
+
+    # Pre-flight check: can we write to config_dir?
+    if [ ! -w "$config_dir" ]; then
+        error "Cannot clean up legacy directories: $config_dir is not writable"
+        error "  Try: chmod u+w \"$config_dir\" and re-run"
+        return 1
+    fi
+
+    for legacy_dir in scripts hooks skills; do
+        local target="$config_dir/$legacy_dir"
+
+        # Handle symlinks separately to avoid deleting symlink targets
+        if [ -L "$target" ]; then
+            local symlink_target
+            symlink_target=$(readlink "$target" 2>/dev/null) || symlink_target=""
+            if [ -n "$symlink_target" ]; then
+                warn "Removing legacy $legacy_dir symlink (was pointing to: $symlink_target)..."
+            else
+                warn "Removing legacy $legacy_dir symlink (target could not be determined)..."
+            fi
+            local rm_err
+            if rm_err=$(rm "$target" 2>&1); then
+                [ -n "$symlink_target" ] && info "Symlink removed. Original target at $symlink_target was preserved."
+                cleaned=true
+            else
+                error "Failed to remove symlink $target"
+                [ -n "$rm_err" ] && error "  Reason: $rm_err"
+                error "  Try: rm -f \"$target\""
+                failed=true
+            fi
+        elif [ -d "$target" ]; then
+            warn "Removing legacy $legacy_dir directory (now in plugin)..."
+
+            if [ ! -w "$target" ]; then
+                error "Cannot remove $target: directory is not writable"
+                error "  Try: chmod -R u+w \"$target\" && rm -rf \"$target\""
+                failed=true
+                continue
+            fi
+
+            # Attempt removal and verify the directory is gone
+            local rm_output
+            if rm_output=$(rm -r "$target" 2>&1) && [ ! -d "$target" ]; then
+                cleaned=true
+            else
+                error "Failed to remove $target"
+                [ -n "$rm_output" ] && error "  Reason: $rm_output"
+                error "  Try: sudo rm -rf \"$target\""
+                failed=true
+            fi
+        fi
+    done
+
+    if [ "$cleaned" = true ]; then
+        info "Legacy files cleaned up. Skills/hooks are now provided via plugin."
+    fi
+
+    if [ "$failed" = true ]; then
+        return 1
+    fi
+    return 0
 }
 
 install_codex() {
@@ -415,7 +558,10 @@ install_codex() {
     fi
 
     log "Installing Codex configuration..."
-    mkdir -p "$config_dir"
+    if ! mkdir -p "$config_dir"; then
+        error "Failed to create config directory: $config_dir"
+        return 1
+    fi
 
     # Install example files (only if not exists)
     install_example_file "$account_dir/config.toml.example" "$config_dir/config.toml" "Codex config.toml"
@@ -437,8 +583,14 @@ install_antigravity() {
     fi
 
     log "Installing Antigravity configuration..."
-    mkdir -p "$config_dir"
-    mkdir -p "$gemini_dir"
+    if ! mkdir -p "$config_dir"; then
+        error "Failed to create config directory: $config_dir"
+        return 1
+    fi
+    if ! mkdir -p "$gemini_dir"; then
+        error "Failed to create gemini directory: $gemini_dir"
+        return 1
+    fi
 
     # Install example files (only if not exists)
     # Settings go to ~/.gemini/antigravity/
@@ -460,10 +612,31 @@ verify_claude() {
 
     info "Verifying Claude Code installation..."
 
-    [ -d "$config_dir/skills" ] && info "  ✓ Skills" || { warn "  ✗ Skills"; success=false; }
-    [ -d "$config_dir/scripts" ] && info "  ✓ Scripts" || { warn "  ✗ Scripts"; success=false; }
+    # Account-level configs (installed by this script)
     [ -f "$config_dir/CLAUDE.md" ] && info "  ✓ CLAUDE.md" || { warn "  ✗ CLAUDE.md"; success=false; }
-    [ -d "$config_dir/hooks" ] && info "  ✓ Hooks" || info "  - Hooks (optional)"
+    [ -f "$config_dir/settings.json" ] && info "  ✓ settings.json (permissions)" || { warn "  ✗ settings.json"; success=false; }
+    [ -f "$config_dir/llm-models-latest.md" ] && info "  ✓ llm-models-latest.md" || info "  - llm-models-latest.md (optional)"
+
+    # Plugin components (should NOT exist - they're in the plugin now)
+    local legacy_warning=false
+    for legacy_dir in scripts hooks skills; do
+        if [ -L "$config_dir/$legacy_dir" ] || [ -d "$config_dir/$legacy_dir" ]; then
+            warn "  ! Legacy $legacy_dir still present"
+            legacy_warning=true
+        else
+            info "  ✓ No legacy $legacy_dir"
+        fi
+    done
+
+    if [ "$legacy_warning" = true ]; then
+        echo ""
+        error "CLEANUP REQUIRED: Legacy directories still present"
+        error "This will cause conflicts with the plugin architecture."
+        error "Please remove manually:"
+        error "  rm -rf \"$config_dir/scripts\" \"$config_dir/hooks\" \"$config_dir/skills\""
+        echo ""
+        success=false
+    fi
 
     [ "$success" = true ]
 }
@@ -568,13 +741,19 @@ install_tools() {
     # Verify installations
     echo ""
     log "=== Verification ==="
+    local verify_failed=false
     for tool in $tools; do
         case "$tool" in
-            claude) verify_claude ;;
-            codex) verify_codex ;;
-            antigravity) verify_antigravity ;;
+            claude) verify_claude || verify_failed=true ;;
+            codex) verify_codex || verify_failed=true ;;
+            antigravity) verify_antigravity || verify_failed=true ;;
         esac
     done
+
+    if [ "$verify_failed" = true ]; then
+        error "Verification failed - see errors above"
+        return 1
+    fi
 }
 
 show_help() {
@@ -677,16 +856,51 @@ main() {
     fi
 
     # Install
-    install_tools "$tools" "$force_install" "$skip_backup"
+    if ! install_tools "$tools" "$force_install" "$skip_backup"; then
+        echo ""
+        error "Installation completed with errors - see messages above"
+        exit 1
+    fi
 
     # Done
     echo ""
     log "Installation complete!"
     echo ""
+
+    # Show plugin installation guide for Claude
+    if [[ " $tools " =~ " claude " ]]; then
+        show_claude_plugin_guide
+    fi
+
     info "Next steps:"
     for tool in $tools; do
         info "  - Review $tool config in $(get_config_dir "$tool")"
     done
+    echo ""
+}
+
+# Show plugin installation guide for Claude Code
+show_claude_plugin_guide() {
+    echo ""
+    echo "========================================"
+    echo " Plugin Installation (Skills & Hooks)"
+    echo "========================================"
+    echo ""
+    info "Skills and hooks are now distributed via plugin."
+    info "Run these commands in Claude Code:"
+    echo ""
+    echo "  1. Add marketplace:"
+    echo "     ${CYAN}/plugin marketplace add sungjunlee/claude-config${NC}"
+    echo ""
+    echo "  2. Install plugin:"
+    echo "     ${CYAN}/plugin install my@sungjunlee-claude-config${NC}"
+    echo ""
+    echo "  3. Enable auto-update (recommended):"
+    echo "     ${CYAN}/plugin${NC} → Select marketplace → Enable auto-update"
+    echo ""
+    info "The plugin provides:"
+    info "  - Skills: /session, /worktree, /dev-setup"
+    info "  - Hooks: datetime injection, audit logging, permission notifications, auto-formatting"
     echo ""
 }
 

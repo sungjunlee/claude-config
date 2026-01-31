@@ -13,7 +13,7 @@ Supported:
   - Rust (.rs): cargo fmt + clippy
   - Go (.go): gofmt + golangci-lint
 
-Usage: Set in .claude/settings.json PostToolUse hook
+Usage: Configured in hooks/hooks.json PostToolUse section (via plugin)
 Environment variables (from Claude Code):
   - TOOL_USE: The tool that was used (Edit, Write, MultiEdit)
   - FILE_PATH: Path to the edited file
@@ -24,6 +24,7 @@ import sys
 import subprocess
 import shutil
 import shlex
+import traceback
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Callable
 
@@ -112,8 +113,11 @@ def handle_python(filepath: str) -> None:
         print("  ⚠️  ruff not found")
         return
 
-    ok, _ = run_command([*ruff, "format", filepath])
-    print("  ✓ formatted" if ok else "  ⚠️  format failed")
+    ok, out = run_command([*ruff, "format", filepath])
+    if ok:
+        print("  ✓ formatted")
+    else:
+        print(f"  ⚠️  format failed: {out[:80] if out else 'Unknown error'}")
 
     ok, out = run_command([*ruff, "check", "--fix", "--quiet", filepath])
     if not ok:
@@ -161,8 +165,11 @@ def handle_rust(filepath: str) -> None:
         print("  ⚠️  cargo not found")
         return
 
-    ok, _ = run_command(["cargo", "fmt", "--", filepath], cwd=project_root)
-    print("  ✓ cargo fmt" if ok else "  ⚠️  fmt failed")
+    ok, out = run_command(["cargo", "fmt", "--", filepath], cwd=project_root)
+    if ok:
+        print("  ✓ cargo fmt")
+    else:
+        print(f"  ⚠️  fmt failed: {out[:80] if out else 'Unknown error'}")
 
     ok, out = run_command(
         ["cargo", "clippy", "--message-format=short", "-q"],
@@ -180,11 +187,17 @@ def handle_rust(filepath: str) -> None:
 def handle_go(filepath: str) -> None:
     """Handle Go files with gofmt + golangci-lint."""
     if has_tool("gofmt"):
-        ok, _ = run_command(["gofmt", "-w", filepath])
-        print("  ✓ gofmt" if ok else "  ⚠️  gofmt failed")
+        ok, out = run_command(["gofmt", "-w", filepath])
+        if ok:
+            print("  ✓ gofmt")
+        else:
+            print(f"  ⚠️  gofmt failed: {out[:80] if out else 'Unknown error'}")
     elif has_tool("go"):
-        ok, _ = run_command(["go", "fmt", filepath])
-        print("  ✓ go fmt" if ok else "  ⚠️  go fmt failed")
+        ok, out = run_command(["go", "fmt", filepath])
+        if ok:
+            print("  ✓ go fmt")
+        else:
+            print(f"  ⚠️  go fmt failed: {out[:80] if out else 'Unknown error'}")
     else:
         print("  ⚠️  gofmt/go not found")
 
@@ -221,10 +234,17 @@ def main() -> None:
     tool_use = os.environ.get("TOOL_USE", "")
     file_path = os.environ.get("FILE_PATH", "")
 
+    # Warn on missing env vars (suggests misconfigured hook)
+    if not tool_use:
+        print("post_edit: WARNING - TOOL_USE not set", file=sys.stderr)
+        return
     if tool_use not in ("Edit", "Write", "MultiEdit"):
         return
-    if not file_path or not os.path.exists(file_path):
+    if not file_path:
+        print("post_edit: WARNING - FILE_PATH not set", file=sys.stderr)
         return
+    if not os.path.exists(file_path):
+        return  # File may have been deleted, this is expected
 
     ext = Path(file_path).suffix.lower()
     handler = HANDLERS.get(ext)
@@ -234,10 +254,22 @@ def main() -> None:
     print(f"\n🔧 {Path(file_path).name}")
     try:
         handler(file_path)
-    except (OSError, subprocess.SubprocessError) as e:
-        print(f"  ⚠️  {e}")
+    except OSError as e:
+        # File system error - don't block operations (exit code 2)
+        print(f"  ⚠️  File system error: {e}", file=sys.stderr)
+        sys.exit(2)
+    except subprocess.SubprocessError as e:
+        # Command execution error - don't block operations (exit code 2)
+        print(f"  ⚠️  Command execution error: {e}", file=sys.stderr)
+        sys.exit(2)
     print()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        # Catch-all for unexpected errors - don't block operations (exit code 2)
+        print(f"post_edit: Unexpected error ({type(e).__name__}): {e}", file=sys.stderr)
+        print(f"post_edit: {traceback.format_exc()}", file=sys.stderr)
+        sys.exit(2)

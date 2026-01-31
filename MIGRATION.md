@@ -1,6 +1,66 @@
 # Migration Guide
 
-## 저장소 구조 변경 (v4.2)
+## Plugin Architecture (v2.1.0) - Current
+
+2026년 1월, 플러그인 아키텍처로 전환되었습니다.
+
+### 주요 변경점
+
+1. **Skills/Hooks → Plugin**: 자동 업데이트 가능한 플러그인으로 배포
+2. **install.sh 간소화**: Account 설정(permissions, CLAUDE.md)만 설치
+3. **레거시 정리**: `~/.claude/skills/`, `~/.claude/hooks/`, `~/.claude/scripts/` 제거
+
+### 저장소 구조
+
+```text
+.
+├── .claude-plugin/plugin.json  # Plugin metadata
+├── skills/                     # Plugin (auto-update)
+├── hooks/hooks.json            # Plugin (auto-update)
+├── scripts/                    # Plugin (auto-update)
+├── account/
+│   ├── claude-code/            # → ~/.claude/ (install.sh로 설치)
+│   ├── codex/                  # → ~/.codex/
+│   └── antigravity/            # → ~/.gemini/antigravity/
+└── install.sh
+```
+
+### 설치 후 ~/.claude/ 구조
+
+```text
+~/.claude/
+├── CLAUDE.md            # 글로벌 설정 (install.sh)
+├── settings.json        # Permissions (install.sh)
+└── llm-models-latest.md # LLM 모델 참조 (install.sh)
+
+# Skills, hooks, scripts는 플러그인에서 제공 (별도 위치)
+```
+
+### 설치 방법
+
+```bash
+# 1. Account 설정 설치
+./install.sh
+
+# 2. Plugin 설치 (Claude Code 내에서)
+/plugin marketplace add sungjunlee/claude-config
+/plugin install my@sungjunlee-claude-config
+```
+
+### 레거시 정리
+
+`install.sh`가 자동으로 레거시 디렉토리를 정리합니다. 자동 정리가 실패한 경우에만 수동 삭제가 필요합니다:
+
+```bash
+# 자동 정리 실패 시에만 실행
+rm -rf ~/.claude/scripts ~/.claude/hooks ~/.claude/skills
+```
+
+---
+
+## 저장소 구조 변경 (v4.2) - Historical
+
+> ⚠️ **참고**: 이 섹션은 v2.1.0 이전 기록입니다. 현재 구조는 위의 Plugin Architecture를 참조하세요.
 
 2026년 1월, 저장소 구조가 개편되었습니다.
 
@@ -9,32 +69,6 @@
 1. **account/ 디렉토리 도입**: 계정 레벨 설정이 `account/` 하위로 이동
 2. **멀티 도구 지원**: Claude Code, Codex, Antigravity 동시 지원
 3. **커뮤니티 Skills**: `npx skills add`로 외부 skills 설치 가능
-
-### 저장소 구조
-
-```text
-.
-├── account/
-│   ├── claude-code/     # → ~/.claude/ (scripts, hooks, CLAUDE.md 등)
-│   ├── codex/           # → ~/.codex/
-│   └── antigravity/     # → ~/.gemini/antigravity/
-├── skills/              # → ~/.claude/skills/
-└── install.sh
-```
-
-### 설치 후 ~/.claude/ 구조
-
-```text
-~/.claude/
-├── skills/
-│   ├── session/         # 세션 연속성 도구
-│   ├── worktree/        # 병렬 개발 도구
-│   └── dev-setup/       # 개발 환경 설정
-├── scripts/             # 지원 스크립트
-├── hooks/               # 이벤트 훅
-├── CLAUDE.md            # 글로벌 설정
-└── llm-models-latest.md
-```
 
 ---
 

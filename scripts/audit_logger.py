@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
 Claude Code Enhanced Audit Logger
-Logs detailed command execution information with context
+Logs detailed command execution information with context.
+
+Exit codes:
+    0 - Success
+    1 - Invalid JSON input (blocking error)
+    2 - Non-critical error (file write failed, unexpected error) - does not block operations
 """
 
 import json
@@ -11,6 +16,7 @@ import subprocess
 import os
 import socket
 import getpass
+import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -34,7 +40,7 @@ def run_command(cmd, cwd=None, timeout=5):
         FileNotFoundError,
         OSError,
     ) as e:
-        print(f"audit_logger: command failed: {cmd_list[0]} ({e})", file=sys.stderr)
+        print(f"audit_logger: command failed: {' '.join(cmd_list)} ({e})", file=sys.stderr)
         return None
 
 
@@ -154,11 +160,17 @@ def main():
         # Silent operation - no output unless error
 
     except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+        print(f"audit_logger: Invalid JSON input: {e}", file=sys.stderr)
         sys.exit(1)
+    except OSError as e:
+        # Audit failure should not block operations; use exit code 2 for monitoring
+        print(f"audit_logger: Failed to write log: {e}", file=sys.stderr)
+        sys.exit(2)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        # Catch-all for unexpected errors - don't block operations
+        print(f"audit_logger: Unexpected error ({type(e).__name__}): {e}", file=sys.stderr)
+        print(f"audit_logger: {traceback.format_exc()}", file=sys.stderr)
+        sys.exit(2)
 
 
 if __name__ == "__main__":
