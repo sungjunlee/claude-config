@@ -162,7 +162,9 @@ def main():
         sys.exit(2)
     except Exception as e:
         # Catch-all for unexpected errors - don't block operations
-        print(f"audit_logger: Unexpected error: {e}", file=sys.stderr)
+        import traceback
+        print(f"audit_logger: Unexpected error ({type(e).__name__}): {e}", file=sys.stderr)
+        print(f"audit_logger: {traceback.format_exc()}", file=sys.stderr)
         sys.exit(2)
 
 

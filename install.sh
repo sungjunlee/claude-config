@@ -235,7 +235,11 @@ backup_tool_config() {
     if [ -d "$config_dir" ]; then
         local backup_dir="$HOME/.${tool}-backup-$(date +%Y%m%d-%H%M%S)"
         log "Backing up $tool config to $backup_dir"
-        cp -r "$config_dir" "$backup_dir"
+        if ! cp -r "$config_dir" "$backup_dir"; then
+            error "Failed to backup $config_dir to $backup_dir"
+            error "  Check disk space and permissions"
+            return 1
+        fi
         info "Backup created at: $backup_dir"
     fi
 }
@@ -288,8 +292,15 @@ handle_config_merge() {
         b|backup)
             local backup_name="${target_file}.backup-$(date +%Y%m%d-%H%M%S)"
             log "Backing up to $backup_name"
-            cp "$target_file" "$backup_name"
-            cp "$source_file" "$target_file"
+            if ! cp "$target_file" "$backup_name"; then
+                error "Failed to create backup at $backup_name"
+                error "  Aborting to prevent data loss"
+                return 1
+            fi
+            if ! cp "$source_file" "$target_file"; then
+                error "Failed to install $target_file"
+                return 1
+            fi
             ;;
         d|diff)
             info "Showing differences (existing < > new):"
@@ -320,8 +331,14 @@ install_example_file() {
 
     if [ -f "$src" ]; then
         if [ ! -f "$dest" ]; then
-            mkdir -p "$(dirname "$dest")"
-            cp "$src" "$dest"
+            if ! mkdir -p "$(dirname "$dest")"; then
+                error "Failed to create directory for $label"
+                return 1
+            fi
+            if ! cp "$src" "$dest"; then
+                error "Failed to install $label"
+                return 1
+            fi
             log "Installed $label"
         else
             info "$label already exists; leaving as-is"
@@ -338,11 +355,20 @@ install_dir() {
 
     if [ -d "$src" ]; then
         log "Installing $label..."
-        mkdir -p "$dest"
-        cp -r "$src" "$dest"
+        if ! mkdir -p "$dest"; then
+            error "Failed to create directory: $dest"
+            return 1
+        fi
+        if ! cp -r "$src" "$dest"; then
+            error "Failed to copy $src to $dest"
+            return 1
+        fi
         if [ "$exec_flag" = "true" ]; then
             local target="$dest/$(basename "$src")"
-            find "$target" -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod +x {} \;
+            if ! find "$target" -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod +x {} \; ; then
+                error "Failed to set executable permissions in $target"
+                return 1
+            fi
         fi
     else
         debug "$label not found at $src"
@@ -357,8 +383,14 @@ install_file() {
 
     if [ -f "$src" ]; then
         log "Installing $label..."
-        mkdir -p "$(dirname "$dest")"
-        cp "$src" "$dest"
+        if ! mkdir -p "$(dirname "$dest")"; then
+            error "Failed to create directory for $label"
+            return 1
+        fi
+        if ! cp "$src" "$dest"; then
+            error "Failed to install $label"
+            return 1
+        fi
     else
         debug "$label not found at $src"
     fi

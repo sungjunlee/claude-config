@@ -112,8 +112,11 @@ def handle_python(filepath: str) -> None:
         print("  ⚠️  ruff not found")
         return
 
-    ok, _ = run_command([*ruff, "format", filepath])
-    print("  ✓ formatted" if ok else "  ⚠️  format failed")
+    ok, out = run_command([*ruff, "format", filepath])
+    if ok:
+        print("  ✓ formatted")
+    else:
+        print(f"  ⚠️  format failed: {out[:80] if out else 'Unknown error'}")
 
     ok, out = run_command([*ruff, "check", "--fix", "--quiet", filepath])
     if not ok:
@@ -241,9 +244,14 @@ def main() -> None:
     print(f"\n🔧 {Path(file_path).name}")
     try:
         handler(file_path)
-    except (OSError, subprocess.SubprocessError) as e:
-        print(f"  ⚠️  Error processing file: {e}", file=sys.stderr)
-        sys.exit(1)
+    except OSError as e:
+        # File system error - don't block operations (exit code 2)
+        print(f"  ⚠️  File system error: {e}", file=sys.stderr)
+        sys.exit(2)
+    except subprocess.SubprocessError as e:
+        # Command execution error - don't block operations (exit code 2)
+        print(f"  ⚠️  Command execution error: {e}", file=sys.stderr)
+        sys.exit(2)
     print()
 
 
