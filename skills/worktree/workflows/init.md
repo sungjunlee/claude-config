@@ -170,5 +170,5 @@ Implement OAuth2.0 authentication system
 
 Run the worktree manager script:
 ```bash
-~/.claude/scripts/worktree-manager.sh init "$ARGUMENTS"
+${CLAUDE_PLUGIN_ROOT}/scripts/worktree-manager.sh init "$ARGUMENTS"
 ```

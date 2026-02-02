@@ -99,5 +99,5 @@ git branch -d feature/[name]
 
 Run the worktree manager script:
 ```bash
-~/.claude/scripts/worktree-manager.sh status
+${CLAUDE_PLUGIN_ROOT}/scripts/worktree-manager.sh status
 ```

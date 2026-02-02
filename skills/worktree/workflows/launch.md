@@ -121,5 +121,5 @@ To attach: tmux attach -t myproject-wt
 
 Run the worktree manager script:
 ```bash
-~/.claude/scripts/worktree-manager.sh launch {tmux|iterm|list}
+${CLAUDE_PLUGIN_ROOT}/scripts/worktree-manager.sh launch {tmux|iterm|list}
 ```
