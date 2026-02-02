@@ -125,21 +125,6 @@ check_prerequisites() {
         exit 1
     fi
 
-    # Check optional Python deps for handoff_manager
-    if command -v python3 &> /dev/null; then
-        if ! python3 - <<'PY' 2>/dev/null; then
-import importlib.util
-missing = []
-for mod in ("yaml", "tiktoken"):
-    if importlib.util.find_spec(mod) is None:
-        missing.append(mod)
-if missing:
-    raise SystemExit(1)
-PY
-            warn "Optional Python deps missing (pyyaml, tiktoken)."
-            info "For handoff_manager: pip install pyyaml tiktoken"
-        fi
-    fi
 }
 
 # Check if a tool is installed
