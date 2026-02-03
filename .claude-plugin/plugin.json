@@ -17,14 +17,6 @@
     "hooks",
     "automation"
   ],
-  "category": "productivity",
-  "tags": [
-    "worktree",
-    "session",
-    "handoff",
-    "development-workflow",
-    "hooks"
-  ],
   "skills": [
     "./skills/"
   ],
