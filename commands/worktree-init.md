@@ -1,3 +1,9 @@
+---
+description: Initialize parallel development with git worktrees - create isolated environments for multi-task development
+argument-hint: "<task1, task2, ...>" [--continue] [--no-setup]
+allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep"]
+---
+
 # Worktree Init
 
 Initialize parallel development environment for: $ARGUMENTS
@@ -42,13 +48,11 @@ You are a parallel development orchestrator. Your job is to:
    - `package.json`, `*lock*` files
    - `tsconfig.json`, `.eslintrc.*`, `.prettierrc.*`
    - `pyproject.toml`, `requirements.txt`
-   - And 15+ other config file types
 
 ### Phase 3: Setup
 
 5. **Auto-detect and Run Package Manager**:
    ```bash
-   # Detection order
    pnpm-lock.yaml  → pnpm install
    yarn.lock       → yarn install
    package-lock.json → npm install
@@ -66,14 +70,9 @@ You are a parallel development orchestrator. Your job is to:
 ## Examples
 
 ```bash
-# Feature development
-/worktree init "Implement auth, payment, and search features"
-
-# Bug fixes
-/worktree init "Fix login timeout, payment error, and search ranking bugs"
-
-# Refactoring
-/worktree init "Migrate API routes to new pattern, update tests, update docs"
+/worktree-init "Implement auth, payment, and search features"
+/worktree-init "Fix login timeout, payment error, and search ranking bugs"
+/worktree-init "Migrate API routes, update tests, update docs" --continue
 ```
 
 ## Generated Structure
@@ -88,63 +87,9 @@ You are a parallel development orchestrator. Your job is to:
 ├── auth/                      # Worktree directories
 │   ├── CLAUDE.md             # Task-specific context
 │   ├── .env                  # Copied env files
-│   ├── node_modules/         # Installed dependencies
-│   └── src/...
+│   └── node_modules/         # Installed dependencies
 ├── payment/
 └── search/
-```
-
-## Per-worktree CLAUDE.md Example
-
-```markdown
-# Task: auth
-
-## Objective
-Implement OAuth2.0 authentication system
-
-## Scope - Files to Modify
-- src/auth/*
-- src/middleware/auth.ts
-- tests/auth/*
-
-## Out of Scope - DO NOT MODIFY
-- src/payment/* (another worktree)
-- src/search/* (another worktree)
-
-## Acceptance Criteria
-- OAuth2.0 flow working
-- JWT token generation
-- Test coverage > 80%
-
-## Common Context
-- Use TypeScript strict mode
-- Follow existing patterns in src/
-```
-
-## Output Example
-
-```
-🚀 Initializing parallel worktrees...
-
-📋 Planning Phase
-   Analyzed: 3 independent tasks identified
-   Created: .worktrees/PLAN.md
-
-📦 Distribution Phase
-   ✅ auth worktree created (feature/auth)
-   ✅ payment worktree created (feature/payment)
-   ✅ search worktree created (feature/search)
-
-🔧 Setup Phase
-   auth: pnpm install... done (3.2s)
-   payment: pnpm install... done (1.1s, cached)
-   search: pnpm install... done (1.0s, cached)
-
-📝 CLAUDE.md generated for each worktree
-
-🎉 Ready! Next steps:
-   /worktree launch tmux    # Launch Claude sessions
-   /worktree status         # Monitor progress
 ```
 
 ## Options
@@ -155,16 +100,10 @@ Implement OAuth2.0 authentication system
 | `--continue` | Distribute worktrees + auto-setup (after editing PLAN.md) |
 | `--no-setup` | Distribute worktrees without package manager install |
 
-## Error Handling
-
-- **Branch exists**: Offer to reuse or create new name
-- **Conflicting tasks**: Warn about overlapping file modifications
-- **Setup failure**: Continue with other worktrees, report issues
-
 ## Related Commands
 
-- `/worktree launch` - Launch Claude sessions in worktrees
-- `/worktree status` - Monitor worktree progress
+- `/worktree-launch` - Launch Claude sessions in worktrees
+- `/worktree-status` - Monitor worktree progress
 
 ## Execution
 

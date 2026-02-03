@@ -1,6 +1,12 @@
+---
+description: Display comprehensive status of all worktrees - commits, changes, merge readiness
+argument-hint: ""
+allowed-tools: ["Bash", "Read"]
+---
+
 # Worktree Status
 
-Display comprehensive status of all worktrees for: $ARGUMENTS
+Display comprehensive status of all worktrees.
 
 ## Role
 
@@ -82,9 +88,6 @@ When a worktree is ready to be removed:
 ## Quick Actions
 
 ```bash
-# View detailed status
-/worktree status
-
 # After work is complete
 git worktree remove .worktrees/[name]
 git branch -d feature/[name]
@@ -92,8 +95,8 @@ git branch -d feature/[name]
 
 ## Related Commands
 
-- `/worktree init` - Initialize new worktrees
-- `/worktree launch` - Launch Claude sessions
+- `/worktree-init` - Initialize new worktrees
+- `/worktree-launch` - Launch Claude sessions
 
 ## Execution
 
