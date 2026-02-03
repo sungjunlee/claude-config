@@ -150,8 +150,8 @@ Automatically check:
 ### Missing Handoff
 ```markdown
 No handoff found. Options:
-1. /feature-dev:code-architect [requirements]
-2. /session-handoff (create initial)
+1. Start fresh with current context
+2. /session-handoff (create initial handoff for future)
 ```
 
 ### Outdated Handoff (> 3 days)

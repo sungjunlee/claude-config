@@ -1,12 +1,13 @@
 # CLAUDE.md
 
-Claude Code Skills 기반 설정 저장소입니다.
+Claude Code Commands 기반 설정 저장소입니다.
 
 ## 저장소 구조
 
 ```
 .claude-plugin/          # Plugin metadata
-skills/                  # Plugin: Skills (자동 업데이트)
+commands/                # Plugin: Commands (자동 업데이트)
+reference/               # Command 참조 문서
 hooks/                   # Plugin: Hooks (자동 업데이트)
 scripts/                 # Plugin: Scripts (hooks에서 사용)
 account/
@@ -25,11 +26,10 @@ account/
 
 ## 개발
 
-### 새 Skill 추가
-1. `skills/[name]/` 생성
-2. `SKILL.md` 작성 (skill 정의)
-3. `workflows/*.md` 추가 (실행 워크플로)
-4. `context/*.md` 추가 (도메인 지식)
+### 새 Command 추가
+1. `commands/[name].md` 생성
+2. Frontmatter 작성 (description, argument-hint, allowed-tools)
+3. 필요시 `reference/[name]/` 에 참조 문서 추가
 
 ### 테스트
 ```bash
@@ -48,4 +48,3 @@ account/
 ## 참고
 
 - [MIGRATION.md](MIGRATION.md) - 마이그레이션 가이드
-- [docs/SKILLS_MIGRATION_PROPOSAL.md](docs/SKILLS_MIGRATION_PROPOSAL.md) - 설계 문서

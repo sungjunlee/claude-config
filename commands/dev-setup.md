@@ -152,3 +152,8 @@ __pycache__/
 
 Setup complete! Run 'pre-commit run --all-files' to verify.
 ```
+
+## See Also
+
+- `reference/dev-setup/gitleaks.md` - Detailed gitleaks configuration
+- `reference/dev-setup/gitignore-patterns.md` - Language-specific patterns

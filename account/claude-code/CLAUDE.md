@@ -10,7 +10,7 @@
 - Functions < 20 lines
 
 ## Session Continuity
-Use `/session handoff` before `/clear`, `/session resume` to restore.
+Use `/session-handoff` before `/clear`, `/session-resume` to restore.
 
 ## References
 - LLM models: @llm-models-latest.md

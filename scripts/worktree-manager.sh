@@ -37,9 +37,9 @@ Example:
   $0 status                  # Check progress
 
 Slash commands:
-  /worktree init     - Plan + distribute + setup
-  /worktree launch   - Launch sessions
-  /worktree status   - Check status
+  /worktree-init     - Plan + distribute + setup
+  /worktree-launch   - Launch sessions
+  /worktree-status   - Check status
 
 EOF
 }
@@ -393,7 +393,7 @@ $(echo -e "$out_of_scope")
 - Focus only on this task
 - Commit changes frequently
 - Run tests before completing
-- Check /worktree status for overall progress
+- Check /worktree-status for overall progress
 
 ## Context
 - Task Plan: \`../PLAN.md\`

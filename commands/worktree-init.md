@@ -1,6 +1,6 @@
 ---
 description: Initialize parallel development with git worktrees - create isolated environments for multi-task development
-argument-hint: "<task1, task2, ...>" [--continue] [--no-setup]
+argument-hint: "<task1, task2, ...> [--continue] [--no-setup]"
 allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep"]
 ---
 
