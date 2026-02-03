@@ -78,13 +78,13 @@ rm -rf ~/.claude/scripts ~/.claude/hooks ~/.claude/skills
 
 ### 명령어 변경
 
-| 이전 | 현재 |
+| 이전 | 현재 (v3.0.0) |
 |------|------|
-| `/flow:handoff` | `/session handoff` |
-| `/flow:resume` | `/session resume` |
-| `/worktree:plan` | `/worktree init` |
-| `/worktree:distribute` | `/worktree init --continue` |
-| `/worktree:status` | `/worktree status` |
+| `/flow:handoff` | `/session-handoff` |
+| `/flow:resume` | `/session-resume` |
+| `/worktree:plan` | `/worktree-init` |
+| `/worktree:distribute` | `/worktree-init --continue` |
+| `/worktree:status` | `/worktree-status` |
 | `/worktree:sync` | 제거됨 (init 시 자동 복사) |
 | `/ai:gemini` | 제거됨 |
 | `/ai:codex` | 제거됨 |
@@ -127,13 +127,13 @@ rm -rf ~/.claude/skills/{workflow,worktree,ai,testing,linting,frameworks}
 rm -rf ~/.claude/skills/my/commands
 ```
 
-### Skills 명령어 요약
+### Commands 명령어 요약 (v3.0.0)
 
 공식 플러그인에 없는 기능:
 
-| Skill | 명령어 | 용도 |
-|-------|--------|------|
-| session | `/session handoff`, `/session resume` | 세션 연속성 |
-| worktree | `/worktree init`, `/worktree launch` | 병렬 개발 |
-| worktree | `/worktree status` | 워크트리 관리 |
-| dev-setup | `/dev-setup [gitleaks\|gitignore\|hooks]` | 개발 환경 설정 |
+| 명령어 | 용도 |
+|--------|------|
+| `/session-handoff`, `/session-resume` | 세션 연속성 |
+| `/worktree-init`, `/worktree-launch` | 병렬 개발 |
+| `/worktree-status` | 워크트리 관리 |
+| `/dev-setup [gitleaks\|gitignore\|hooks]` | 개발 환경 설정 |

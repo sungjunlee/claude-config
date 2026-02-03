@@ -1,4 +1,10 @@
-# Resume Workflow
+---
+description: Resume work session from previous handoff with intelligent context restoration
+argument-hint: "[filename] [--list] [--verify]"
+allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep"]
+---
+
+# Session Resume
 
 Resume work session from: $ARGUMENTS
 
@@ -144,8 +150,8 @@ Automatically check:
 ### Missing Handoff
 ```markdown
 No handoff found. Options:
-1. /feature-dev:code-architect [requirements]
-2. /session handoff (create initial)
+1. Start fresh with current context
+2. /session-handoff (create initial handoff for future)
 ```
 
 ### Outdated Handoff (> 3 days)
@@ -153,6 +159,10 @@ No handoff found. Options:
 Handoff is [X] days old.
 Recommend: Use plan-agent to reassess.
 ```
+
+## Related Commands
+
+- `/session-handoff` - Create handoff before /clear
 
 ---
 Execute resume process now.

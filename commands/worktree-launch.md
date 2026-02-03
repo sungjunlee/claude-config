@@ -1,3 +1,9 @@
+---
+description: Launch Claude sessions in existing worktrees using tmux or iTerm
+argument-hint: "[tmux|iterm|list]"
+allowed-tools: ["Bash", "Read"]
+---
+
 # Worktree Launch
 
 Launch Claude sessions in existing worktrees: $ARGUMENTS
@@ -26,14 +32,9 @@ Before launching, verify:
 ## Usage
 
 ```bash
-# Launch with tmux (recommended - works everywhere)
-/worktree launch tmux
-
-# Launch with iTerm (macOS only)
-/worktree launch iterm
-
-# List existing worktrees
-/worktree launch list
+/worktree-launch tmux    # Recommended (works everywhere)
+/worktree-launch iterm   # macOS only
+/worktree-launch list    # List existing worktrees
 ```
 
 ## Commands
@@ -59,22 +60,6 @@ Opens iTerm tabs for each worktree:
 
 Shows existing worktrees and their branches.
 
-## Prerequisites
-
-- Worktrees must exist (use `/worktree init` first)
-- For tmux: `tmux` installed (`brew install tmux`)
-- For iTerm: iTerm2 app installed, macOS only
-
-## Workflow
-
-```
-/worktree init "tasks..."    # Create worktrees
-         ↓
-/worktree launch tmux        # Launch terminals
-         ↓
-tmux attach -t {project}-wt  # Attach to session
-```
-
 ## Tmux Quick Reference
 
 ```bash
@@ -99,7 +84,7 @@ tmux kill-session -t {project}-wt
 ## Output Example
 
 ```
-🚀 Launching Claude sessions...
+Launching Claude sessions...
 
 tmux session: myproject-wt
 
@@ -107,15 +92,15 @@ tmux session: myproject-wt
   Window 1: payment  → claude started
   Window 2: search   → claude started
 
-✅ Session created (detached)
+Session created (detached)
 
 To attach: tmux attach -t myproject-wt
 ```
 
 ## Related Commands
 
-- `/worktree init` - Initialize worktrees (run first)
-- `/worktree status` - Monitor worktree progress
+- `/worktree-init` - Initialize worktrees (run first)
+- `/worktree-status` - Monitor worktree progress
 
 ## Execution
 

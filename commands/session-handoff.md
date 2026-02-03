@@ -1,4 +1,10 @@
-# Handoff Workflow
+---
+description: Save session state before /clear to maintain work continuity across sessions
+argument-hint: "[--detailed] [--team]"
+allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep"]
+---
+
+# Session Handoff
 
 Generate handoff documentation for: $ARGUMENTS
 
@@ -113,6 +119,10 @@ confidence_level: [1-10]
 
 - Keep last 5 handoffs
 - Move older to `docs/handoff/archive/`
+
+## Related Commands
+
+- `/session-resume` - Resume from handoff
 
 ---
 Generate handoff documentation now.

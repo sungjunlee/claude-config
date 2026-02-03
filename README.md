@@ -2,7 +2,7 @@
 
 Claude Code Plugin으로 배포되는 개인 설정입니다.
 
-**v2.1.0** - Plugin Architecture
+**v3.0.0** - Commands Architecture
 
 ## 왜 플러그인인가?
 
@@ -47,22 +47,22 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 | Permissions | ~/.claude/settings.json | ❌ |
 | CLAUDE.md | ~/.claude/CLAUDE.md | ❌ |
 
-## Skills
+## Commands
 
 ### Session
 
 | 명령어 | 용도 |
 |--------|------|
-| `/session handoff` | 세션 상태 저장 (`/clear` 전) |
-| `/session resume` | 이전 세션 복원 |
+| `/session-handoff` | 세션 상태 저장 (`/clear` 전) |
+| `/session-resume` | 이전 세션 복원 |
 
 ### Worktree
 
 | 명령어 | 용도 |
 |--------|------|
-| `/worktree init` | 병렬 워크트리 초기화 |
-| `/worktree launch` | tmux/iTerm에서 Claude 세션 실행 |
-| `/worktree status` | 워크트리 상태 확인 |
+| `/worktree-init` | 병렬 워크트리 초기화 |
+| `/worktree-launch` | tmux/iTerm에서 Claude 세션 실행 |
+| `/worktree-status` | 워크트리 상태 확인 |
 
 ### Dev Setup
 
@@ -102,11 +102,19 @@ curl -fsSL https://raw.githubusercontent.com/sungjunlee/claude-config/main/insta
 ```
 .
 ├── .claude-plugin/
-│   └── plugin.json          # Plugin manifest (v2.1.0)
+│   └── plugin.json          # Plugin manifest (v3.0.0)
 │
-├── skills/                  # [Plugin] 자동 업데이트
-│   ├── session/
+├── commands/                # [Plugin] 자동 업데이트
+│   ├── worktree-init.md
+│   ├── worktree-launch.md
+│   ├── worktree-status.md
+│   ├── session-handoff.md
+│   ├── session-resume.md
+│   └── dev-setup.md
+│
+├── reference/               # Command 참조 문서
 │   ├── worktree/
+│   ├── session/
 │   └── dev-setup/
 │
 ├── hooks/
